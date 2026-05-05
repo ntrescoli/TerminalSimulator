@@ -1,0 +1,72 @@
+:root {
+    --bg-color: #300a24; /* Color berenjena clásico de Ubuntu */
+    --text-color: #ffffff;
+    --prompt-color: #8ae234; /* Verde brillante para el usuario */
+    --font-family: 'Ubuntu Mono', 'Courier New', monospace;
+}
+
+body {
+    background-color: #000; /* Fondo negro puro alrededor */
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+}
+
+#terminal-container {
+    background-color: var(--bg-color);
+    width: 100%;
+    max-width: 900px;
+    height: 80vh;
+    padding: 15px;
+    border-radius: 6px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    overflow-y: auto;
+    font-family: var(--font-family);
+    font-size: 16px;
+    line-height: 1.4;
+    color: var(--text-color);
+}
+
+#output {
+    white-space: pre-wrap; /* Mantiene espacios y saltos de línea */
+}
+
+.input-line {
+    display: flex;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.prompt {
+    color: var(--prompt-color);
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+#terminal-input {
+    background: transparent;
+    border: none;
+    color: var(--text-color);
+    font-family: var(--font-family);
+    font-size: 16px;
+    outline: none;
+    flex-grow: 1;
+    width: 100%;
+}
+
+/* Scrollbar personalizado estilo Linux */
+#terminal-container::-webkit-scrollbar {
+    width: 8px;
+}
+#terminal-container::-webkit-scrollbar-thumb {
+    background: #5e2750;
+}
+
+.history-line {
+    display: flex;
+    gap: 10px;
+    opacity: 0.8; /* Un poco más tenue para diferenciar del output */
+}
