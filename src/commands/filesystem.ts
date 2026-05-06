@@ -5,7 +5,7 @@ export const Ls: ICommand = {
     execute: ({ args, hasFlag, fs }) => {
         const showHidden = hasFlag('-a');
         const isDetailed = hasFlag('-l');
-        const path = args[0] || '.'; 
+        const path = args[0] || '.';
 
         if (isDetailed) {
             return fs.lsDetailed(path, showHidden).join('\n');
@@ -19,7 +19,7 @@ export const Cat: ICommand = {
     execute: ({ args, fs }) => {
         const filename = args[0];
         if (!filename) return "cat: missing file operand";
-        
+
         try {
             const content = fs.cat(filename);
             // Si fs.cat devuelve null o undefined cuando no existe:
@@ -38,12 +38,11 @@ export const Cd: ICommand = {
     execute: ({ args, fs, env }) => {
         const path = args[0] || '~';
         const error = fs.changeDirectory(path);
-        
-        if (error) return error;
 
-        // Sincronizamos el PWD del entorno con la realidad del FileSystem
+        if (error) return error; // "cd: no such directory", etc.
+
         env.set('PWD', fs.getPresentWorkingDirectory());
-        return ""; 
+        return "";
     }
 };
 
@@ -58,10 +57,12 @@ export const Touch: ICommand = {
         if (args.length < 1) return "touch: missing file operand";
 
         const path = args[0];
-        // Si hay un segundo argumento (lo que estaba entre comillas), es el contenido
-        const content = args[1] || ""; 
+        const content = args[1] || "";
 
-        fs.writeFile(path, content);
+        // Capturamos el error de permisos o de ruta
+        const error = fs.touch(path, content);
+
+        if (error) return error;
         return "";
     }
 };
@@ -69,8 +70,15 @@ export const Touch: ICommand = {
 export const Mkdir: ICommand = {
     name: 'mkdir',
     execute: ({ args, fs }) => {
-        if (!args[0]) return "mkdir: missing operand";
-        fs.mkdir(args[0]);
+        if (args.length < 1) return "mkdir: missing operand";
+
+        // Capturamos lo que devuelve el FileSystem
+        const error = fs.mkdir(args[0]);
+
+        // Si hay un error (es un string), lo devolvemos a la terminal
+        if (error) return error;
+
+        // Si es null, devolvemos string vacío (todo ok)
         return "";
     }
 };
@@ -80,7 +88,7 @@ export const Grep: ICommand = {
     execute: ({ args, hasFlag, fs, pipeInput }) => {
         const pattern = args[0];
         const filePath = args[1];
-        
+
         if (!pattern) return "usage: grep [pattern]";
 
         // Prioridad: 1. El input del Pipe | 2. El contenido del archivo
@@ -99,5 +107,41 @@ export const Grep: ICommand = {
         return content.split('\n')
             .filter(line => regex.test(line))
             .join('\n');
+    }
+};
+
+export const Chmod: ICommand = {
+    name: 'chmod',
+    execute: ({ args, options, fs }) => {
+        // 1. Combinamos todo para buscar el modo (+r, -w, etc)
+        const allParams = [...options, ...args];
+        
+        // 2. Buscamos el parámetro que contiene la operación
+        const mode = allParams.find(p => p.startsWith('+') || p.startsWith('-'));
+        // 3. El path suele ser el primer argumento que no es el modo
+        const path = args.find(a => a !== mode);
+
+        if (!mode || !path) {
+            return "usage: chmod [+/-][rwx] [file]";
+        }
+
+        const node = (fs as any).resolvePath(path);
+        if (!node) return `chmod: cannot access '${path}': No such file or directory`;
+
+        const operation = mode[0];    // '+' o '-'
+        const permission = mode[1];   // 'r', 'w' o 'x'
+        const value = (operation === '+');
+
+        // Validamos que el permiso sea válido
+        if (!['r', 'w', 'x'].includes(permission)) {
+            return `chmod: invalid permission mode: ${permission}`;
+        }
+
+        // Aplicamos el cambio al nodo
+        if (permission === 'r') node.permissions.read = value;
+        if (permission === 'w') node.permissions.write = value;
+        if (permission === 'x') node.permissions.execute = value;
+
+        return ""; 
     }
 };
