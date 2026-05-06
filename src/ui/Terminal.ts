@@ -23,14 +23,16 @@ export class TerminalUI {
         const line = document.createElement('div');
         if (className) line.classList.add(className);
         
-        // Usamos innerHTML para permitir etiquetas como <strong> o colores
-        // Pero cuidado: en un proyecto real, sanitizaríamos esto
+        // Añadimos estilo para preservar espacios y saltos de línea (\n)
+        line.style.whiteSpace = 'pre-wrap'; 
+        line.style.wordBreak = 'break-all';
+        
         line.innerHTML = text || '&nbsp;'; 
         
         this.outputElement.appendChild(line);
         this.scrollToBottom();
     }
-
+    
     /**
      * Copia lo que el usuario escribió al historial antes de procesarlo
      */

@@ -2,14 +2,14 @@ export class Environment {
     private vars: Record<string, string>;
 
     constructor() {
-        // Estas son tus "default_variables"
         this.vars = {
             USER: 'root',
             HOSTNAME: 'ubuntu-server',
             HOME: '/root',
             PATH: '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin',
             SHELL: '/bin/bash',
-            PWD: '/'
+            PWD: '/',
+            TERM: 'xterm-256color' // Añadido para dar más realismo
         };
     }
 
@@ -19,5 +19,15 @@ export class Environment {
 
     set(key: string, value: string): void {
         this.vars[key] = value;
+    }
+
+    // Útil para el comando 'env' o 'export' sin argumentos
+    getAll(): Record<string, string> {
+        return { ...this.vars };
+    }
+
+    // Útil para el comando 'unset'
+    delete(key: string): void {
+        delete this.vars[key];
     }
 }
