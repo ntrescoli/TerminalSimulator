@@ -57,12 +57,12 @@ export class FileSystem {
             permissions: nodeData.permissions || { read: true, write: true, execute: true },
             content: nodeData.content || "",
             createdAt: nodeData.createdAt || Date.now(),
-            parent: parent, 
+            parent: parent,
             children: []
         };
 
         if (nodeData.children) {
-            newNode.children = nodeData.children.map((childData: any) => 
+            newNode.children = nodeData.children.map((childData: any) =>
                 this.reconstructTree(childData, newNode)
             );
         }
@@ -195,5 +195,31 @@ export class FileSystem {
             current = current.parent;
         }
         return path || "/";
+    }
+
+    /**
+     * Convierte el estado actual del FS en un objeto JSON puro (sin referencias circulares)
+     */
+    public serialize(): any {
+        const serializeNode = (node: INode): any => {
+            const cleanNode: any = {
+                name: node.name,
+                type: node.type,
+                owner: node.owner,
+                permissions: node.permissions,
+                content: node.content,
+                createdAt: node.createdAt,
+                children: []
+            };
+
+            if (node.children) {
+                cleanNode.children = node.children.map(child => serializeNode(child));
+            }
+
+            return cleanNode;
+        };
+
+        // DEVOLVEMOS EL NODO DIRECTAMENTE
+        return serializeNode(this.root);
     }
 }

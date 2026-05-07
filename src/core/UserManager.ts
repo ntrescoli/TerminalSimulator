@@ -10,9 +10,13 @@ export class UserManager {
         // Ya no creamos usuarios aquí, dejamos que el Kernel decida
     }
 
-    /**
-     * Carga una lista de usuarios (usado por el Kernel desde JSON)
-     */
+    private updatePasswdFile() {
+        const content = this.users
+            .map(u => `${u.username}:x:${u.uid}:${u.gid}:${u.fullName}:${u.home}:${u.shell}`)
+            .join('\n');
+        this.fs.writeFile("/etc/passwd", content);
+    }
+
     public loadUsers(usersData: any[]) {
         this.users = usersData.map(u => ({
             username: u.username,
@@ -22,31 +26,32 @@ export class UserManager {
             shell: u.shell,
             fullName: u.fullName || u.username
         }));
-        
-        console.log(`UserManager: ${this.users.length} users loaded.`);
+        this.updatePasswdFile(); // Sincronizamos con el FS virtual
     }
 
-    /**
-     * Crea los usuarios por defecto (usado por el Kernel si falla el JSON)
-     */
     public loadDefaults() {
         this.users = [
             { username: 'root', uid: 0, gid: 0, home: '/root', shell: '/bin/bash', fullName: 'root' },
             { username: 'guest', uid: 1000, gid: 1000, home: '/home/guest', shell: '/bin/bash', fullName: 'Guest User' }
         ];
+        this.updatePasswdFile(); // Sincronizamos con el FS virtual
     }
 
-    // public getUsers(): User[] {
-    //     return this.users;
-    // }
-
     /**
-     * Parsea el archivo /etc/passwd y devuelve una lista de objetos User
+     * Devuelve la lista de usuarios actual del array (la fuente de verdad)
      */
     public getUsers(): User[] {
-        const content = this.fs.cat("/etc/passwd");
-        if (content.includes("No such file")) return [];
+        // Si el array está vacío, intentamos recuperarlo del archivo una vez
+        if (this.users.length === 0) {
+            const content = this.fs.cat("/etc/passwd");
+            if (!content.includes("No such file") && content.trim() !== "") {
+                this.users = this.parsePasswd(content);
+            }
+        }
+        return this.users;
+    }
 
+    private parsePasswd(content: string): User[] {
         return content.split('\n')
             .filter(line => line.trim() !== "" && !line.startsWith("#"))
             .map(line => {
@@ -77,14 +82,8 @@ export class UserManager {
             return `useradd: user '${user.username}' already exists`;
         }
 
-        const userLine = `${user.username}:x:${user.uid}:${user.gid}:${user.fullName}:${user.home}:${user.shell}`;
-        const currentContent = this.fs.cat("/etc/passwd");
-        
-        // Evitamos concatenar si el archivo está vacío o da error
-        const cleanContent = currentContent.includes("No such file") ? "" : currentContent;
-        const newContent = cleanContent ? `${cleanContent}\n${userLine}` : userLine;
-
-        this.fs.writeFile("/etc/passwd", newContent);
+        this.users.push(user);
+        this.updatePasswdFile();
         return null;
     }
 }

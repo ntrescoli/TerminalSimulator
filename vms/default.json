@@ -1,0 +1,45 @@
+{
+  "users": [
+    { "username": "root", "uid": 0, "gid": 0, "home": "/root", "shell": "/bin/bash", "fullName": "root" },
+    { "username": "ubuntu", "uid": 1000, "gid": 1000, "home": "/home/ubuntu", "shell": "/bin/bash", "fullName": "Ubuntu User" }
+  ],
+  "env": {
+    "PATH": "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+    "HOME": "/home/ubuntu",
+    "USER": "ubuntu",
+    "SHELL": "/bin/bash",
+    "LOGNAME": "ubuntu",
+    "HOSTNAME": "ubuntu-desktop",
+    "LANG": "en_US.UTF-8",
+    "PWD": "/"
+  },
+  "fileSystem": {
+    "name": "/",
+    "type": "dir",
+    "owner": "root",
+    "permissions": { "read": true, "write": true, "execute": true },
+    "children": [
+      { "name": "bin", "type": "dir", "owner": "root", "children": [] },
+      { "name": "boot", "type": "dir", "owner": "root", "children": [] },
+      { "name": "dev", "type": "dir", "owner": "root", "children": [] },
+      { "name": "etc", "type": "dir", "owner": "root", "children": [
+        { "name": "hostname", "type": "file", "owner": "root", "content": "ubuntu-desktop" },
+        { "name": "issue", "type": "file", "owner": "root", "content": "Ubuntu 24.04 LTS \\n \\l" }
+      ]},
+      { "name": "home", "type": "dir", "owner": "root", "children": [
+        { "name": "ubuntu", "type": "dir", "owner": "ubuntu", "children": [
+          { "name": ".bashrc", "type": "file", "owner": "ubuntu", "content": "# Default bashrc" }
+        ]}
+      ]},
+      { "name": "root", "type": "dir", "owner": "root", "children": [] },
+      { "name": "tmp", "type": "dir", "owner": "root", "children": [] },
+      { "name": "usr", "type": "dir", "owner": "root", "children": [
+        { "name": "bin", "type": "dir", "owner": "root", "children": [] }
+      ]},
+      { "name": "var", "type": "dir", "owner": "root", "children": [
+        { "name": "log", "type": "dir", "owner": "root", "children": [] }
+      ]}
+    ]
+  },
+  "history": []
+}

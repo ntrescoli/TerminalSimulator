@@ -9,15 +9,22 @@ export class Kernel {
     private fs: FileSystem;
     private env: Environment;
     private userManager: UserManager;
+    private history: string[] = [];
+
+    private isReady: boolean = false;
 
     constructor() {
         this.env = new Environment();
         this.fs = new FileSystem(this.env);
         this.userManager = new UserManager(this.fs);
         this.loadCommands();
+        // NO llamamos a initSystem aquí
+    }
 
-        // Iniciamos el proceso de carga de datos
-        this.initSystem();
+    public async boot() {
+        if (this.isReady) return;
+        await this.initSystem(); // Tu método que hace el fetch
+        this.isReady = true;
     }
 
     /**
@@ -25,20 +32,30 @@ export class Kernel {
      */
     private async initSystem() {
         try {
-            const response = await fetch('/src/vms/default.json');
+            const response = await fetch('/vms/default.json');
             if (!response.ok) throw new Error();
-
             const config = await response.json();
 
+            // 1. Cargar Archivos
             this.fs.loadFromJSON(config);
 
-            if (config.users) {
-                this.userManager.loadUsers(config.users); // <--- Ahora ya existe
+            // 2. Cargar Usuarios
+            if (config.users) this.userManager.loadUsers(config.users);
+
+            // 3. CARGAR VARIABLES DE ENTORNO
+            if (config.env) {
+                this.env.loadFromObject(config.env);
+            } else {
+                this.env.loadDefaults();
             }
+
+            // 4. Cargar Historial
+            if (config.history) this.loadHistory(config.history);
+
         } catch (error) {
-            // Si el JSON falla, cargamos los defaults en ambos
+            this.env.loadDefaults();
             this.fs.loadDefaults();
-            this.userManager.loadDefaults(); // <--- Ahora ya existe
+            this.userManager.loadDefaults();
         }
     }
 
@@ -90,6 +107,12 @@ export class Kernel {
 
     async execute(input: string): Promise<string> {
         if (!input.trim()) return "";
+
+        const trimmedInput = input.trim();
+        if (!trimmedInput) return "";
+
+        // Guardamos en el historial antes de procesar pipes o redirecciones
+        this.history.push(trimmedInput);
 
         if (input.includes('|')) {
             const commands = input.split('|').map(s => s.trim());
@@ -159,4 +182,26 @@ export class Kernel {
         const path = this.fs.getPresentWorkingDirectory();
         return `${user}@${host}:${path}$ `;
     }
+
+    // Método público para que el comando 'history' pueda leer los datos
+    public getHistory(): string[] {
+        return this.history;
+    }
+
+    /**
+     * Opcional: Cargar un historial previo desde el JSON inicial
+     */
+    public loadHistory(historyData: string[]) {
+        this.history = historyData;
+    }
+
+    public exportFullSystemState() {
+        return {
+            env: this.env.getAll(),
+            fileSystem: this.fs.serialize(),
+            users: this.userManager.getUsers(),
+            history: this.history // <-- Ahora incluimos el historial
+        };
+    }
+
 }

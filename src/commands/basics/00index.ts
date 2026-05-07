@@ -3,6 +3,7 @@ import { Whoami } from './whoami';
 import { Clear } from './clear';
 import { Help } from './help';
 import { Env } from './env';
+import { History } from './history';
 
 export const basicCmds = [
     Clear,
@@ -10,4 +11,5 @@ export const basicCmds = [
     Env,
     Help,
     Whoami,
+    History,
 ];
