@@ -3,8 +3,10 @@ export class Environment {
 
     constructor() {
         this.vars = {
+            // USER: 'guest',
             USER: 'root',
             HOSTNAME: 'ubuntu-server',
+            // HOME: '/home/guest',
             HOME: '/root',
             PATH: '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin',
             SHELL: '/bin/bash',

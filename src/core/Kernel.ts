@@ -1,94 +1,127 @@
-import { FileSystem } from './FileSystem';
+import { commandList } from '../commands';
+import { ICommand } from '../types/types';
 import { Environment } from './Environment';
-import { ICommand } from './types';
-import * as FSCmds from '../commands/filesystem';
-import * as BasicCmds from '../commands/basic'; // Asegúrate de importar BasicCmds
+import { FileSystem } from './FileSystem';
+import { UserManager } from './UserManager';
 
 export class Kernel {
     private commands: Map<string, ICommand> = new Map();
     private fs: FileSystem;
     private env: Environment;
+    private userManager: UserManager;
 
     constructor() {
-        this.fs = new FileSystem();
         this.env = new Environment();
+        this.fs = new FileSystem(this.env);
+        this.userManager = new UserManager(this.fs);
         this.loadCommands();
     }
-
+    
     private loadCommands() {
-        // Unimos todos los módulos de comandos
-        const allCmds = [
-            ...Object.values(BasicCmds), 
-            ...Object.values(FSCmds)
-        ];
-        
-        allCmds.forEach(cmd => {
+        commandList.forEach(cmd => {
             this.commands.set(cmd.name, cmd);
-            // Si el comando tiene alias, también los registramos
-            if (cmd.alias) {
-                cmd.alias.forEach(a => this.commands.set(a, cmd));
-            }
         });
     }
 
-async execute(input: string): Promise<string> {
-    if (!input.trim()) return "";
+    private parseArgsAndFlags(tokens: string[], valuedFlags: string[] = []) {
+        const options: string[] = [];
+        const args: string[] = [];
+        const flagValues: { [key: string]: string } = {};
 
-    if (input.includes('|')) {
-        const commands = input.split('|').map(s => s.trim());
-        let lastOutput = "";
+        for (let i = 0; i < tokens.length; i++) {
+            const token = tokens[i];
 
-        for (const cmdText of commands) {
-            // 2. Añadimos el await aquí
-            lastOutput = await this.executeCommandChain(cmdText, lastOutput);
+            if (token.startsWith('-') && token.length > 1) {
+                // Eliminar el guion para analizar las letras
+                const cluster = token.startsWith('--') ? [token.slice(2)] : token.slice(1).split('');
+                const isLong = token.startsWith('--');
+
+                for (let j = 0; j < cluster.length; j++) {
+                    const char = cluster[j];
+                    const flagName = isLong ? `--${char}` : `-${char}`;
+                    options.push(flagName);
+
+                    // ¿Es una flag que espera un valor?
+                    if (valuedFlags.includes(isLong ? char : char)) {
+                        // 1. Si es flag corta y tiene el valor pegado (ej: -uroot)
+                        const remaining = !isLong ? token.slice(j + 2) : "";
+                        if (remaining) {
+                            flagValues[flagName] = remaining;
+                            break; // Salimos del cluster
+                        }
+                        // 2. Si el valor es el siguiente token (ej: -u root)
+                        else if (i + 1 < tokens.length) {
+                            flagValues[flagName] = tokens[++i];
+                            break;
+                        }
+                    }
+                }
+            } else {
+                args.push(token);
+            }
         }
-        return lastOutput;
+        return { options, args, flagValues };
+    };
+
+    async execute(input: string): Promise<string> {
+        if (!input.trim()) return "";
+
+        if (input.includes('|')) {
+            const commands = input.split('|').map(s => s.trim());
+            let lastOutput = "";
+
+            for (const cmdText of commands) {
+                lastOutput = await this.executeCommandChain(cmdText, lastOutput);
+            }
+            return lastOutput;
+        }
+
+        return await this.executeCommandChain(input);
     }
 
-    return await this.executeCommandChain(input);
-}
+    private async executeCommandChain(commandLine: string, pipeInput?: string): Promise<string> {
+        // 1. Redirección
+        const redirectMatch = commandLine.match(/>\s*([^\s]+)$/);
+        let targetFile: string | null = null;
+        let finalCommandLine = commandLine;
 
-private async executeCommandChain(commandLine: string, pipeInput?: string): Promise<string> {
-    // 1. Redirección
-    const redirectMatch = commandLine.match(/>\s*([^\s]+)$/);
-    let targetFile: string | null = null;
-    let finalCommandLine = commandLine;
+        if (redirectMatch) {
+            targetFile = redirectMatch[1];
+            finalCommandLine = commandLine.replace(/>\s*[^\s]+$/, '').trim();
+        }
 
-    if (redirectMatch) {
-        targetFile = redirectMatch[1];
-        finalCommandLine = commandLine.replace(/>\s*[^\s]+$/, '').trim();
+        // 2. Tokenización
+        const tokens = this.tokenize(finalCommandLine);
+        const name = tokens[0]?.toLowerCase();
+        const rawTokens = tokens.slice(1);
+
+        const cmd = this.commands.get(name);
+        if (!cmd) return `-bash: ${name}: command not found`;
+
+        // 3. SEPARACIÓN DE FLAGS Y PARÁMETROS
+        const { options, args, flagValues } = this.parseArgsAndFlags(rawTokens, cmd.valuedFlags);
+
+        // Ejecución
+        const result = await cmd.execute({
+            args,           // Archivos/Rutas
+            options,        // ['-l', '-a', '-h']
+            flagValues,     // { '-u': 'root' }
+            rawArgs: rawTokens,
+            fs: this.fs,
+            env: this.env,
+            userManager: this.userManager,
+            pipeInput,
+            kernel: this,
+            hasFlag: (f: string) => options.includes(f.startsWith('-') ? f : `-${f}`)
+        });
+
+        if (targetFile) {
+            this.fs.writeFile(targetFile, result);
+            return "";
+        }
+
+        return result;
     }
-
-    // 2. Tokenización
-    const tokens = this.tokenize(finalCommandLine);
-    const name = tokens[0]?.toLowerCase();
-    const rawArgs = tokens.slice(1);
-
-    const cmd = this.commands.get(name);
-    if (!cmd) return `-bash: ${name}: command not found`;
-
-    // 3. SEPARACIÓN DE FLAGS Y PARÁMETROS
-    const options = rawArgs.filter(arg => arg.startsWith('-'));
-    const args = rawArgs.filter(arg => !arg.startsWith('-'));
-
-    // Ejecución
-    const result = await cmd.execute({
-        args,
-        options,
-        rawArgs,
-        fs: this.fs,
-        env: this.env,
-        pipeInput, // <--- Aquí pasamos el regalo del comando anterior
-        hasFlag: (f: string) => options.some(opt => opt === f || (opt.startsWith('-') && opt.includes(f.replace('-', ''))))
-    });
-
-    if (targetFile) {
-        this.fs.writeFile(targetFile, result);
-        return "";
-    }
-
-    return result;
-}
 
     private tokenize(input: string): string[] {
         const regex = /"([^"]*)"|'([^']*)'|([^\s]+)/g;
@@ -100,7 +133,6 @@ private async executeCommandChain(commandLine: string, pipeInput?: string): Prom
         return parts;
     }
 
-    // Necesario para que main.ts siga funcionando
     getPromptText(): string {
         const user = this.env.get('USER');
         const host = this.env.get('HOSTNAME');
