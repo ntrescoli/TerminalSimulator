@@ -2,12 +2,48 @@ import { User } from '../types/types';
 import { FileSystem } from './FileSystem';
 
 export class UserManager {
-    constructor(private fs: FileSystem) {}
+    private users: User[] = [];
+    private fs: FileSystem;
+
+    constructor(fs: FileSystem) {
+        this.fs = fs;
+        // Ya no creamos usuarios aquí, dejamos que el Kernel decida
+    }
+
+    /**
+     * Carga una lista de usuarios (usado por el Kernel desde JSON)
+     */
+    public loadUsers(usersData: any[]) {
+        this.users = usersData.map(u => ({
+            username: u.username,
+            uid: u.uid,
+            gid: u.gid,
+            home: u.home,
+            shell: u.shell,
+            fullName: u.fullName || u.username
+        }));
+        
+        console.log(`UserManager: ${this.users.length} users loaded.`);
+    }
+
+    /**
+     * Crea los usuarios por defecto (usado por el Kernel si falla el JSON)
+     */
+    public loadDefaults() {
+        this.users = [
+            { username: 'root', uid: 0, gid: 0, home: '/root', shell: '/bin/bash', fullName: 'root' },
+            { username: 'guest', uid: 1000, gid: 1000, home: '/home/guest', shell: '/bin/bash', fullName: 'Guest User' }
+        ];
+    }
+
+    // public getUsers(): User[] {
+    //     return this.users;
+    // }
 
     /**
      * Parsea el archivo /etc/passwd y devuelve una lista de objetos User
      */
-    getUsers(): User[] {
+    public getUsers(): User[] {
         const content = this.fs.cat("/etc/passwd");
         if (content.includes("No such file")) return [];
 
@@ -29,14 +65,14 @@ export class UserManager {
     /**
      * Busca un usuario por su nombre
      */
-    getUserByName(username: string): User | undefined {
+    public getUserByName(username: string): User | undefined {
         return this.getUsers().find(u => u.username === username);
     }
 
     /**
      * Guarda un nuevo usuario en el sistema
      */
-    saveUser(user: User): string | null {
+    public saveUser(user: User): string | null {
         if (this.getUserByName(user.username)) {
             return `useradd: user '${user.username}' already exists`;
         }

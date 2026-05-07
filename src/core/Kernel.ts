@@ -15,13 +15,44 @@ export class Kernel {
         this.fs = new FileSystem(this.env);
         this.userManager = new UserManager(this.fs);
         this.loadCommands();
+
+        // Iniciamos el proceso de carga de datos
+        this.initSystem();
     }
-    
+
+    /**
+     * Lógica de carga: JSON externo vs Configuración por defecto
+     */
+    private async initSystem() {
+        try {
+            const response = await fetch('/src/vms/default.json');
+            if (!response.ok) throw new Error();
+
+            const config = await response.json();
+
+            this.fs.loadFromJSON(config);
+
+            if (config.users) {
+                this.userManager.loadUsers(config.users); // <--- Ahora ya existe
+            }
+        } catch (error) {
+            // Si el JSON falla, cargamos los defaults en ambos
+            this.fs.loadDefaults();
+            this.userManager.loadDefaults(); // <--- Ahora ya existe
+        }
+    }
+
     private loadCommands() {
         commandList.forEach(cmd => {
             this.commands.set(cmd.name, cmd);
+            // Soporte para alias si los comandos los tienen
+            if (cmd.alias) {
+                cmd.alias.forEach(a => this.commands.set(a, cmd));
+            }
         });
     }
+
+    // --- MÉTODOS DE EJECUCIÓN (Se mantienen igual) ---
 
     private parseArgsAndFlags(tokens: string[], valuedFlags: string[] = []) {
         const options: string[] = [];
@@ -30,9 +61,7 @@ export class Kernel {
 
         for (let i = 0; i < tokens.length; i++) {
             const token = tokens[i];
-
             if (token.startsWith('-') && token.length > 1) {
-                // Eliminar el guion para analizar las letras
                 const cluster = token.startsWith('--') ? [token.slice(2)] : token.slice(1).split('');
                 const isLong = token.startsWith('--');
 
@@ -41,16 +70,12 @@ export class Kernel {
                     const flagName = isLong ? `--${char}` : `-${char}`;
                     options.push(flagName);
 
-                    // ¿Es una flag que espera un valor?
-                    if (valuedFlags.includes(isLong ? char : char)) {
-                        // 1. Si es flag corta y tiene el valor pegado (ej: -uroot)
+                    if (valuedFlags && valuedFlags.includes(char)) {
                         const remaining = !isLong ? token.slice(j + 2) : "";
                         if (remaining) {
                             flagValues[flagName] = remaining;
-                            break; // Salimos del cluster
-                        }
-                        // 2. Si el valor es el siguiente token (ej: -u root)
-                        else if (i + 1 < tokens.length) {
+                            break;
+                        } else if (i + 1 < tokens.length) {
                             flagValues[flagName] = tokens[++i];
                             break;
                         }
@@ -69,7 +94,6 @@ export class Kernel {
         if (input.includes('|')) {
             const commands = input.split('|').map(s => s.trim());
             let lastOutput = "";
-
             for (const cmdText of commands) {
                 lastOutput = await this.executeCommandChain(cmdText, lastOutput);
             }
@@ -80,7 +104,6 @@ export class Kernel {
     }
 
     private async executeCommandChain(commandLine: string, pipeInput?: string): Promise<string> {
-        // 1. Redirección
         const redirectMatch = commandLine.match(/>\s*([^\s]+)$/);
         let targetFile: string | null = null;
         let finalCommandLine = commandLine;
@@ -90,7 +113,6 @@ export class Kernel {
             finalCommandLine = commandLine.replace(/>\s*[^\s]+$/, '').trim();
         }
 
-        // 2. Tokenización
         const tokens = this.tokenize(finalCommandLine);
         const name = tokens[0]?.toLowerCase();
         const rawTokens = tokens.slice(1);
@@ -98,14 +120,12 @@ export class Kernel {
         const cmd = this.commands.get(name);
         if (!cmd) return `-bash: ${name}: command not found`;
 
-        // 3. SEPARACIÓN DE FLAGS Y PARÁMETROS
         const { options, args, flagValues } = this.parseArgsAndFlags(rawTokens, cmd.valuedFlags);
 
-        // Ejecución
         const result = await cmd.execute({
-            args,           // Archivos/Rutas
-            options,        // ['-l', '-a', '-h']
-            flagValues,     // { '-u': 'root' }
+            args,
+            options,
+            flagValues,
             rawArgs: rawTokens,
             fs: this.fs,
             env: this.env,
@@ -134,8 +154,8 @@ export class Kernel {
     }
 
     getPromptText(): string {
-        const user = this.env.get('USER');
-        const host = this.env.get('HOSTNAME');
+        const user = this.env.get('USER') || 'guest';
+        const host = this.env.get('HOSTNAME') || 'js-terminal';
         const path = this.fs.getPresentWorkingDirectory();
         return `${user}@${host}:${path}$ `;
     }

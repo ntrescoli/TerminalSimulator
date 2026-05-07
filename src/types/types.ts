@@ -47,5 +47,5 @@ export interface User {
     gid: number;
     home: string;
     shell: string;
-    fullName: string;
+    fullName?: string;
 }
