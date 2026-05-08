@@ -34,6 +34,7 @@ export interface INode {
     content?: string;
     createdAt: number;
     owner: string;
+    group: string;
     permissions: {
         read: boolean;
         write: boolean;
@@ -48,4 +49,10 @@ export interface User {
     home: string;
     shell: string;
     fullName?: string;
+}
+
+export interface Group {
+    groupName: string;
+    gid: number;
+    members: string[];
 }

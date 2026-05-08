@@ -1,8 +1,9 @@
-import { User } from '../types/types';
+import { User, Group } from '../types/types';
 import { FileSystem } from './FileSystem';
 
 export class UserManager {
     private users: User[] = [];
+    private groups: Group[] = [];
     private fs: FileSystem;
 
     constructor(fs: FileSystem) {
@@ -82,8 +83,72 @@ export class UserManager {
             return `useradd: user '${user.username}' already exists`;
         }
 
+        // 1. Crear el grupo privado para el usuario (Ubuntu style)
+        // Usamos el mismo GID que el UID para mantener consistencia
+        this.groups.push({
+            groupName: user.username,
+            gid: user.gid,
+            members: [user.username]
+        });
+
+        // 2. Añadir el usuario al array
         this.users.push(user);
+
+        // 3. Sincronizar ambos archivos en el FS virtual
         this.updatePasswdFile();
+        this.updateGroupFile();
+
+        return null;
+    }
+
+    public getGroups(): Group[] { return this.groups; }
+
+    /**
+     * Sincroniza el array de grupos con el archivo /etc/group
+     */
+    private updateGroupFile() {
+        const content = this.groups
+            .map(g => `${g.groupName}:x:${g.gid}:${g.members.join(',')}`)
+            .join('\n');
+        this.fs.writeFile("/etc/group", content);
+    }
+
+    /**
+     * Crea un nuevo grupo
+     */
+    public addGroup(group: Group): string | null {
+        // Verificar si el grupo ya existe
+        if (this.groups.find(g => g.groupName === group.groupName)) {
+            return `addgroup: El grupo '${group.groupName}' ya existe.`;
+        }
+
+        if (this.groups.find(g => g.gid === group.gid)) {
+            return `addgroup: El GID '${group.gid}' ya está en uso.`;
+        }
+
+        this.groups.push(group);
+        this.updateGroupFile(); // Sincroniza con el FS virtual (/etc/group)
+        return null;
+    }
+
+    /**
+     * Añade un usuario existente a un grupo existente
+     */
+    public addUserToGroup(username: string, groupName: string): string | null {
+        // 1. Verificar que el usuario existe
+        const user = this.users.find(u => u.username === username);
+        if (!user) return `adduser: The user '${username}' does not exist.`;
+
+        // 2. Verificar que el grupo existe
+        const group = this.groups.find(g => g.groupName === groupName);
+        if (!group) return `adduser: The group '${groupName}' does not exist.`;
+
+        // 3. Añadir si no está ya presente
+        if (!group.members.includes(username)) {
+            group.members.push(username);
+            this.updateGroupFile(); // Sincronizamos /etc/group
+        }
+
         return null;
     }
 }

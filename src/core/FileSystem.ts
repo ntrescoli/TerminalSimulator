@@ -8,7 +8,6 @@ export class FileSystem {
 
     constructor(env: Environment) {
         this.env = env;
-        // Creamos un estado inicial mínimo (raíz vacía)
         this.root = this.createDefaultRoot();
         this.currentDirectory = this.root;
     }
@@ -21,13 +20,11 @@ export class FileSystem {
             parent: null,
             createdAt: Date.now(),
             owner: 'root',
+            group: 'root', // <-- Añadido grupo raíz
             permissions: { read: true, write: true, execute: true }
         };
     }
 
-    /**
-     * Este método lo llamarás desde el Kernel si no hay JSON
-     */
     public loadDefaults() {
         this.root = this.createDefaultRoot();
         this.currentDirectory = this.root;
@@ -36,13 +33,12 @@ export class FileSystem {
         this.mkdir("bin");
         this.mkdir("etc");
         this.mkdir("var");
+        // Actualizado /etc/passwd y añadido /etc/group por defecto
         this.writeFile("/etc/passwd", "root:x:0:0:root:/root:/bin/bash\nguest:x:1000:1000:guest:/home/guest:/bin/bash");
+        this.writeFile("/etc/group", "root:x:0:\nget:x:1000:"); 
         this.writeFile("home/readme.txt", "Bienvenido al sistema de archivos avanzado.");
     }
 
-    /**
-     * Carga el sistema desde un objeto JSON
-     */
     public loadFromJSON(jsonData: any) {
         if (!jsonData.fileSystem) return;
         this.root = this.reconstructTree(jsonData.fileSystem, null);
@@ -54,6 +50,7 @@ export class FileSystem {
             name: nodeData.name,
             type: nodeData.type,
             owner: nodeData.owner || 'root',
+            group: nodeData.group || nodeData.owner || 'root', // <-- Recuperar grupo
             permissions: nodeData.permissions || { read: true, write: true, execute: true },
             content: nodeData.content || "",
             createdAt: nodeData.createdAt || Date.now(),
@@ -72,17 +69,11 @@ export class FileSystem {
 
     // --- MÉTODOS DE DATOS ---
 
-    /**
-     * Devuelve los nodos hijos de una ruta. Ideal para comandos que listan.
-     */
     public getNodes(path: string = ".", showHidden: boolean = false): INode[] {
         const node = this.resolvePath(path);
         if (!node) throw new Error(`ls: cannot access '${path}': No such file or directory`);
-
-        // Si es un archivo, devolvemos solo ese nodo
         if (node.type === 'file') return [node];
 
-        // Si es un directorio, devolvemos sus hijos filtrados
         let nodes = [...node.children];
         if (!showHidden) {
             nodes = nodes.filter(n => !n.name.startsWith('.'));
@@ -90,9 +81,6 @@ export class FileSystem {
         return nodes.sort((a, b) => a.name.localeCompare(b.name));
     }
 
-    /**
-     * Resuelve una ruta y devuelve el nodo.
-     */
     public resolvePath(path: string): INode | null {
         if (!path || path === ".") return this.currentDirectory;
         if (path === "/") return this.root;
@@ -114,43 +102,29 @@ export class FileSystem {
         return current;
     }
 
-    /**
-     * Devuelve solo los nombres de los hijos del directorio actual
-     */
     public readdir(path: string): string[] {
-        const node = this.resolvePath(path); // Tu método para buscar el nodo
+        const node = this.resolvePath(path);
         if (node && node.type === 'dir' && node.children) {
             return node.children.map(child => child.name);
         }
         return [];
     }
 
-    /**
-     * Devuelve la lista de nodos hijos del directorio actual
-     */
     public getChildren(path: string): any[] {
         const node = this.resolvePath(path);
         if (node && node.type === 'dir' && node.children) {
-            return node.children; // Devolvemos el array de objetos INode
+            return node.children;
         }
         return [];
     }
 
-    /**
- * Convierte una ruta relativa (ej: "proyectos/") en absoluta 
- * basándose en el directorio actual.
- */
-public getAbsolutePath(relativePath: string): string {
-    if (relativePath.startsWith('/')) return relativePath;
-    
-    const current = this.getPresentWorkingDirectory();
-    // Normalizar la ruta (esto depende de cómo gestiones tus strings de ruta)
-    const base = current === '/' ? '/' : current + '/';
-    const full = base + relativePath;
-    
-    // Opcional: limpiar dobles barras "//"
-    return full.replace(/\/+/g, '/');
-}
+    public getAbsolutePath(relativePath: string): string {
+        if (relativePath.startsWith('/')) return relativePath;
+        const current = this.getPresentWorkingDirectory();
+        const base = current === '/' ? '/' : current + '/';
+        const full = base + relativePath;
+        return full.replace(/\/+/g, '/');
+    }
 
     // --- MÉTODOS DE ACCIÓN ---
 
@@ -158,14 +132,20 @@ public getAbsolutePath(relativePath: string): string {
         const currentUser = this.env.get('USER');
         if (currentUser === 'root') return true;
         if (currentUser === node.owner) return node.permissions[action];
+        
+        // Futura implementación: aquí podrías añadir lógica de grupos
+        // if (userManager.isUserInGroup(currentUser, node.group)) return node.groupPermissions[action];
+        
         return false;
     }
 
     private createNode(name: string, type: 'dir' | 'file', parent: INode, content: string = ""): INode {
+        const currentUser = this.env.get('USER') || 'root';
         return {
             name, type, parent, children: [], content,
             createdAt: Date.now(),
-            owner: this.env.get('USER') || 'root',
+            owner: currentUser,
+            group: currentUser, // <-- Por defecto, el grupo es el nombre del usuario (Ubuntu style)
             permissions: { read: true, write: true, execute: type === 'dir' }
         };
     }
@@ -235,15 +215,13 @@ public getAbsolutePath(relativePath: string): string {
         return path || "/";
     }
 
-    /**
-     * Convierte el estado actual del FS en un objeto JSON puro (sin referencias circulares)
-     */
     public serialize(): any {
         const serializeNode = (node: INode): any => {
             const cleanNode: any = {
                 name: node.name,
                 type: node.type,
                 owner: node.owner,
+                group: node.group, // <-- Serializar grupo
                 permissions: node.permissions,
                 content: node.content,
                 createdAt: node.createdAt,
@@ -253,11 +231,8 @@ public getAbsolutePath(relativePath: string): string {
             if (node.children) {
                 cleanNode.children = node.children.map(child => serializeNode(child));
             }
-
             return cleanNode;
         };
-
-        // DEVOLVEMOS EL NODO DIRECTAMENTE
         return serializeNode(this.root);
     }
 }

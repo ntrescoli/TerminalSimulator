@@ -240,7 +240,8 @@ export class Kernel {
             env: this.env.getAll(),
             fileSystem: this.fs.serialize(),
             users: this.userManager.getUsers(),
-            history: this.history // <-- Ahora incluimos el historial
+            groups: this.userManager.getGroups(),
+            history: this.history
         };
     }
 
