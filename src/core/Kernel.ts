@@ -183,6 +183,23 @@ export class Kernel {
         return `${user}@${host}:${path}$ `;
     }
 
+    public getCompletions(input: string): string[] {
+        const tokens = input.split(/\s+/);
+        const lastToken = tokens[tokens.length - 1];
+
+        // Si solo hay un token y no hay espacios, estamos completando un COMANDO
+        if (tokens.length === 1 && !input.endsWith(' ')) {
+            const commandNames = Array.from(this.commands.keys());
+            return commandNames.filter(name => name.startsWith(lastToken.toLowerCase()));
+        }
+
+        // Si hay más de un token o el comando ya tiene espacio, completamos ARCHIVOS
+        const currentDir = this.fs.getPresentWorkingDirectory();
+        const contents = this.fs.readdir(currentDir); // Usamos el nuevo método
+
+        return contents.filter(name => name.startsWith(lastToken));
+    }
+
     // Método público para que el comando 'history' pueda leer los datos
     public getHistory(): string[] {
         return this.history;

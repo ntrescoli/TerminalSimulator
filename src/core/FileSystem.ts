@@ -114,6 +114,17 @@ export class FileSystem {
         return current;
     }
 
+    /**
+     * Devuelve solo los nombres de los hijos del directorio actual
+     */
+    public readdir(path: string): string[] {
+        const node = this.resolvePath(path); // Tu método para buscar el nodo
+        if (node && node.type === 'dir' && node.children) {
+            return node.children.map(child => child.name);
+        }
+        return [];
+    }
+
     // --- MÉTODOS DE ACCIÓN ---
 
     private hasPermission(node: INode, action: 'read' | 'write' | 'execute'): boolean {

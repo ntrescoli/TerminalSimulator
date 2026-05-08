@@ -9,7 +9,7 @@ const bootstrap = async () => {
 
     // 2. Inicialización
     const kernel = new Kernel();
-    
+
     // Mostramos un mensaje temporal de carga si quieres
     outputElement.innerText = "Cargando sistema...";
 
@@ -48,8 +48,8 @@ const bootstrap = async () => {
     inputElement.addEventListener('keydown', (e: KeyboardEvent) => {
         if (e.key === 'Enter') {
             const value = inputElement.value;
-            historyIndex = -1; 
-            handleCommand(value); 
+            historyIndex = -1;
+            handleCommand(value);
             inputElement.value = '';
             terminal.scrollToBottom();
         }
@@ -75,6 +75,28 @@ const bootstrap = async () => {
                 }
             }
         }
+
+        if (e.key === 'Tab') {
+            e.preventDefault();
+
+            const currentValue = inputElement.value;
+            const completions = kernel.getCompletions(currentValue);
+
+            if (completions.length === 1) {
+                // Buscamos dónde empieza la última palabra para reemplazarla
+                const lastSpaceIndex = currentValue.lastIndexOf(' ');
+                const prefix = currentValue.substring(0, lastSpaceIndex + 1);
+
+                inputElement.value = prefix + completions[0];
+            }
+            else if (completions.length > 1) {
+                // Mostrar opciones si hay varias
+                terminal.print("\n" + completions.join('  '));
+                terminal.updatePrompt(kernel.getPromptText());
+                // Restauramos el valor para que el usuario siga escribiendo
+                inputElement.value = currentValue;
+            }
+        }
     });
 
     // Foco constante
@@ -84,7 +106,7 @@ const bootstrap = async () => {
     terminal.print("Welcome to Ubuntu 24.04 LTS (GNU/Linux 6.8.0-generic x86_64)");
     terminal.print(`System information as of ${new Date().toUTCString()}`);
     terminal.print("");
-    
+
     terminal.updatePrompt(kernel.getPromptText());
     inputElement.focus();
 };
