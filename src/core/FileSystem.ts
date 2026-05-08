@@ -125,6 +125,33 @@ export class FileSystem {
         return [];
     }
 
+    /**
+     * Devuelve la lista de nodos hijos del directorio actual
+     */
+    public getChildren(path: string): any[] {
+        const node = this.resolvePath(path);
+        if (node && node.type === 'dir' && node.children) {
+            return node.children; // Devolvemos el array de objetos INode
+        }
+        return [];
+    }
+
+    /**
+ * Convierte una ruta relativa (ej: "proyectos/") en absoluta 
+ * basándose en el directorio actual.
+ */
+public getAbsolutePath(relativePath: string): string {
+    if (relativePath.startsWith('/')) return relativePath;
+    
+    const current = this.getPresentWorkingDirectory();
+    // Normalizar la ruta (esto depende de cómo gestiones tus strings de ruta)
+    const base = current === '/' ? '/' : current + '/';
+    const full = base + relativePath;
+    
+    // Opcional: limpiar dobles barras "//"
+    return full.replace(/\/+/g, '/');
+}
+
     // --- MÉTODOS DE ACCIÓN ---
 
     private hasPermission(node: INode, action: 'read' | 'write' | 'execute'): boolean {

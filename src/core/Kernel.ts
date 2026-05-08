@@ -184,21 +184,44 @@ export class Kernel {
     }
 
     public getCompletions(input: string): string[] {
-        const tokens = input.split(/\s+/);
-        const lastToken = tokens[tokens.length - 1];
+    const tokens = input.split(/\s+/);
+    let lastToken = tokens[tokens.length - 1];
 
-        // Si solo hay un token y no hay espacios, estamos completando un COMANDO
-        if (tokens.length === 1 && !input.endsWith(' ')) {
-            const commandNames = Array.from(this.commands.keys());
-            return commandNames.filter(name => name.startsWith(lastToken.toLowerCase()));
-        }
-
-        // Si hay más de un token o el comando ya tiene espacio, completamos ARCHIVOS
-        const currentDir = this.fs.getPresentWorkingDirectory();
-        const contents = this.fs.readdir(currentDir); // Usamos el nuevo método
-
-        return contents.filter(name => name.startsWith(lastToken));
+    // Caso A: Comandos (solo si es el primer token y no hay espacio final)
+    if (tokens.length === 1 && !input.endsWith(' ')) {
+        return Array.from(this.commands.keys())
+            .filter(name => name.startsWith(lastToken.toLowerCase()))
+            .map(name => name + " ");
     }
+
+    // Caso B: Archivos y Rutas
+    // 1. Separamos la ruta base de la parte que se está escribiendo
+    // Ejemplo: "proyectos/we" -> base: "proyectos/", partial: "we"
+    const lastSlashIndex = lastToken.lastIndexOf('/');
+    let searchPath = this.fs.getPresentWorkingDirectory();
+    let partialName = lastToken;
+    let pathPrefix = "";
+
+    if (lastSlashIndex !== -1) {
+        pathPrefix = lastToken.substring(0, lastSlashIndex + 1); // "proyectos/"
+        partialName = lastToken.substring(lastSlashIndex + 1);   // "we"
+        
+        // La ruta de búsqueda ahora es la ruta relativa que escribió el usuario
+        searchPath = this.fs.getAbsolutePath(pathPrefix); 
+    }
+
+    // 2. Obtenemos los hijos de esa carpeta específica
+    const children = this.fs.getChildren(searchPath);
+
+    return children
+        .filter(child => child.name.startsWith(partialName))
+        .map(child => {
+            const suffix = child.type === 'dir' ? '/' : ' ';
+            // Devolvemos el prefijo + el nombre + el sufijo
+            // Ejemplo: "proyectos/" + "web" + "/"
+            return pathPrefix + child.name + suffix;
+        });
+}
 
     // Método público para que el comando 'history' pueda leer los datos
     public getHistory(): string[] {

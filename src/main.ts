@@ -78,23 +78,25 @@ const bootstrap = async () => {
 
         if (e.key === 'Tab') {
             e.preventDefault();
-
             const currentValue = inputElement.value;
             const completions = kernel.getCompletions(currentValue);
 
             if (completions.length === 1) {
-                // Buscamos dónde empieza la última palabra para reemplazarla
                 const lastSpaceIndex = currentValue.lastIndexOf(' ');
-                const prefix = currentValue.substring(0, lastSpaceIndex + 1);
+                const textBeforeLastWord = currentValue.substring(0, lastSpaceIndex + 1);
 
-                inputElement.value = prefix + completions[0];
+                // Completions[0] ahora ya incluye "proyectos/web/" completo
+                inputElement.value = textBeforeLastWord + completions[0];
             }
             else if (completions.length > 1) {
-                // Mostrar opciones si hay varias
-                terminal.print("\n" + completions.join('  '));
+                // Al mostrar sugerencias, solo mostramos el nombre final para no ensuciar
+                const suggestions = completions.map(c => {
+                    const parts = c.split('/');
+                    // Si termina en /, la parte importante es la penúltima
+                    return c.endsWith('/') ? parts[parts.length - 2] + '/' : parts[parts.length - 1];
+                });
+                terminal.print("\n" + suggestions.join('  '));
                 terminal.updatePrompt(kernel.getPromptText());
-                // Restauramos el valor para que el usuario siga escribiendo
-                inputElement.value = currentValue;
             }
         }
     });
