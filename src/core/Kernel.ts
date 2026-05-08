@@ -1,5 +1,5 @@
 import { commandList } from '../commands';
-import { ICommand } from '../types/types';
+import { ICommand, CommandContext } from '../types/types';
 import { Environment } from './Environment';
 import { FileSystem } from './FileSystem';
 import { UserManager } from './UserManager';
@@ -10,7 +10,6 @@ export class Kernel {
     private env: Environment;
     private userManager: UserManager;
     private history: string[] = [];
-
     private isReady: boolean = false;
 
     constructor() {
@@ -18,38 +17,27 @@ export class Kernel {
         this.fs = new FileSystem(this.env);
         this.userManager = new UserManager(this.fs);
         this.loadCommands();
-        // NO llamamos a initSystem aquí
     }
 
     public async boot() {
         if (this.isReady) return;
-        await this.initSystem(); // Tu método que hace el fetch
+        await this.initSystem();
         this.isReady = true;
     }
 
-    /**
-     * Lógica de carga: JSON externo vs Configuración por defecto
-     */
     private async initSystem() {
         try {
-            const response = await fetch('/vms/default.json');
+            const response = await fetch('vms/default.json');
             if (!response.ok) throw new Error();
             const config = await response.json();
 
-            // 1. Cargar Archivos
             this.fs.loadFromJSON(config);
-
-            // 2. Cargar Usuarios
             if (config.users) this.userManager.loadUsers(config.users);
-
-            // 3. CARGAR VARIABLES DE ENTORNO
             if (config.env) {
                 this.env.loadFromObject(config.env);
             } else {
                 this.env.loadDefaults();
             }
-
-            // 4. Cargar Historial
             if (config.history) this.loadHistory(config.history);
 
         } catch (error) {
@@ -62,71 +50,42 @@ export class Kernel {
     private loadCommands() {
         commandList.forEach(cmd => {
             this.commands.set(cmd.name, cmd);
-            // Soporte para alias si los comandos los tienen
             if (cmd.alias) {
                 cmd.alias.forEach(a => this.commands.set(a, cmd));
             }
         });
     }
 
-    // --- MÉTODOS DE EJECUCIÓN (Se mantienen igual) ---
+    // --- MOTOR DE EJECUCIÓN CENTRALIZADO ---
 
-    private parseArgsAndFlags(tokens: string[], valuedFlags: string[] = []) {
-        const options: string[] = [];
-        const args: string[] = [];
-        const flagValues: { [key: string]: string } = {};
-
-        for (let i = 0; i < tokens.length; i++) {
-            const token = tokens[i];
-            if (token.startsWith('-') && token.length > 1) {
-                const cluster = token.startsWith('--') ? [token.slice(2)] : token.slice(1).split('');
-                const isLong = token.startsWith('--');
-
-                for (let j = 0; j < cluster.length; j++) {
-                    const char = cluster[j];
-                    const flagName = isLong ? `--${char}` : `-${char}`;
-                    options.push(flagName);
-
-                    if (valuedFlags && valuedFlags.includes(char)) {
-                        const remaining = !isLong ? token.slice(j + 2) : "";
-                        if (remaining) {
-                            flagValues[flagName] = remaining;
-                            break;
-                        } else if (i + 1 < tokens.length) {
-                            flagValues[flagName] = tokens[++i];
-                            break;
-                        }
-                    }
-                }
-            } else {
-                args.push(token);
-            }
-        }
-        return { options, args, flagValues };
-    };
-
-    async execute(input: string): Promise<string> {
-        if (!input.trim()) return "";
-
+    /**
+     * Punto de entrada principal (Terminal y Sudo usan este)
+     */
+    public async execute(input: string, skipHistory: boolean = false): Promise<string> {
         const trimmedInput = input.trim();
         if (!trimmedInput) return "";
 
-        // Guardamos en el historial antes de procesar pipes o redirecciones
-        this.history.push(trimmedInput);
+        if (!skipHistory) {
+            this.history.push(trimmedInput);
+        }
 
+        // Soporte para Pipes
         if (input.includes('|')) {
             const commands = input.split('|').map(s => s.trim());
             let lastOutput = "";
             for (const cmdText of commands) {
-                lastOutput = await this.executeCommandChain(cmdText, lastOutput);
+                lastOutput = await this.processCommandLine(cmdText, lastOutput);
             }
             return lastOutput;
         }
 
-        return await this.executeCommandChain(input);
+        return await this.processCommandLine(trimmedInput);
     }
 
-    private async executeCommandChain(commandLine: string, pipeInput?: string): Promise<string> {
+    /**
+     * Procesa una línea individual (maneja redirecciones y parseo)
+     */
+    private async processCommandLine(commandLine: string, pipeInput?: string): Promise<string> {
         const redirectMatch = commandLine.match(/>\s*([^\s]+)$/);
         let targetFile: string | null = null;
         let finalCommandLine = commandLine;
@@ -143,9 +102,11 @@ export class Kernel {
         const cmd = this.commands.get(name);
         if (!cmd) return `-bash: ${name}: command not found`;
 
+        // Parseo de argumentos y flags
         const { options, args, flagValues } = this.parseArgsAndFlags(rawTokens, cmd.valuedFlags);
 
-        const result = await cmd.execute({
+        // CREACIÓN DEL CONTEXTO COMPLETO (Esto resuelve tu error de tipos en Sudo)
+        const context: CommandContext = {
             args,
             options,
             flagValues,
@@ -156,7 +117,9 @@ export class Kernel {
             pipeInput,
             kernel: this,
             hasFlag: (f: string) => options.includes(f.startsWith('-') ? f : `-${f}`)
-        });
+        };
+
+        const result = await cmd.execute(context);
 
         if (targetFile) {
             this.fs.writeFile(targetFile, result);
@@ -164,6 +127,41 @@ export class Kernel {
         }
 
         return result;
+    }
+
+    // --- UTILIDADES DE PARSEO ---
+
+    private parseArgsAndFlags(tokens: string[], valuedFlags: string[] = []) {
+        const options: string[] = [];
+        const args: string[] = [];
+        const flagValues: { [key: string]: string } = {};
+
+        for (let i = 0; i < tokens.length; i++) {
+            const token = tokens[i];
+            if (token.startsWith('-') && token.length > 1) {
+                const isLong = token.startsWith('--');
+                const cluster = isLong ? [token.slice(2)] : token.slice(1).split('');
+
+                for (let j = 0; j < cluster.length; j++) {
+                    const char = cluster[j];
+                    const flagName = isLong ? `--${char}` : `-${char}`;
+                    options.push(flagName);
+
+                    if (valuedFlags && valuedFlags.includes(char)) {
+                        if (!isLong && token.slice(j + 2)) {
+                            flagValues[flagName] = token.slice(j + 2);
+                            break;
+                        } else if (i + 1 < tokens.length) {
+                            flagValues[flagName] = tokens[++i];
+                            break;
+                        }
+                    }
+                }
+            } else {
+                args.push(token);
+            }
+        }
+        return { options, args, flagValues };
     }
 
     private tokenize(input: string): string[] {
@@ -176,7 +174,9 @@ export class Kernel {
         return parts;
     }
 
-    getPromptText(): string {
+    // --- GETTERS Y SISTEMA ---
+
+    public getPromptText(): string {
         const user = this.env.get('USER') || 'guest';
         const host = this.env.get('HOSTNAME') || 'js-terminal';
         const path = this.fs.getPresentWorkingDirectory();
@@ -184,56 +184,37 @@ export class Kernel {
     }
 
     public getCompletions(input: string): string[] {
-    const tokens = input.split(/\s+/);
-    let lastToken = tokens[tokens.length - 1];
+        const tokens = input.split(/\s+/);
+        let lastToken = tokens[tokens.length - 1];
 
-    // Caso A: Comandos (solo si es el primer token y no hay espacio final)
-    if (tokens.length === 1 && !input.endsWith(' ')) {
-        return Array.from(this.commands.keys())
-            .filter(name => name.startsWith(lastToken.toLowerCase()))
-            .map(name => name + " ");
+        if (tokens.length === 1 && !input.endsWith(' ')) {
+            return Array.from(this.commands.keys())
+                .filter(name => name.startsWith(lastToken.toLowerCase()))
+                .map(name => name + " ");
+        }
+
+        const lastSlashIndex = lastToken.lastIndexOf('/');
+        let searchPath = this.fs.getPresentWorkingDirectory();
+        let partialName = lastToken;
+        let pathPrefix = "";
+
+        if (lastSlashIndex !== -1) {
+            pathPrefix = lastToken.substring(0, lastSlashIndex + 1);
+            partialName = lastToken.substring(lastSlashIndex + 1);
+            searchPath = this.fs.getAbsolutePath(pathPrefix);
+        }
+
+        const children = this.fs.getChildren(searchPath);
+        return children
+            .filter(child => child.name.startsWith(partialName))
+            .map(child => {
+                const suffix = child.type === 'dir' ? '/' : ' ';
+                return pathPrefix + child.name + suffix;
+            });
     }
 
-    // Caso B: Archivos y Rutas
-    // 1. Separamos la ruta base de la parte que se está escribiendo
-    // Ejemplo: "proyectos/we" -> base: "proyectos/", partial: "we"
-    const lastSlashIndex = lastToken.lastIndexOf('/');
-    let searchPath = this.fs.getPresentWorkingDirectory();
-    let partialName = lastToken;
-    let pathPrefix = "";
-
-    if (lastSlashIndex !== -1) {
-        pathPrefix = lastToken.substring(0, lastSlashIndex + 1); // "proyectos/"
-        partialName = lastToken.substring(lastSlashIndex + 1);   // "we"
-        
-        // La ruta de búsqueda ahora es la ruta relativa que escribió el usuario
-        searchPath = this.fs.getAbsolutePath(pathPrefix); 
-    }
-
-    // 2. Obtenemos los hijos de esa carpeta específica
-    const children = this.fs.getChildren(searchPath);
-
-    return children
-        .filter(child => child.name.startsWith(partialName))
-        .map(child => {
-            const suffix = child.type === 'dir' ? '/' : ' ';
-            // Devolvemos el prefijo + el nombre + el sufijo
-            // Ejemplo: "proyectos/" + "web" + "/"
-            return pathPrefix + child.name + suffix;
-        });
-}
-
-    // Método público para que el comando 'history' pueda leer los datos
-    public getHistory(): string[] {
-        return this.history;
-    }
-
-    /**
-     * Opcional: Cargar un historial previo desde el JSON inicial
-     */
-    public loadHistory(historyData: string[]) {
-        this.history = historyData;
-    }
+    public getHistory(): string[] { return this.history; }
+    public loadHistory(historyData: string[]) { this.history = historyData; }
 
     public exportFullSystemState() {
         return {
@@ -244,5 +225,4 @@ export class Kernel {
             history: this.history
         };
     }
-
 }

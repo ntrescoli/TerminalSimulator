@@ -35,7 +35,7 @@ export class FileSystem {
         this.mkdir("var");
         // Actualizado /etc/passwd y añadido /etc/group por defecto
         this.writeFile("/etc/passwd", "root:x:0:0:root:/root:/bin/bash\nguest:x:1000:1000:guest:/home/guest:/bin/bash");
-        this.writeFile("/etc/group", "root:x:0:\nget:x:1000:"); 
+        this.writeFile("/etc/group", "root:x:0:\nsudo:x:27:guest,nico\n");
         this.writeFile("home/readme.txt", "Bienvenido al sistema de archivos avanzado.");
     }
 
@@ -128,15 +128,29 @@ export class FileSystem {
 
     // --- MÉTODOS DE ACCIÓN ---
 
+    // private hasPermission(node: INode, action: 'read' | 'write' | 'execute'): boolean {
+    //     const currentUser = this.env.get('USER');
+    //     if (currentUser === 'root') return true;
+    //     if (currentUser === node.owner) return node.permissions[action];
+
+    //     // Futura implementación: aquí podrías añadir lógica de grupos
+    //     // if (userManager.isUserInGroup(currentUser, node.group)) return node.groupPermissions[action];
+
+    //     return false;
+    // }
+
     private hasPermission(node: INode, action: 'read' | 'write' | 'execute'): boolean {
         const currentUser = this.env.get('USER');
         if (currentUser === 'root') return true;
-        if (currentUser === node.owner) return node.permissions[action];
-        
-        // Futura implementación: aquí podrías añadir lógica de grupos
-        // if (userManager.isUserInGroup(currentUser, node.group)) return node.groupPermissions[action];
-        
-        return false;
+
+        // Si intentas escribir en /etc, /bin o /var y no eres root...
+        const systemPaths = ['etc', 'bin', 'var'];
+        const isSystemNode = systemPaths.some(p => this.getAbsolutePath(node.name).startsWith('/' + p));
+
+        if (isSystemNode && action === 'write') return false;
+
+        // Lógica normal de dueño
+        return node.owner === currentUser;
     }
 
     private createNode(name: string, type: 'dir' | 'file', parent: INode, content: string = ""): INode {
