@@ -21,7 +21,12 @@ export class FileSystem {
             createdAt: Date.now(),
             owner: 'root',
             group: 'root', // <-- Añadido grupo raíz
-            permissions: { read: true, write: true, execute: true }
+            // permissions: { read: true, write: true, execute: true }
+            permissions: {
+    user: { read: true, write: true, execute: false },
+    group: { read: true, write: false, execute: false },
+    others: { read: true, write: false, execute: false }
+}
         };
     }
 
@@ -51,7 +56,11 @@ export class FileSystem {
             type: nodeData.type,
             owner: nodeData.owner || 'root',
             group: nodeData.group || nodeData.owner || 'root', // <-- Recuperar grupo
-            permissions: nodeData.permissions || { read: true, write: true, execute: true },
+            permissions: nodeData.permissions || {
+                user: { read: true, write: true, execute: nodeData.type === 'dir' },
+                group: { read: true, write: false, execute: false },
+                others: { read: true, write: false, execute: false }
+            },
             content: nodeData.content || "",
             createdAt: nodeData.createdAt || Date.now(),
             parent: parent,
@@ -160,7 +169,11 @@ export class FileSystem {
             createdAt: Date.now(),
             owner: currentUser,
             group: currentUser, // <-- Por defecto, el grupo es el nombre del usuario (Ubuntu style)
-            permissions: { read: true, write: true, execute: type === 'dir' }
+            permissions: {
+                user: { read: true, write: true, execute: type === 'dir' },
+                group: { read: true, write: false, execute: false },
+                others: { read: true, write: false, execute: false }
+            }
         };
     }
 
@@ -248,5 +261,15 @@ export class FileSystem {
             return cleanNode;
         };
         return serializeNode(this.root);
+    }
+
+    public setOwnership(path: string, owner?: string, group?: string): boolean {
+        const node = this.resolvePath(path); // Método interno para buscar el archivo
+        if (!node) return false;
+
+        if (owner) node.owner = owner;
+        if (group) node.group = group; // Asegúrate de que INode tenga este campo
+
+        return true;
     }
 }

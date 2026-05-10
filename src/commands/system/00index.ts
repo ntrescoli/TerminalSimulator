@@ -7,6 +7,8 @@ import { History } from './history';
 import { Sudo } from './sudo';
 import { DateCommand } from './date';
 import { Uptime } from './uptime';
+import { Who, W } from './who';
+import { Chown } from './chown';
 
 export const basicCmds = [
     Sudo,
@@ -17,5 +19,8 @@ export const basicCmds = [
     Whoami,
     History,
     DateCommand,
-    Uptime
+    Uptime,
+    Who,
+    W,
+    Chown
 ];

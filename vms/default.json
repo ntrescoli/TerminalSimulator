@@ -17,38 +17,38 @@
     "HOSTNAME": "ubuntu-desktop",
     "LANG": "en_US.UTF-8",
     "PWD": "/",
-    "SUDO_USER": null
+    "SUDO_USER": ""
   },
   "fileSystem": {
     "name": "/",
     "type": "dir",
     "owner": "root",
-    "permissions": { "read": true, "write": true, "execute": true },
+    "group": "root",
+    "permissions": {
+      "user": { "read": true, "write": true, "execute": true },
+      "group": { "read": true, "write": false, "execute": true },
+      "others": { "read": true, "write": false, "execute": true }
+    },
     "children": [
-      { "name": "bin", "type": "dir", "owner": "root", "children": [] },
-      { "name": "boot", "type": "dir", "owner": "root", "children": [] },
-      { "name": "dev", "type": "dir", "owner": "root", "children": [] },
-      { "name": "etc", "type": "dir", "owner": "root",
+      { "name": "bin", "type": "dir", "owner": "root", "group": "root", "permissions": { "user": { "read": true, "write": true, "execute": true }, "group": { "read": true, "write": false, "execute": true }, "others": { "read": true, "write": false, "execute": true } }, "children": [] },
+      { "name": "etc", "type": "dir", "owner": "root", "group": "root", 
+        "permissions": { "user": { "read": true, "write": true, "execute": true }, "group": { "read": true, "write": false, "execute": true }, "others": { "read": true, "write": false, "execute": true } },
         "children": [
-          { "name": "hostname", "type": "file", "owner": "root", "content": "ubuntu-desktop" },
-          { "name": "issue", "type": "file", "owner": "root", "content": "Ubuntu 24.04 LTS \\n \\l" },
-          { "name": "passwd", "type": "file", "owner": "root", "content": "root:x:0:0:root:/root:/bin/bash\nubuntu:x:1000:1000:Ubuntu User:/home/ubuntu:/bin/bash" },
-          { "name": "group", "type": "file", "owner": "root", "content": "root:x:0:\nsudo:x:27:ubuntu\nubuntu:x:1000:ubuntu" }
+          { "name": "hostname", "type": "file", "owner": "root", "group": "root", "content": "ubuntu-desktop", "permissions": { "user": { "read": true, "write": true, "execute": false }, "group": { "read": true, "write": false, "execute": false }, "others": { "read": true, "write": false, "execute": false } } },
+          { "name": "passwd", "type": "file", "owner": "root", "group": "root", "content": "root:x:0:0:root:/root:/bin/bash\nubuntu:x:1000:1000:Ubuntu User:/home/ubuntu:/bin/bash", "permissions": { "user": { "read": true, "write": true, "execute": false }, "group": { "read": true, "write": false, "execute": false }, "others": { "read": true, "write": false, "execute": false } } },
+          { "name": "group", "type": "file", "owner": "root", "group": "root", "content": "root:x:0:\nsudo:x:27:ubuntu\nubuntu:x:1000:ubuntu", "permissions": { "user": { "read": true, "write": true, "execute": false }, "group": { "read": true, "write": false, "execute": false }, "others": { "read": true, "write": false, "execute": false } } }
         ]
       },
-      { "name": "home", "type": "dir", "owner": "root", "children": [
-        { "name": "ubuntu", "type": "dir", "owner": "ubuntu", "children": [
-          { "name": ".bashrc", "type": "file", "owner": "ubuntu", "content": "# Default bashrc" }
-        ]}
+      { "name": "home", "type": "dir", "owner": "root", "group": "root", "permissions": { "user": { "read": true, "write": true, "execute": true }, "group": { "read": true, "write": false, "execute": true }, "others": { "read": true, "write": false, "execute": true } }, "children": [
+        { "name": "ubuntu", "type": "dir", "owner": "ubuntu", "group": "ubuntu", 
+          "permissions": { "user": { "read": true, "write": true, "execute": true }, "group": { "read": false, "write": false, "execute": false }, "others": { "read": false, "write": false, "execute": false } },
+          "children": [
+            { "name": ".bashrc", "type": "file", "owner": "ubuntu", "group": "ubuntu", "content": "# Default bashrc", "permissions": { "user": { "read": true, "write": true, "execute": false }, "group": { "read": true, "write": false, "execute": false }, "others": { "read": true, "write": false, "execute": false } } }
+          ]
+        }
       ]},
-      { "name": "root", "type": "dir", "owner": "root", "children": [] },
-      { "name": "tmp", "type": "dir", "owner": "root", "children": [] },
-      { "name": "usr", "type": "dir", "owner": "root", "children": [
-        { "name": "bin", "type": "dir", "owner": "root", "children": [] }
-      ]},
-      { "name": "var", "type": "dir", "owner": "root", "children": [
-        { "name": "log", "type": "dir", "owner": "root", "children": [] }
-      ]}
+      { "name": "root", "type": "dir", "owner": "root", "group": "root", "permissions": { "user": { "read": true, "write": true, "execute": true }, "group": { "read": false, "write": false, "execute": false }, "others": { "read": false, "write": false, "execute": false } }, "children": [] },
+      { "name": "tmp", "type": "dir", "owner": "root", "group": "root", "permissions": { "user": { "read": true, "write": true, "execute": true }, "group": { "read": true, "write": true, "execute": true }, "others": { "read": true, "write": true, "execute": true } }, "children": [] }
     ]
   },
   "history": []

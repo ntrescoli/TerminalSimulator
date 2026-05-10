@@ -26,6 +26,12 @@ export interface ICommand {
 // directorios y archivos
 export type NodeType = 'file' | 'dir';
 
+export interface IPermissions {
+    read: boolean;
+    write: boolean;
+    execute: boolean;
+}
+
 export interface INode {
     name: string;
     type: 'file' | 'dir';
@@ -35,10 +41,15 @@ export interface INode {
     createdAt: number;
     owner: string;
     group: string;
+    // permissions: {
+    //     read: boolean;
+    //     write: boolean;
+    //     execute: boolean;
+    // };
     permissions: {
-        read: boolean;
-        write: boolean;
-        execute: boolean;
+        user: IPermissions;
+        group: IPermissions;
+        others: IPermissions;
     };
 }
 
