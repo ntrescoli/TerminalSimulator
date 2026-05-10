@@ -3,6 +3,11 @@
     { "username": "root", "uid": 0, "gid": 0, "home": "/root", "shell": "/bin/bash", "fullName": "root" },
     { "username": "ubuntu", "uid": 1000, "gid": 1000, "home": "/home/ubuntu", "shell": "/bin/bash", "fullName": "Ubuntu User" }
   ],
+  "groups": [
+    { "groupName": "root", "gid": 0, "members": [] },
+    { "groupName": "sudo", "gid": 27, "members": ["ubuntu"] },
+    { "groupName": "ubuntu", "gid": 1000, "members": ["ubuntu"] }
+  ],
   "env": {
     "PATH": "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
     "HOME": "/home/ubuntu",
@@ -11,7 +16,8 @@
     "LOGNAME": "ubuntu",
     "HOSTNAME": "ubuntu-desktop",
     "LANG": "en_US.UTF-8",
-    "PWD": "/"
+    "PWD": "/",
+    "SUDO_USER": null
   },
   "fileSystem": {
     "name": "/",
@@ -22,10 +28,14 @@
       { "name": "bin", "type": "dir", "owner": "root", "children": [] },
       { "name": "boot", "type": "dir", "owner": "root", "children": [] },
       { "name": "dev", "type": "dir", "owner": "root", "children": [] },
-      { "name": "etc", "type": "dir", "owner": "root", "children": [
-        { "name": "hostname", "type": "file", "owner": "root", "content": "ubuntu-desktop" },
-        { "name": "issue", "type": "file", "owner": "root", "content": "Ubuntu 24.04 LTS \\n \\l" }
-      ]},
+      { "name": "etc", "type": "dir", "owner": "root",
+        "children": [
+          { "name": "hostname", "type": "file", "owner": "root", "content": "ubuntu-desktop" },
+          { "name": "issue", "type": "file", "owner": "root", "content": "Ubuntu 24.04 LTS \\n \\l" },
+          { "name": "passwd", "type": "file", "owner": "root", "content": "root:x:0:0:root:/root:/bin/bash\nubuntu:x:1000:1000:Ubuntu User:/home/ubuntu:/bin/bash" },
+          { "name": "group", "type": "file", "owner": "root", "content": "root:x:0:\nsudo:x:27:ubuntu\nubuntu:x:1000:ubuntu" }
+        ]
+      },
       { "name": "home", "type": "dir", "owner": "root", "children": [
         { "name": "ubuntu", "type": "dir", "owner": "ubuntu", "children": [
           { "name": ".bashrc", "type": "file", "owner": "ubuntu", "content": "# Default bashrc" }

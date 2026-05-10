@@ -5,6 +5,8 @@ import { Help } from './help';
 import { Env } from './env';
 import { History } from './history';
 import { Sudo } from './sudo';
+import { DateCommand } from './date';
+import { Uptime } from './uptime';
 
 export const basicCmds = [
     Sudo,
@@ -14,4 +16,6 @@ export const basicCmds = [
     Help,
     Whoami,
     History,
+    DateCommand,
+    Uptime
 ];

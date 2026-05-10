@@ -1,4 +1,4 @@
-import { basicCmds } from './basics/00index';
+import { basicCmds } from './system/00index';
 import { filesystemCmds } from './filesystem/00index';
 import { textCmds } from './text/00index';
 import { usersCmds } from './users/00index';

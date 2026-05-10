@@ -30,6 +30,11 @@ export class UserManager {
         this.updatePasswdFile(); // Sincronizamos con el FS virtual
     }
 
+    public loadGroups(groupsData: Group[]) {
+        this.groups = [...groupsData]; // Cargamos lo que viene del JSON
+        this.updateGroupFile();
+    }
+
     public loadDefaults() {
         this.users = [
             { username: 'root', uid: 0, gid: 0, home: '/root', shell: '/bin/bash', fullName: 'root' },
@@ -148,6 +153,55 @@ export class UserManager {
             group.members.push(username);
             this.updateGroupFile(); // Sincronizamos /etc/group
         }
+
+        return null;
+    }
+
+    /**
+     * Elimina un usuario y su grupo privado (si existe)
+     */
+    public deleteUser(username: string): string | null {
+        if (username === 'root') return "deluser: cannot remove user 'root'";
+
+        const userIndex = this.users.findIndex(u => u.username === username);
+        if (userIndex === -1) return `deluser: the user '${username}' does not exist`;
+
+        // 1. Eliminar al usuario del array
+        this.users.splice(userIndex, 1);
+
+        // 2. Eliminar al usuario de todos los grupos donde era miembro
+        this.groups.forEach(group => {
+            group.members = group.members.filter(m => m !== username);
+        });
+
+        // 3. Opcional: Eliminar su grupo privado (Ubuntu style)
+        const groupIndex = this.groups.findIndex(g => g.groupName === username);
+        if (groupIndex !== -1) this.groups.splice(groupIndex, 1);
+
+        // 4. Sincronizar archivos
+        this.updatePasswdFile();
+        this.updateGroupFile();
+
+        return null;
+    }
+
+    /**
+     * Elimina un grupo
+     */
+    public deleteGroup(groupName: string): string | null {
+        if (groupName === 'root' || groupName === 'sudo') {
+            return `delgroup: cannot remove system group '${groupName}'`;
+        }
+
+        const groupIndex = this.groups.findIndex(g => g.groupName === groupName);
+        if (groupIndex === -1) return `delgroup: the group '${groupName}' does not exist`;
+
+        // Verificar si hay usuarios que dependen de este grupo como grupo principal
+        const hasDependents = this.users.some(u => u.username === groupName);
+        if (hasDependents) return `delgroup: group '${groupName}' is the primary group of a user`;
+
+        this.groups.splice(groupIndex, 1);
+        this.updateGroupFile();
 
         return null;
     }

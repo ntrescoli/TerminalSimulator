@@ -1,5 +1,3 @@
-// src/core/Environment.ts
-
 /**
  * Gestiona las variables de entorno del sistema (PATH, USER, PWD, etc.)
  * Actúa como la fuente de configuración dinámica para los procesos del Kernel.
@@ -25,7 +23,8 @@ export class Environment {
             SHELL: '/bin/bash',
             PWD: '/',
             TERM: 'xterm-256color',
-            LANG: 'en_US.UTF-8'
+            LANG: 'en_US.UTF-8',
+            SUDO_USER: ''
         };
     }
 

@@ -3,11 +3,15 @@ import { AddUser } from "./adduser";
 import { AddGroup } from "./addgroup";
 import { Su } from "./su";
 import { UserAdd } from "./useradd";
+import { DelUser } from "./deluser";
+import { DelGroup } from "./delgroup";
 
 export const usersCmds = [
     Su,
     UserAdd,
     Groups,
     AddUser,
-    AddGroup
+    AddGroup,
+    DelUser,
+    DelGroup
 ];

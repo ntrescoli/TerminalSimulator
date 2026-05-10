@@ -5,6 +5,7 @@ import { FileSystem } from './FileSystem';
 import { UserManager } from './UserManager';
 
 export class Kernel {
+    private startTime: number;
     private commands: Map<string, ICommand> = new Map();
     private fs: FileSystem;
     private env: Environment;
@@ -13,6 +14,7 @@ export class Kernel {
     private isReady: boolean = false;
 
     constructor() {
+        this.startTime = Date.now();
         this.env = new Environment();
         this.fs = new FileSystem(this.env);
         this.userManager = new UserManager(this.fs);
@@ -32,7 +34,9 @@ export class Kernel {
             const config = await response.json();
 
             this.fs.loadFromJSON(config);
+            // Sincronizar la MEMORIA del UserManager
             if (config.users) this.userManager.loadUsers(config.users);
+            if (config.groups) this.userManager.loadGroups(config.groups);
             if (config.env) {
                 this.env.loadFromObject(config.env);
             } else {
@@ -224,5 +228,9 @@ export class Kernel {
             groups: this.userManager.getGroups(),
             history: this.history
         };
+    }
+    
+    public getUptime(): number {
+        return Date.now() - this.startTime;
     }
 }
