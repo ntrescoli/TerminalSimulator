@@ -1,5 +1,4 @@
 import { Group, User } from '../types/types';
-import { Result } from '../types/system'
 import { FileSystem } from './FileSystem';
 
 export class UserManager {

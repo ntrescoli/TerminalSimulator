@@ -1,10 +1,9 @@
 import { ICommand } from '../../types/types';
+import { commandList } from '../index';
 
 export const Help: ICommand = {
     name: 'help',
     execute: ({ args }) => {
-        // En una fase posterior, podríamos pasar la lista de comandos al contexto
-        // Por ahora, una ayuda genérica
-        return "Comandos disponibles: ls, cd, cat, echo, whoami, clear, help, mkdir, pwd";
+        return `Comandos disponibles: ${commandList.map(c => c.name).join(', ')}`;
     }
 };

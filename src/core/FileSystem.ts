@@ -1,11 +1,11 @@
+import { Result } from '../types/result';
 import { INode } from '../types/types';
 import { Errors } from '../utils/errors';
-import { Result } from '../types/system';
 import { Environment } from './Environment';
 
-import { PathResolver } from './filesystem/PathResolver';
-import { NodeFactory } from './filesystem/NodeFactory';
 import { AccessControl } from './filesystem/AccessControl';
+import { NodeFactory } from './filesystem/NodeFactory';
+import { PathResolver } from './filesystem/PathResolver';
 
 export class FileSystem {
     root: INode;
