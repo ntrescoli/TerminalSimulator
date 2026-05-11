@@ -37,11 +37,6 @@ export class FileSystem {
         this.currentDirectory = this.root;
     }
 
-    /**
-     * Ya no necesitamos el método privado largo aquí.
-     * Creamos un pequeño wrapper si queremos mantener la comodidad, 
-     * o llamamos directamente a AccessControl.
-     */
     private checkAccess(node: INode, action: 'read' | 'write' | 'execute'): boolean {
         const user = this.env.get('USER') || 'guest';
         const path = PathResolver.getAbsolutePath(node);
@@ -84,28 +79,29 @@ export class FileSystem {
 
     // --- MÉTODOS DE ACCIÓN ---
 
-/**
- * Escribe contenido en un archivo.
- * @param append Si es true, añade al final. Si es false, sobrescribe.
- */
-public writeFile(path: string, content: string, append: boolean = false): Result<INode> {
-    const processedContent = content.replace(/\\n/g, '\n');
-    
-    // Si queremos añadir contenido, primero intentamos leer lo que ya hay
-    if (append) {
-        const existingFile = this.cat(path);
-        if (existingFile.success) {
-            // Concatenamos: contenido viejo + salto de línea + contenido nuevo
-            // El trim() evita que se acumulen infinitos saltos de línea al final
-            const newContent = (existingFile.data.trimEnd() + '\n' + processedContent).trim();
-            return this.touch(path, newContent);
+    /**
+     * Escribe contenido en un archivo.
+     * @param append Si es true, añade al final. Si es false, sobrescribe.
+     */
+    public writeFile(path: string, content: string, append: boolean = false): Result<INode> {
+        const processedContent = content.replace(/\\n/g, '\n');
+
+        // Si queremos añadir contenido, primero intentamos leer lo que ya hay
+        if (append) {
+            const existingFile = this.cat(path);
+            if (existingFile.success) {
+                // Concatenamos: contenido viejo + salto de línea + contenido nuevo
+                // El trim() evita que se acumulen infinitos saltos de línea al final
+                const newContent = (existingFile.data.trimEnd() + '\n' + processedContent).trim();
+                return this.touch(path, newContent);
+            }
+            // Si el archivo no existe, touch lo creará de todos modos, 
+            // así que seguimos adelante.
         }
-        // Si el archivo no existe, touch lo creará de todos modos, 
-        // así que seguimos adelante.
+
+        return this.touch(path, processedContent);
     }
 
-    return this.touch(path, processedContent);
-}
     /**
      * Crea un archivo o actualiza su contenido.
      * Devuelve Result<INode> para que el llamador tenga acceso al nodo creado/modificado.
@@ -181,7 +177,7 @@ public writeFile(path: string, content: string, append: boolean = false): Result
         return { success: true, data: newNode };
     }
 
-    changeDirectory(path: string): string | null {
+    public changeDirectory(path: string): string | null {
         const target = this.resolvePath(path);
         if (!target) return `cd: no such file or directory: ${path}`;
         if (target.type !== 'dir') return `cd: not a directory: ${path}`;

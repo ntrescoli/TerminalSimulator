@@ -1,41 +1,100 @@
-Punto de entrada -> index.html (+estilos -> style.css) + (+interactividad -> main.ts)
+# Terminal Simulator 🖥️
 
-main.ts:
-- Gestiona la pulsación de teclas: ⬆️, ⬇️, enter
-- Inicializa el Kernel (funciones)
-- Inicializa el UI (vista)
+Un simulador interactivo de terminal Linux/Ubuntu funcional en el navegador. Escrito en TypeScript con Vite.
 
-/ui
+## 📋 Descripción
 
-Terminal.ts:
-- Pinta la pantalla
-- Recibe el texto
-- Escribe respuesta
-- Gestiona el contenido del prompt
+Terminal Simulator es una aplicación web que emula un terminal Linux completo con:
+- Sistema de archivos virtual
+- Gestión de usuarios y permisos
+- Historial de comandos
+- Variables de entorno
+- Soporte para pipes (`|`) y redirecciones (`>`, `>>`)
+- Más de 40 comandos del sistema
 
-/types
+Perfecto para aprender Linux, hacer demostraciones educativas o entretenimiento interactivo.
 
-intex.ts: (Se fusionará en el futuro con types.ts)
-- Guarda la clase y la interfaz para describir cómo es un nodo (file, dir)
+## 🚀 Instalación
 
-types.ts:
-- Guarda la clase y la interfaz para describir cómo es un comando y sus flags, ruta, etc.
+### Requisitos
+- Node.js 18+ o superior
+- pnpm (recomendado) o npm
 
-/core -> variables y funciones auxiliares para ser usadas por las librerias de comandos
+### Pasos
 
-Kernel.ts:
-- Importa y registra los comandos
+```bash
+# Clonar el repositorio
+git clone <repository-url>
+cd TerminalSimulator
 
-Environment.ts
-- Contiene las variables de entorno y sus getters y setters
+# Instalar dependencias
+pnpm install
 
-FileSystem.ts
-- Contiene funciones auxiliares para ser utilizadas por los comandos
+# Iniciar servidor de desarrollo
+pnpm dev
 
-/commands -> donde se añaden las librerias de comandos
+# Compilar para producción
+pnpm build
 
-basic.ts:
-- contiene los comandos básicos del sistema. Recurre a Environment.ts y FileSystem.ts para usar sus funciones.
+# Vista previa de producción
+pnpm preview
+```
 
-filesystem.ts:
-- contiene los comandos del sistema de archivos. Recurre a Environment.ts y FileSystem.ts para usar sus funciones.
+## 📁 Estructura del Proyecto
+
+```
+TerminalSimulator/
+├── src/
+│   ├── main.ts                 # Punto de entrada, manejo de eventos
+│   ├── core/                   # Núcleo del sistema
+│   │   ├── Kernel.ts           # Motor de ejecución de comandos
+│   │   ├── Environment.ts      # Variables de entorno
+│   │   ├── FileSystem.ts       # Sistema de archivos virtual
+│   │   ├── UserManager.ts      # Gestión de usuarios y grupos
+│   │   └── filesystem/
+│   │       ├── AccessControl.ts    # Control de permisos (rwx)
+│   │       ├── NodeFactory.ts      # Factory para crear nodos
+│   │       └── PathResolver.ts     # Resolver de rutas
+│   ├── commands/               # Implementación de comandos
+│   │   ├── index.ts            # Registro central
+│   │   ├── system/             # Comandos del sistema
+│   │   ├── filesystem/         # Comandos de archivos
+│   │   ├── text/               # Comandos de texto
+│   │   ├── users/              # Comandos de usuarios
+│   │   └── custom/             # Comandos personalizados
+│   ├── types/                  # Tipos e interfaces TypeScript
+│   ├── ui/                     # Componentes UI
+│   └── utils/                  # Utilidades
+├── vms/                        # Configuraciones iniciales
+├── index.html                  # HTML principal
+├── style.css                   # Estilos
+└── vite.config.ts             # Configuración Vite
+```
+
+## 🎮 Comandos Disponibles
+
+### Sistema
+`clear`, `echo`, `date`, `uptime`, `who`, `whoami`, `sudo`, `history`, `help`
+
+### Archivos
+`ls`, `cd`, `pwd`, `mkdir`, `touch`, `cat`, `rm`, `cp`, `mv`
+
+### Usuarios
+`adduser`, `deluser`, `useradd`, `addgroup`, `delgroup`, `groups`, `su`
+
+### Texto
+`grep`, `cat`
+
+### Permisos
+`chmod`, `chown`
+
+## 🔧 Desarrollo
+
+Para agregar nuevos comandos, consulta [CONTRIBUTING.md](./docs/CONTRIBUTING.md)
+
+## 📚 Documentación
+
+- [ARCHITECTURE.md](./docs/ARCHITECTURE.md) - Arquitectura del sistema
+- [COMMANDS.md](./docs/COMMANDS.md) - Documentación de comandos
+- [CONTRIBUTING.md](./docs/CONTRIBUTING.md) - Guía de contribución
+- [API.md](./docs/API.md) - Interfaz programática

@@ -41,11 +41,6 @@ export interface INode {
     createdAt: number;
     owner: string;
     group: string;
-    // permissions: {
-    //     read: boolean;
-    //     write: boolean;
-    //     execute: boolean;
-    // };
     permissions: {
         user: IPermissions;
         group: IPermissions;
