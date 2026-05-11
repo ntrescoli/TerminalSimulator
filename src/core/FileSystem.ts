@@ -84,11 +84,26 @@ export class FileSystem {
 
     // --- MÉTODOS DE ACCIÓN ---
 
-    public writeFile(path: string, content: string = ""): Result<INode> {
-    // Si content es undefined por error, usamos un string vacío
-    const safeContent = content || ""; 
-    const processedContent = safeContent.replace(/\\n/g, '\n');
+/**
+ * Escribe contenido en un archivo.
+ * @param append Si es true, añade al final. Si es false, sobrescribe.
+ */
+public writeFile(path: string, content: string, append: boolean = false): Result<INode> {
+    const processedContent = content.replace(/\\n/g, '\n');
     
+    // Si queremos añadir contenido, primero intentamos leer lo que ya hay
+    if (append) {
+        const existingFile = this.cat(path);
+        if (existingFile.success) {
+            // Concatenamos: contenido viejo + salto de línea + contenido nuevo
+            // El trim() evita que se acumulen infinitos saltos de línea al final
+            const newContent = (existingFile.data.trimEnd() + '\n' + processedContent).trim();
+            return this.touch(path, newContent);
+        }
+        // Si el archivo no existe, touch lo creará de todos modos, 
+        // así que seguimos adelante.
+    }
+
     return this.touch(path, processedContent);
 }
     /**
@@ -182,7 +197,7 @@ export class FileSystem {
         return { success: true, data: node.content || "" };
     }
 
-    getPresentWorkingDirectory(): string {
+    public getPresentWorkingDirectory(): string {
         let current = this.currentDirectory;
         let path = "";
         while (current.parent !== null) {

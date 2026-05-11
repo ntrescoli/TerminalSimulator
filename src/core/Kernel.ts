@@ -13,13 +13,11 @@ export class Kernel {
     private userManager: UserManager;
     private history: string[] = [];
     private isReady: boolean = false;
-    private PathResolver: PathResolver;
 
     constructor() {
         this.startTime = Date.now();
         this.env = new Environment();
         this.fs = new FileSystem(this.env);
-        this.PathResolver = new PathResolver();
         this.userManager = new UserManager(this.fs);
         this.loadCommands();
     }
@@ -37,9 +35,9 @@ export class Kernel {
             const config = await response.json();
 
             this.fs.loadFromJSON(config);
-            // Sincronizar la MEMORIA del UserManager
             if (config.users) this.userManager.loadUsers(config.users);
             if (config.groups) this.userManager.loadGroups(config.groups);
+            
             if (config.env) {
                 this.env.loadFromObject(config.env);
             } else {
@@ -48,6 +46,7 @@ export class Kernel {
             if (config.history) this.loadHistory(config.history);
 
         } catch (error) {
+            console.warn("Kernel: Error loading config, using defaults.");
             this.env.loadDefaults();
             this.fs.loadDefaults();
             this.userManager.loadDefaults();
@@ -65,9 +64,6 @@ export class Kernel {
 
     // --- MOTOR DE EJECUCIÓN CENTRALIZADO ---
 
-    /**
-     * Punto de entrada principal (Terminal y Sudo usan este)
-     */
     public async execute(input: string, skipHistory: boolean = false): Promise<string> {
         const trimmedInput = input.trim();
         if (!trimmedInput) return "";
@@ -76,11 +72,12 @@ export class Kernel {
             this.history.push(trimmedInput);
         }
 
-        // Soporte para Pipes
-        if (input.includes('|')) {
-            const commands = input.split('|').map(s => s.trim());
+        // Soporte para Pipes (Ejecución secuencial)
+        if (trimmedInput.includes('|')) {
+            const commands = trimmedInput.split('|').map(s => s.trim());
             let lastOutput = "";
             for (const cmdText of commands) {
+                // Pasamos el output del comando anterior como pipeInput
                 lastOutput = await this.processCommandLine(cmdText, lastOutput);
             }
             return lastOutput;
@@ -89,30 +86,39 @@ export class Kernel {
         return await this.processCommandLine(trimmedInput);
     }
 
-    /**
-     * Procesa una línea individual (maneja redirecciones y parseo)
-     */
-    private async processCommandLine(commandLine: string, pipeInput?: string): Promise<string> {
-        const redirectMatch = commandLine.match(/>\s*([^\s]+)$/);
+    private async processCommandLine(commandLine: string, pipeInput: string = ""): Promise<string> {
+        let finalCommandLine = commandLine.trim();
         let targetFile: string | null = null;
-        let finalCommandLine = commandLine;
+        let isAppend = false;
 
-        if (redirectMatch) {
-            targetFile = redirectMatch[1];
-            finalCommandLine = commandLine.replace(/>\s*[^\s]+$/, '').trim();
+        // 1. Detectar Redirecciones (Priorizamos >> sobre >)
+        const appendMatch = finalCommandLine.match(/>>\s*([^\s]+)$/);
+        const overwriteMatch = finalCommandLine.match(/>\s*([^\s]+)$/);
+
+        if (appendMatch) {
+            isAppend = true;
+            targetFile = appendMatch[1];
+            finalCommandLine = finalCommandLine.replace(/>>\s*[^\s]+$/, '').trim();
+        } else if (overwriteMatch) {
+            isAppend = false;
+            targetFile = overwriteMatch[1];
+            finalCommandLine = finalCommandLine.replace(/>\s*[^\s]+$/, '').trim();
         }
 
+        // 2. Tokenización
         const tokens = this.tokenize(finalCommandLine);
-        const name = tokens[0]?.toLowerCase();
+        if (tokens.length === 0) return "";
+
+        const name = tokens[0].toLowerCase();
         const rawTokens = tokens.slice(1);
 
         const cmd = this.commands.get(name);
         if (!cmd) return `-bash: ${name}: command not found`;
 
-        // Parseo de argumentos y flags
+        // 3. Parseo de argumentos y flags
         const { options, args, flagValues } = this.parseArgsAndFlags(rawTokens, cmd.valuedFlags);
 
-        // CREACIÓN DEL CONTEXTO COMPLETO (Esto resuelve tu error de tipos en Sudo)
+        // 4. Creación del contexto
         const context: CommandContext = {
             args,
             options,
@@ -126,14 +132,15 @@ export class Kernel {
             hasFlag: (f: string) => options.includes(f.startsWith('-') ? f : `-${f}`)
         };
 
+        // 5. Ejecución
         const result = await cmd.execute(context);
 
+        // 6. Manejo de la salida (Redirección o Retorno)
         if (targetFile) {
-            const writeResult = this.fs.writeFile(targetFile, result);
+            const writeResult = this.fs.writeFile(targetFile, result, isAppend);
             if (!writeResult.success) {
                 return writeResult.error;
             }
-            // this.fs.writeFile({ path: targetFile, content: result });
             return "";
         }
 
@@ -141,6 +148,16 @@ export class Kernel {
     }
 
     // --- UTILIDADES DE PARSEO ---
+
+    private tokenize(input: string): string[] {
+        const regex = /"([^"]*)"|'([^']*)'|([^\s]+)/g;
+        const parts: string[] = [];
+        let match;
+        while ((match = regex.exec(input)) !== null) {
+            parts.push(match[1] || match[2] || match[3]);
+        }
+        return parts;
+    }
 
     private parseArgsAndFlags(tokens: string[], valuedFlags: string[] = []) {
         const options: string[] = [];
@@ -158,9 +175,9 @@ export class Kernel {
                     const flagName = isLong ? `--${char}` : `-${char}`;
                     options.push(flagName);
 
-                    if (valuedFlags && valuedFlags.includes(char)) {
-                        if (!isLong && token.slice(j + 2)) {
-                            flagValues[flagName] = token.slice(j + 2);
+                    if (valuedFlags.includes(char) || valuedFlags.includes(flagName)) {
+                        if (!isLong && token.slice(j + 1).length > 0) {
+                            flagValues[flagName] = token.slice(j + 1);
                             break;
                         } else if (i + 1 < tokens.length) {
                             flagValues[flagName] = tokens[++i];
@@ -175,17 +192,7 @@ export class Kernel {
         return { options, args, flagValues };
     }
 
-    private tokenize(input: string): string[] {
-        const regex = /"([^"]*)"|'([^']*)'|([^\s]+)/g;
-        const parts: string[] = [];
-        let match;
-        while ((match = regex.exec(input)) !== null) {
-            parts.push(match[1] || match[2] || match[3]);
-        }
-        return parts;
-    }
-
-    // --- GETTERS Y SISTEMA ---
+    // --- SISTEMA Y AUTOCOMPLETADO ---
 
     public getPromptText(): string {
         const user = this.env.get('USER') || 'guest';
@@ -196,37 +203,32 @@ export class Kernel {
 
     public getCompletions(input: string): string[] {
         const tokens = input.split(/\s+/);
-        let lastToken = tokens[tokens.length - 1];
+        const lastToken = tokens[tokens.length - 1];
 
+        // Autocompletar comandos
         if (tokens.length === 1 && !input.endsWith(' ')) {
             return Array.from(this.commands.keys())
                 .filter(name => name.startsWith(lastToken.toLowerCase()))
                 .map(name => name + " ");
         }
 
+        // Autocompletar rutas
         const lastSlashIndex = lastToken.lastIndexOf('/');
-        let searchPath = this.fs.getPresentWorkingDirectory();
         let partialName = lastToken;
         let pathPrefix = "";
+        let searchDirNode;
 
         if (lastSlashIndex !== -1) {
             pathPrefix = lastToken.substring(0, lastSlashIndex + 1);
             partialName = lastToken.substring(lastSlashIndex + 1);
-
-            // 1. Primero resolvemos el string a un nodo real
-            const prefixNode = PathResolver.resolve(pathPrefix, this.fs.currentDirectory, this.fs.root);
-
-            // 2. Ahora sí, si el nodo existe, obtenemos su ruta absoluta (que es un string)
-            if (prefixNode) {
-                searchPath = PathResolver.getAbsolutePath(prefixNode);
-            } else {
-                // Si la ruta no existe, no podemos completar nada
-                return [];
-            }
+            searchDirNode = PathResolver.resolve(pathPrefix, this.fs.currentDirectory, this.fs.root);
+        } else {
+            searchDirNode = this.fs.currentDirectory;
         }
 
-        const children = this.fs.getChildren(searchPath);
-        return children
+        if (!searchDirNode || searchDirNode.type !== 'dir') return [];
+
+        return searchDirNode.children
             .filter(child => child.name.startsWith(partialName))
             .map(child => {
                 const suffix = child.type === 'dir' ? '/' : ' ';
@@ -237,6 +239,10 @@ export class Kernel {
     public getHistory(): string[] { return this.history; }
     public loadHistory(historyData: string[]) { this.history = historyData; }
 
+    public getUptime(): number {
+        return Date.now() - this.startTime;
+    }
+
     public exportFullSystemState() {
         return {
             env: this.env.getAll(),
@@ -245,9 +251,5 @@ export class Kernel {
             groups: this.userManager.getGroups(),
             history: this.history
         };
-    }
-
-    public getUptime(): number {
-        return Date.now() - this.startTime;
     }
 }
