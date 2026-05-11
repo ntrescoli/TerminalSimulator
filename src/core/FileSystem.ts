@@ -1,5 +1,11 @@
 import { INode } from '../types/types';
+import { Errors } from '../utils/errors';
+import { Result } from '../types/system';
 import { Environment } from './Environment';
+
+import { PathResolver } from './filesystem/PathResolver';
+import { NodeFactory } from './filesystem/NodeFactory';
+import { AccessControl } from './filesystem/AccessControl';
 
 export class FileSystem {
     root: INode;
@@ -8,37 +14,18 @@ export class FileSystem {
 
     constructor(env: Environment) {
         this.env = env;
-        this.root = this.createDefaultRoot();
+        this.root = NodeFactory.create('/', 'dir', 'root');
         this.currentDirectory = this.root;
     }
 
-    private createDefaultRoot(): INode {
-        return {
-            name: '/',
-            type: 'dir',
-            children: [],
-            parent: null,
-            createdAt: Date.now(),
-            owner: 'root',
-            group: 'root', // <-- Añadido grupo raíz
-            // permissions: { read: true, write: true, execute: true }
-            permissions: {
-    user: { read: true, write: true, execute: false },
-    group: { read: true, write: false, execute: false },
-    others: { read: true, write: false, execute: false }
-}
-        };
-    }
-
     public loadDefaults() {
-        this.root = this.createDefaultRoot();
+        this.root = NodeFactory.create('/', 'dir', 'root');
         this.currentDirectory = this.root;
 
         this.mkdir("home");
         this.mkdir("bin");
         this.mkdir("etc");
         this.mkdir("var");
-        // Actualizado /etc/passwd y añadido /etc/group por defecto
         this.writeFile("/etc/passwd", "root:x:0:0:root:/root:/bin/bash\nguest:x:1000:1000:guest:/home/guest:/bin/bash");
         this.writeFile("/etc/group", "root:x:0:\nsudo:x:27:guest,nico\n");
         this.writeFile("home/readme.txt", "Bienvenido al sistema de archivos avanzado.");
@@ -46,34 +33,19 @@ export class FileSystem {
 
     public loadFromJSON(jsonData: any) {
         if (!jsonData.fileSystem) return;
-        this.root = this.reconstructTree(jsonData.fileSystem, null);
+        this.root = NodeFactory.reconstruct(jsonData.fileSystem, null);
         this.currentDirectory = this.root;
     }
 
-    private reconstructTree(nodeData: any, parent: INode | null): INode {
-        const newNode: INode = {
-            name: nodeData.name,
-            type: nodeData.type,
-            owner: nodeData.owner || 'root',
-            group: nodeData.group || nodeData.owner || 'root', // <-- Recuperar grupo
-            permissions: nodeData.permissions || {
-                user: { read: true, write: true, execute: nodeData.type === 'dir' },
-                group: { read: true, write: false, execute: false },
-                others: { read: true, write: false, execute: false }
-            },
-            content: nodeData.content || "",
-            createdAt: nodeData.createdAt || Date.now(),
-            parent: parent,
-            children: []
-        };
-
-        if (nodeData.children) {
-            newNode.children = nodeData.children.map((childData: any) =>
-                this.reconstructTree(childData, newNode)
-            );
-        }
-
-        return newNode;
+    /**
+     * Ya no necesitamos el método privado largo aquí.
+     * Creamos un pequeño wrapper si queremos mantener la comodidad, 
+     * o llamamos directamente a AccessControl.
+     */
+    private checkAccess(node: INode, action: 'read' | 'write' | 'execute'): boolean {
+        const user = this.env.get('USER') || 'guest';
+        const path = PathResolver.getAbsolutePath(node);
+        return AccessControl.canAccess(node, user, action, path);
     }
 
     // --- MÉTODOS DE DATOS ---
@@ -91,24 +63,7 @@ export class FileSystem {
     }
 
     public resolvePath(path: string): INode | null {
-        if (!path || path === ".") return this.currentDirectory;
-        if (path === "/") return this.root;
-
-        let cleanPath = path.startsWith('~') ? path.replace('~', '/home') : path;
-        let current = cleanPath.startsWith('/') ? this.root : this.currentDirectory;
-        const segments = cleanPath.split('/').filter(Boolean);
-
-        for (const segment of segments) {
-            if (segment === '.') continue;
-            if (segment === '..') {
-                current = current.parent || current;
-            } else {
-                const found = current.children.find(child => child.name === segment);
-                if (!found) return null;
-                current = found;
-            }
-        }
-        return current;
+        return PathResolver.resolve(path, this.currentDirectory, this.root);
     }
 
     public readdir(path: string): string[] {
@@ -127,93 +82,88 @@ export class FileSystem {
         return [];
     }
 
-    public getAbsolutePath(relativePath: string): string {
-        if (relativePath.startsWith('/')) return relativePath;
-        const current = this.getPresentWorkingDirectory();
-        const base = current === '/' ? '/' : current + '/';
-        const full = base + relativePath;
-        return full.replace(/\/+/g, '/');
-    }
-
     // --- MÉTODOS DE ACCIÓN ---
 
-    // private hasPermission(node: INode, action: 'read' | 'write' | 'execute'): boolean {
-    //     const currentUser = this.env.get('USER');
-    //     if (currentUser === 'root') return true;
-    //     if (currentUser === node.owner) return node.permissions[action];
-
-    //     // Futura implementación: aquí podrías añadir lógica de grupos
-    //     // if (userManager.isUserInGroup(currentUser, node.group)) return node.groupPermissions[action];
-
-    //     return false;
-    // }
-
-    private hasPermission(node: INode, action: 'read' | 'write' | 'execute'): boolean {
-        const currentUser = this.env.get('USER');
-        if (currentUser === 'root') return true;
-
-        // Si intentas escribir en /etc, /bin o /var y no eres root...
-        const systemPaths = ['etc', 'bin', 'var'];
-        const isSystemNode = systemPaths.some(p => this.getAbsolutePath(node.name).startsWith('/' + p));
-
-        if (isSystemNode && action === 'write') return false;
-
-        // Lógica normal de dueño
-        return node.owner === currentUser;
-    }
-
-    private createNode(name: string, type: 'dir' | 'file', parent: INode, content: string = ""): INode {
-        const currentUser = this.env.get('USER') || 'root';
-        return {
-            name, type, parent, children: [], content,
-            createdAt: Date.now(),
-            owner: currentUser,
-            group: currentUser, // <-- Por defecto, el grupo es el nombre del usuario (Ubuntu style)
-            permissions: {
-                user: { read: true, write: true, execute: type === 'dir' },
-                group: { read: true, write: false, execute: false },
-                others: { read: true, write: false, execute: false }
-            }
-        };
-    }
-
-    writeFile(path: string, content: string): string | null {
-        const processedContent = content.replace(/\\n/g, '\n');
-        return this.touch(path, processedContent);
-    }
-
-    touch(path: string, content: string = ""): string | null {
+    public writeFile(path: string, content: string = ""): Result<INode> {
+    // Si content es undefined por error, usamos un string vacío
+    const safeContent = content || ""; 
+    const processedContent = safeContent.replace(/\\n/g, '\n');
+    
+    return this.touch(path, processedContent);
+}
+    /**
+     * Crea un archivo o actualiza su contenido.
+     * Devuelve Result<INode> para que el llamador tenga acceso al nodo creado/modificado.
+     */
+    public touch(path: string, content: string = ""): Result<INode> {
+        // 1. Separar ruta y nombre
         const lastSlash = path.lastIndexOf('/');
-        const dirPath = lastSlash === -1 ? "." : path.substring(0, lastSlash);
+        const dirPath = lastSlash === -1 ? "." : path.substring(0, lastSlash) || "/";
         const fileName = lastSlash === -1 ? path : path.substring(lastSlash + 1);
-        const targetDir = this.resolvePath(dirPath);
 
-        if (!targetDir || targetDir.type !== 'dir') return `touch: cannot create '${path}': No such directory`;
-        if (!this.hasPermission(targetDir, 'write')) return `touch: '${path}': Permission denied`;
+        // 2. Resolver directorio padre
+        const targetDir = PathResolver.resolve(dirPath, this.currentDirectory, this.root);
 
-        const existing = targetDir.children.find(n => n.name === fileName);
-        if (existing) {
-            if (existing.type === 'dir') return `touch: '${path}': Is a directory`;
-            if (!this.hasPermission(existing, 'write')) return `touch: '${path}': Permission denied`;
-            existing.content = content;
-        } else {
-            targetDir.children.push(this.createNode(fileName, 'file', targetDir, content));
+        // 3. Validar existencia del directorio
+        if (!targetDir || targetDir.type !== 'dir') {
+            return { success: false, error: Errors.NOT_FOUND(path) };
         }
-        return null;
+
+        // 4. Validar permisos de escritura en el directorio (para poder crear archivos)
+        if (!this.checkAccess(targetDir, 'write')) {
+            return { success: false, error: Errors.PERMISSION_DENIED(path) };
+        }
+
+        // 5. Buscar si ya existe
+        const existing = targetDir.children.find(n => n.name === fileName);
+
+        if (existing) {
+            // Error si es un directorio
+            if (existing.type === 'dir') {
+                return { success: false, error: Errors.IS_DIRECTORY(path) };
+            }
+
+            // Validar permisos sobre el archivo existente
+            if (!this.checkAccess(existing, 'write')) {
+                return { success: false, error: Errors.PERMISSION_DENIED(path) };
+            }
+
+            // Actualizar contenido
+            existing.content = content;
+            return { success: true, data: existing };
+        } else {
+            // 6. Crear nuevo nodo
+            const currentUser = this.env.get('USER') || 'root';
+            const newNode = NodeFactory.create(fileName, 'file', currentUser, targetDir, content);
+
+            targetDir.children.push(newNode);
+            return { success: true, data: newNode };
+        }
     }
 
-    mkdir(path: string): string | null {
+    public mkdir(path: string): Result<INode> {
         const lastSlash = path.lastIndexOf('/');
-        const dirPath = lastSlash === -1 ? "." : path.substring(0, lastSlash);
+        const dirPath = lastSlash === -1 ? "." : path.substring(0, lastSlash) || "/";
         const dirName = lastSlash === -1 ? path : path.substring(lastSlash + 1);
-        const parentDir = this.resolvePath(dirPath);
 
-        if (!parentDir || parentDir.type !== 'dir') return `mkdir: cannot create directory '${path}': No such file or directory`;
-        if (!this.hasPermission(parentDir, 'write')) return `mkdir: '${path}': Permission denied`;
-        if (parentDir.children.some(n => n.name === dirName)) return `mkdir: cannot create directory '${path}': File exists`;
+        const parentDir = PathResolver.resolve(dirPath, this.currentDirectory, this.root);
 
-        parentDir.children.push(this.createNode(dirName, 'dir', parentDir));
-        return null;
+        if (!parentDir || parentDir.type !== 'dir') {
+            return { success: false, error: Errors.NOT_FOUND(path) };
+        }
+
+        if (!this.checkAccess(parentDir, 'write')) {
+            return { success: false, error: Errors.PERMISSION_DENIED(path) };
+        }
+
+        if (parentDir.children.some(n => n.name === dirName)) {
+            return { success: false, error: Errors.ALREADY_EXISTS(path) };
+        }
+
+        const newNode = NodeFactory.create(dirName, 'dir', this.env.get('USER'), parentDir);
+        parentDir.children.push(newNode);
+
+        return { success: true, data: newNode };
     }
 
     changeDirectory(path: string): string | null {
@@ -224,12 +174,12 @@ export class FileSystem {
         return null;
     }
 
-    cat(path: string): string {
-        const node = this.resolvePath(path);
-        if (!node) return `cat: ${path}: No such file or directory`;
-        if (node.type === 'dir') return `cat: ${path}: Is a directory`;
-        if (!this.hasPermission(node, 'read')) return `cat: ${path}: Permission denied`;
-        return node.content || "";
+    public cat(path: string): Result<string> {
+        const node = PathResolver.resolve(path, this.currentDirectory, this.root);
+        if (!node) return { success: false, error: Errors.NOT_FOUND(path) };
+        if (node.type === 'dir') return { success: false, error: Errors.IS_DIRECTORY(path) };
+        if (!this.checkAccess(node, 'read')) return { success: false, error: Errors.PERMISSION_DENIED(path) };
+        return { success: true, data: node.content || "" };
     }
 
     getPresentWorkingDirectory(): string {

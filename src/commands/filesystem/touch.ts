@@ -6,12 +6,17 @@ export const Touch: ICommand = {
         if (args.length < 1) return "touch: missing file operand";
 
         const path = args[0];
-        const content = args[1] || "";
+        const content = args[1] || ""; // Mantenemos tu soporte para contenido opcional
 
-        // Capturamos el error de permisos o de ruta
-        const error = fs.touch(path, content);
+        // 1. Llamamos al FileSystem (ahora devuelve Result<INode>)
+        const result = fs.touch(path, content);
 
-        if (error) return error;
+        // 2. Si success es false, devolvemos el string del error
+        if (!result.success) {
+            return result.error;
+        }
+
+        // 3. Si tuvo éxito, devolvemos string vacío (comportamiento Unix)
         return "";
     }
 };

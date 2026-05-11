@@ -1,8 +1,9 @@
 import { commandList } from '../commands';
-import { ICommand, CommandContext } from '../types/types';
+import { CommandContext, ICommand } from '../types/types';
 import { Environment } from './Environment';
 import { FileSystem } from './FileSystem';
 import { UserManager } from './UserManager';
+import { PathResolver } from './filesystem/PathResolver';
 
 export class Kernel {
     private startTime: number;
@@ -12,11 +13,13 @@ export class Kernel {
     private userManager: UserManager;
     private history: string[] = [];
     private isReady: boolean = false;
+    private PathResolver: PathResolver;
 
     constructor() {
         this.startTime = Date.now();
         this.env = new Environment();
         this.fs = new FileSystem(this.env);
+        this.PathResolver = new PathResolver();
         this.userManager = new UserManager(this.fs);
         this.loadCommands();
     }
@@ -126,7 +129,11 @@ export class Kernel {
         const result = await cmd.execute(context);
 
         if (targetFile) {
-            this.fs.writeFile(targetFile, result);
+            const writeResult = this.fs.writeFile(targetFile, result);
+            if (!writeResult.success) {
+                return writeResult.error;
+            }
+            // this.fs.writeFile({ path: targetFile, content: result });
             return "";
         }
 
@@ -205,7 +212,17 @@ export class Kernel {
         if (lastSlashIndex !== -1) {
             pathPrefix = lastToken.substring(0, lastSlashIndex + 1);
             partialName = lastToken.substring(lastSlashIndex + 1);
-            searchPath = this.fs.getAbsolutePath(pathPrefix);
+
+            // 1. Primero resolvemos el string a un nodo real
+            const prefixNode = PathResolver.resolve(pathPrefix, this.fs.currentDirectory, this.fs.root);
+
+            // 2. Ahora sí, si el nodo existe, obtenemos su ruta absoluta (que es un string)
+            if (prefixNode) {
+                searchPath = PathResolver.getAbsolutePath(prefixNode);
+            } else {
+                // Si la ruta no existe, no podemos completar nada
+                return [];
+            }
         }
 
         const children = this.fs.getChildren(searchPath);
@@ -229,7 +246,7 @@ export class Kernel {
             history: this.history
         };
     }
-    
+
     public getUptime(): number {
         return Date.now() - this.startTime;
     }
