@@ -98,3 +98,9 @@ Para agregar nuevos comandos, consulta [CONTRIBUTING.md](./docs/CONTRIBUTING.md)
 - [COMMANDS.md](./docs/COMMANDS.md) - Documentación de comandos
 - [CONTRIBUTING.md](./docs/CONTRIBUTING.md) - Guía de contribución
 - [API.md](./docs/API.md) - Interfaz programática
+
+
+## Notas
+
+- La arquitectura hexadonal dentro de la VM se organiza en slices
+- El slice de users y groups usa la infrastructure para escribir los archivos falsos passwd y group

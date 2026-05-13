@@ -12,6 +12,7 @@ export interface INode {
     createdAt: number;
     owner: string;
     group: string;
+    mtime?: number;
     permissions: {
         user: IPermissions;
         group: IPermissions;

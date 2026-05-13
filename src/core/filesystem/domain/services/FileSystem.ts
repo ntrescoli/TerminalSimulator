@@ -233,4 +233,8 @@ export class FileSystem {
 
         return true;
     }
+
+    public getModificationTime(path: string): number {
+        return this.resolvePath(path)?.mtime || 0;
+    }
 }

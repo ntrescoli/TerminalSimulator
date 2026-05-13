@@ -1,5 +1,5 @@
 import { Environment } from '../../../system/domain/entities/Environment';
-import { UserManager } from '../../../usermanager/domain/services/UserManager';
+import { UserManagerService } from '../../../usermanager/application/services/UserManagerService';
 
 export interface CommandContext {
     args: string[];           // Solo los parámetros (ej: ["home", "docs"])
@@ -8,7 +8,7 @@ export interface CommandContext {
     flagValues: { [key: string]: string };
     fs: FileSystem;
     env: Environment;
-    userManager: UserManager;
+    userManager: UserManagerService;
     // Función de utilidad rápida para el comando
     hasFlag: (flag: string) => boolean;
     pipeInput?: string; // <--- El contenido que viene del comando anterior

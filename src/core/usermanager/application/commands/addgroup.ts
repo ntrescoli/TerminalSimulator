@@ -32,7 +32,7 @@ export const AddGroup: ICommand = {
 
         // 4. Llamada al UserManager para persistir el grupo
         // Asegúrate de que tu userManager tenga este método
-        const error = userManager.addGroup({
+        const error = userManager.saveGroup({
             groupName,
             gid,
             members: [] // Nuevo grupo nace sin miembros
