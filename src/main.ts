@@ -1,4 +1,4 @@
-import { Kernel } from './core/kernel/Kernel';
+import { Kernel } from './kernel/Kernel';
 import { TerminalUI } from './ui/Terminal';
 
 const bootstrap = async () => {
