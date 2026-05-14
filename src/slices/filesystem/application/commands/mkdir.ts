@@ -1,4 +1,4 @@
-import { ICommand } from '../../types/types';
+import { ICommand } from '../../../../kernel/domain/entities/Command';
 
 export const Mkdir: ICommand = {
     name: 'mkdir',

@@ -1,4 +1,3 @@
-// src/users/infrastructure/persistence/UserManagerRepositoryImpl.ts
 import { Group } from '../../domain/entities/Group';
 import { User } from '../../domain/entities/User';
 import { IUserManagerRepository } from '../../domain/ports/out/IUserManagerRepository';
@@ -30,6 +29,8 @@ export class UserManagerRepositoryImpl implements IUserManagerRepository {
             .join('\n');
         this.fs.writeFile('/etc/group', content);
     }
+
+    // -- UTILS --
 
     private parsePasswd(content: string): User[] {
         return content.split('\n')
