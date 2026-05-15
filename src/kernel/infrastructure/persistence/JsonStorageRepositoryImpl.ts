@@ -31,6 +31,7 @@ export class JsonStorageRepositoryImpl implements IStorageRepository {
         }
     }
 
+    // NO FUNCIONA, devuelve el json vacio. Ademas, no se como coger users y GROUPS en el bucle
     public async saveData(): Promise<any> {
         const fullState: Record<string, any> = {};
 

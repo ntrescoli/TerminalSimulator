@@ -4,22 +4,18 @@ import { UserManagerService } from '../../application/services/UserManagerServic
 /**
  * Exportación y carga en formato JSON (orquestado en la infraestructura del Kernel)
  */
-export class UserManagerStateSaverImpl implements ISliceStateSaver {
+export class UserStateSaverImpl implements ISliceStateSaver {
     readonly key = 'users';
 
     constructor(private userManager: UserManagerService) { }
 
     getState() {
         // primero sincronizar passwd y groups???
-        return [ 
-            this.userManager.getUsers(), 
-            this.userManager.getGroups() 
-        ];
+        return this.userManager.getUsers();
     }
 
     loadState(data: any) {     
-        this.userManager.saveUser(data[0]);
-        this.userManager.saveGroup(data[1]);   
+        this.userManager.saveUser(data)  
     }
 
 }

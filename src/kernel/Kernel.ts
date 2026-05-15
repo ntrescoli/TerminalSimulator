@@ -6,10 +6,11 @@ import { commandList } from './application/commands';
 import { CommandContext, ICommand } from './domain/entities/Command';
 
 import { UserManagerRepositoryImpl } from '../slices/usermanager/infrastructure/persistence/UserManagerRepositoryImpl';
-import { UserManagerStateSaverImpl } from '../slices/usermanager/infrastructure/persistence/UserManagerStateSaverImpl';
+import { UserStateSaverImpl } from '../slices/usermanager/infrastructure/persistence/UserStateSaverImpl';
 import { FileSystemStateSaverImpl } from '../slices/filesystem/infrastructure/FileSystemStateSaverImpl';
 import { EnvironmentStateSaverImpl } from '../slices/system/infrastructure/EnvironmentStateSaverImpl';
 import { JsonStorageRepositoryImpl } from './infrastructure/persistence/JsonStorageRepositoryImpl';
+import { GroupStateSaverImpl } from '../slices/usermanager/infrastructure/persistence/GroupStateSaverImpl';
 
 export class Kernel {
     private startTime: number;
@@ -19,7 +20,8 @@ export class Kernel {
     private env: Environment;
     private envStateImpl: EnvironmentStateSaverImpl;
     private userManager: UserManagerService;
-    private userStateImpl: UserManagerStateSaverImpl;
+    private userStateImpl: UserStateSaverImpl;
+    private groupStateImpl: GroupStateSaverImpl;
     private history: string[] = [];
     private jsonStorageImpl: JsonStorageRepositoryImpl;
     private isReady: boolean = false;
@@ -33,7 +35,8 @@ export class Kernel {
         // 2. Inyectamos la infraestructura de Usuarios
         const userRepo = new UserManagerRepositoryImpl(this.fs);
         this.userManager = new UserManagerService(this.fs, userRepo);
-        this.userStateImpl = new UserManagerStateSaverImpl(this.userManager);
+        this.userStateImpl = new UserStateSaverImpl(this.userManager);
+        this.groupStateImpl = new GroupStateSaverImpl(this.userManager);
 
         // Registramos los adaptadores de infraestructura que unen los slices al puerto del Kernel
         const stateSavers = [
@@ -55,26 +58,7 @@ export class Kernel {
 
     private async initSystem() {
         try {
-            // const response = await fetch('vms/default.json');
-            // if (!response.ok) throw new Error();
-            // const config = await response.json();
-
-            // // this.fs.loadFromJSON(config);
-
-            // if (config.fileSystem) this.fsStateImpl.loadState(config.fileSystem);
-
-            // if (config.users & config.groups) this.userStateImpl.loadState([config.users, config.groups])
-
-            // // if (config.users) this.userManager.loadUsers(config.users);
-            // // if (config.groups) this.userManager.loadGroups(config.groups);
-
-            // // if (config.env) this.env.loadFromObject(config.env);
-            // if (config.env) this.envStateImpl.loadState(config.env);
-
-            // if (config.history) this.loadHistory(config.history);
-
-            this.jsonStorageImpl.loadData();
-
+            await this.jsonStorageImpl.loadData();
         } catch (error) {
             console.warn("Kernel: Error loading config, using defaults.");
             this.env.loadDefaults();
@@ -267,22 +251,18 @@ export class Kernel {
     }
 
     public getHistory(): string[] { return this.history; }
-    public loadHistory(historyData: string[]) { this.history = historyData; }
 
     public getUptime(): number {
         return Date.now() - this.startTime;
     }
 
     public exportFullSystemState() {
+        // return this.jsonStorageImpl.saveData();
         return {
-            // env: this.env.getAll(),
             env: this.envStateImpl.getState(),
-            // fileSystem: this.fs.serialize(),
             fileSystem: this.fsStateImpl.getState(),
-            // users: this.userManager.getUsers(),
-            // groups: this.userManager.getGroups(),
-            users: this.userStateImpl.getState()[0],
-            groups: this.userStateImpl.getState()[1],
+            users: this.userStateImpl.getState(),
+            groups: this.groupStateImpl.getState(),
             history: this.history
         };
     }
