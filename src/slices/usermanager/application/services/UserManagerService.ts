@@ -166,48 +166,6 @@ export class UserManagerService {
         return null;
     }
 
-    // --- CARGA INICIAL DESDE EL JSON EXTERNO ---
-
-    /**
-    * Sincroniza el array de usuarios con /etc/passwd
-    */
-    private updatePasswdFile() {
-        const content = this.cachedUsers
-            .map(u => `${u.username}:x:${u.uid}:${u.gid}:${u.fullName}:${u.home}:${u.shell}`)
-            .join('\n');
-
-        // Ahora devuelve un Result, pero aquí (sistema) solemos ignorarlo 
-        // o podrías hacer un console.error si !result.success
-        this.fs.writeFile('/etc/passwd', content);
-    }
-
-    /**
-     * Sincroniza el array de grupos con /etc/group
-     */
-    private updateGroupFile() {
-        const content = this.cachedGroups
-            .map(g => `${g.groupName}:x:${g.gid}:${g.members.join(',')}`)
-            .join('\n');
-
-        this.fs.writeFile('/etc/group', content);
-    }
-
-    public loadUsers(usersData: any[]) {
-        this.cachedUsers = usersData.map(u => ({
-            username: u.username,
-            uid: u.uid,
-            gid: u.gid,
-            home: u.home,
-            shell: u.shell,
-            fullName: u.fullName || u.username
-        }));
-        this.updatePasswdFile();
-    }
-
-    public loadGroups(groupsData: Group[]) {
-        this.cachedGroups = [...groupsData];
-        this.updateGroupFile();
-    }
 
     // --- CARGA INICIAL DE SEGURIDAD (CENTRALIZAR EN EL FUTURO) ---
 

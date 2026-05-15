@@ -1,5 +1,5 @@
 import { Result } from '../../../../result/Result';
-import { Errors } from '../../../../result/errors';
+import { Errors } from '../../../../result/errors2';
 import { Environment } from '../../../system/domain/entities/Environment';
 import { INode } from '../../domain/entities/Node';
 
@@ -8,14 +8,30 @@ import { NodeFactory } from './NodeFactory';
 import { PathResolver } from './PathResolver';
 
 export class FileSystem {
-    root: INode;
-    currentDirectory: INode;
+    private root: INode;
+    private currentDirectory: INode;
     private env: Environment;
 
     constructor(env: Environment) {
         this.env = env;
         this.root = NodeFactory.create('/', 'dir', 'root');
         this.currentDirectory = this.root;
+    }
+
+    public getCurrentDirectory(): INode {
+        return this.currentDirectory;
+    }
+
+    public setCurrentDirectory(pwd: INode): void {
+        this.currentDirectory = pwd;
+    }
+
+    public getRoot(): INode {
+        return this.root;
+    }
+
+    public setRoot(root: INode): void {
+        this.root = root;
     }
 
     private checkAccess(node: INode, action: 'read' | 'write' | 'execute'): boolean {
@@ -52,6 +68,11 @@ export class FileSystem {
             return node.children;
         }
         return [];
+    }
+
+    // Eliminar en el futuro. Lo usa chmod, vigilar
+    public resolvePath(path: string): INode | null {
+        return PathResolver.resolve(path, this.currentDirectory, this.root);
     }
 
     // --- MÉTODOS DE ACCIÓN ---
@@ -208,37 +229,5 @@ export class FileSystem {
         this.writeFile("/etc/group", "root:x:0:\nsudo:x:27:guest,nico\n");
         this.writeFile("home/readme.txt", "Bienvenido al sistema de archivos avanzado.");
     }
-
-    // --- CARGA INICIAL DESDE EL JSON EXTERNO ---
-
-    public loadFromJSON(jsonData: any) {
-        if (!jsonData.fileSystem) return;
-        this.root = NodeFactory.reconstruct(jsonData.fileSystem, null);
-        this.currentDirectory = this.root;
-    }
-
-    // --- EXPORTACIÓN DE JSON HACIA EL EXTERIOR ---
-
-    public serialize(): any {
-        const serializeNode = (node: INode): any => {
-            const cleanNode: any = {
-                name: node.name,
-                type: node.type,
-                owner: node.owner,
-                group: node.group, // <-- Serializar grupo
-                permissions: node.permissions,
-                content: node.content,
-                createdAt: node.createdAt,
-                children: []
-            };
-
-            if (node.children) {
-                cleanNode.children = node.children.map(child => serializeNode(child));
-            }
-            return cleanNode;
-        };
-        return serializeNode(this.root);
-    }
-
 
 }

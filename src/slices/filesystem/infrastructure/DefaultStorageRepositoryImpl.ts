@@ -1,7 +1,7 @@
-import { FileSystem } from '../../../slices/filesystem/application/services/FileSystem';
+import { FileSystem } from '../application/services/FileSystem';
 import { NodeFactory } from '../application/services/NodeFactory';
 
-export class DefaultRepositoryImpl {
+export class DefaultStorageRepositoryImpl {
     constructor(
         private fs: FileSystem, 
     ) { }

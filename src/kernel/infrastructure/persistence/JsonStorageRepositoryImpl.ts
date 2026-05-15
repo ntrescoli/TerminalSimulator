@@ -1,41 +1,50 @@
-import { Kernel } from '@/kernel/Kernel';
 import { IStorageRepository } from '@/kernel/domain/ports/out/IStorageRepository';
-import { FileSystem } from '@/slices/filesystem/application/services/FileSystem';
-import { Environment } from '@/slices/system/domain/entities/Environment';
-import { UserManagerService } from '@/slices/usermanager/application/services/UserManagerService';
+import { ISliceStateSaver } from '@/kernel/domain/ports/out/ISliceStateSaver';
 
 export class JsonStorageRepositoryImpl implements IStorageRepository {
-    constructor(
-        private env: Environment,
-        private fs: FileSystem,
-        private userManager: UserManagerService,
-        private kernel: Kernel
-    ) { }
+    private savers: Map<string, ISliceStateSaver> = new Map();
+    private history: string[] = []; // El historial sí puede ser nativo del Kernel si se maneja aquí
 
-    public async loadData() {
-        const response = await fetch('vms/default.json');
-        if (!response.ok) throw new Error();
-        const config = await response.json();
+    constructor(savers: ISliceStateSaver[]) {
+        savers.forEach(saver => this.savers.set(saver.key, saver));
+    }
 
-        this.fs.loadFromJSON(config);
-        if (config.users) this.userManager.loadUsers(config.users);
-        if (config.groups) this.userManager.loadGroups(config.groups);
+    public async loadData(): Promise<void> {
+        try {
+            const response = await fetch('vms/default.json');
+            if (!response.ok) throw new Error();
+            const config = await response.json();
 
-        if (config.env) {
-            this.env.loadFromObject(config.env);
-        } else {
-            this.env.loadDefaults();
+            // Orquestación pura y ciega:
+            for (const [key, saver] of this.savers.entries()) {
+                if (config[key]) {
+                    saver.loadState(config[key]);
+                }
+            }
+
+            if (config.history) {
+                this.history = config.history;
+            }
+        } catch (error) {
+            console.warn("Storage: Error loading configuration, applying generic defaults.");
+            // Aquí puedes disparar estados vacíos iniciales en los savers si lo deseas
         }
-        if (config.history) this.kernel.loadHistory(config.history);
     }
 
-    public async saveData() {
-        return {
-            env: this.env.getAll(),
-            fileSystem: this.fs.serialize(),
-            users: this.userManager.getUsers(),
-            groups: this.userManager.getGroups(),
-            history: this.kernel.getHistory()
-        };
+    public async saveData(): Promise<any> {
+        const fullState: Record<string, any> = {};
+
+        // Recolectamos el estado de todos los slices dinámicamente
+        for (const [key, saver] of this.savers.entries()) {
+            fullState[key] = saver.getState();
+        }
+
+        fullState['history'] = this.history;
+
+        return fullState;
     }
+
+    // Métodos para que el Kernel acceda a su propio historial sin inyectar la clase Kernel
+    public getHistory(): string[] { return this.history; }
+    public loadHistory(history: string[]): void { this.history = history; }
 }

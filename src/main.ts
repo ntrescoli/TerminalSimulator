@@ -7,6 +7,26 @@ const bootstrap = async () => {
     const inputElement = document.getElementById('terminal-input') as HTMLInputElement;
     const promptElement = document.getElementById('prompt')!;
 
+    // // 2. Inicialización
+    // // Composición de la app
+    // const env = new Environment();
+    // const fs = new FileSystem(env);
+    // const userRepo = new UserManagerRepositoryImpl(fs);
+    // const userManager = new UserManagerService(fs, userRepo);
+
+    // // Registramos los adaptadores de infraestructura que unen los slices al puerto del Kernel
+    // const stateSavers = [
+    //     new FileSystemStateSaverImpl(fs),
+    //     new UserManagerStateSaverImpl(userManager),
+    //     new EnvStateSaverImpl(env)
+    // ];
+
+    // // Inyectamos la infraestructura en el repositorio del Kernel
+    // const storageRepo = new JsonStorageRepositoryImpl(stateSavers);
+
+    // // El Kernel nace libre de acoplamiento cruzado
+    // const kernel = new Kernel(storageRepo);
+
     // 2. Inicialización
     const kernel = new Kernel();
 

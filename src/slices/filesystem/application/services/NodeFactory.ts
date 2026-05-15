@@ -27,33 +27,5 @@ export class NodeFactory {
             }
         };
     }
-
-    /**
-     * Reconstruye el árbol desde el JSON de forma recursiva
-     */
-    public static reconstruct(nodeData: any, parent: INode | null = null): INode {
-        const newNode: INode = {
-            name: nodeData.name,
-            type: nodeData.type,
-            owner: nodeData.owner || 'root',
-            group: nodeData.group || nodeData.owner || 'root',
-            permissions: nodeData.permissions || {
-                user: { read: true, write: true, execute: nodeData.type === 'dir' },
-                group: { read: true, write: false, execute: false },
-                others: { read: true, write: false, execute: false }
-            },
-            content: nodeData.content || "",
-            createdAt: nodeData.createdAt || Date.now(),
-            parent: parent,
-            children: []
-        };
-
-        if (nodeData.children) {
-            newNode.children = nodeData.children.map((childData: any) =>
-                this.reconstruct(childData, newNode)
-            );
-        }
-
-        return newNode;
-    }
+    
 }

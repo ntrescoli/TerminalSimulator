@@ -2,7 +2,6 @@ import { INode } from '../../domain/entities/Node';
 
 export class PathResolver {
     /**
-     * El corazón de la navegación. 
      * Toma una ruta y devuelve el nodo correspondiente o null.
      */
     public static resolve(

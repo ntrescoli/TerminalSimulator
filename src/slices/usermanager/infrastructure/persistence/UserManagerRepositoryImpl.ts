@@ -3,6 +3,9 @@ import { User } from '../../domain/entities/User';
 import { IUserManagerRepository } from '../../domain/ports/out/IUserManagerRepository';
 import { FileSystem } from '../../../filesystem/application/services/FileSystem';
 
+/**
+ * Guardado y Recuperación en Archivos Virtuales (passwd y groups)
+ */
 export class UserManagerRepositoryImpl implements IUserManagerRepository {
     constructor(private fs: FileSystem) { }
 
