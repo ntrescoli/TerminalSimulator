@@ -1,4 +1,4 @@
-import { ICommand } from '../../types/types';
+import { ICommand } from '../../../../kernel/domain/entities/Command';
 
 export const Grep: ICommand = {
     name: 'grep',
@@ -8,24 +8,45 @@ export const Grep: ICommand = {
 
         if (!pattern) return "usage: grep [pattern] [file]";
 
-        // Obtener contenido
-        let content = pipeInput || (filePath ? fs.cat(filePath) : null);
-        
-        if (content === null) return "grep: missing input";
-        if (content.startsWith('cat:')) return content; // Error de fs.cat
+        let content = "";
 
-        // Flags de Grep real
+        // 1. Resolvemos el origen del contenido: Entrada entubada (pipe) o archivo físico
+        if (pipeInput) {
+            content = pipeInput;
+        } else if (filePath) {
+            const result = fs.cat(filePath);
+
+            // Si la lectura falló (no existe, es directorio, etc.), devolvemos el error formateado
+            if (result.isFailure) {
+                return `grep: ${result.error}`;
+            }
+
+            // Si tuvo éxito, extraemos el string plano de forma segura
+            content = result.getValue();
+        } else {
+            return "grep: missing input";
+        }
+
+        // 2. Procesamiento de banderas (Flags) de Grep
         const caseInsensitive = hasFlag('-i');
-        const invertMatch = hasFlag('-v'); // ¡Nueva flag fácil de añadir!
-        const countMode = hasFlag('-c');   // ¡Otra flag común!
+        const invertMatch = hasFlag('-v'); 
+        const countMode = hasFlag('-c');   
 
-        const regex = new RegExp(pattern, caseInsensitive ? 'i' : '');
+        // Creamos la expresión regular de forma segura
+        let regex: RegExp;
+        try {
+            regex = new RegExp(pattern, caseInsensitive ? 'i' : '');
+        } catch (e) {
+            return `grep: invalid regular expression: ${pattern}`;
+        }
         
+        // 3. Filtrado de líneas
         const lines = content.split('\n').filter(line => {
             const matches = regex.test(line);
             return invertMatch ? !matches : matches;
         });
 
+        // 4. Formateo de salida
         if (countMode) return lines.length.toString();
         
         return lines.join('\n');

@@ -4,9 +4,12 @@ export const Cd: ICommand = {
     name: 'cd',
     execute: ({ args, fs, env }) => {
         const path = args[0] || '~';
-        const error = fs.changeDirectory(path);
+        // const error = fs.changeDirectory(path);
+        // if (error) return error; // "cd: no such directory", etc.
 
-        if (error) return error; // "cd: no such directory", etc.
+        const result = fs.changeDirectory(path);
+        // Si falló, exponemos el string de error formateado
+        if (result.isFailure) return `cd: ${result.error}`; 
 
         env.set('PWD', fs.getPresentWorkingDirectory());
         return "";

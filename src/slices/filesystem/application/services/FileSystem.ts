@@ -1,5 +1,5 @@
 import { Result } from '../../../../result/Result';
-import { Errors } from '../../../../result/errors2';
+import { Errors } from '../../../../result/errors';
 import { Environment } from '../../../system/domain/entities/Environment';
 import { INode } from '../../domain/entities/Node';
 
@@ -87,10 +87,10 @@ export class FileSystem {
         // Si queremos añadir contenido, primero intentamos leer lo que ya hay
         if (append) {
             const existingFile = this.cat(path);
-            if (existingFile.success) {
+            if (existingFile.isSuccess) {
                 // Concatenamos: contenido viejo + salto de línea + contenido nuevo
                 // El trim() evita que se acumulen infinitos saltos de línea al final
-                const newContent = (existingFile.data.trimEnd() + '\n' + processedContent).trim();
+                const newContent = (existingFile.getValue().trimEnd() + '\n' + processedContent).trim();
                 return this.touch(path, newContent);
             }
             // Si el archivo no existe, touch lo creará de todos modos, 
@@ -115,12 +115,12 @@ export class FileSystem {
 
         // 3. Validar existencia del directorio
         if (!targetDir || targetDir.type !== 'dir') {
-            return { success: false, error: Errors.NOT_FOUND(path) };
+            return Result.fail<INode>(Errors.FS.NOT_FOUND(path));
         }
 
         // 4. Validar permisos de escritura en el directorio (para poder crear archivos)
         if (!this.checkAccess(targetDir, 'write')) {
-            return { success: false, error: Errors.PERMISSION_DENIED(path) };
+            return Result.fail<INode>(Errors.FS.PERMISSION_DENIED(path));
         }
 
         // 5. Buscar si ya existe
@@ -129,24 +129,24 @@ export class FileSystem {
         if (existing) {
             // Error si es un directorio
             if (existing.type === 'dir') {
-                return { success: false, error: Errors.IS_DIRECTORY(path) };
+                return Result.fail<INode>(Errors.FS.IS_DIRECTORY(path));
             }
 
             // Validar permisos sobre el archivo existente
             if (!this.checkAccess(existing, 'write')) {
-                return { success: false, error: Errors.PERMISSION_DENIED(path) };
+                return Result.fail<INode>(Errors.FS.PERMISSION_DENIED(path));
             }
 
             // Actualizar contenido
             existing.content = content;
-            return { success: true, data: existing };
+            return Result.ok<INode>(existing);
         } else {
             // 6. Crear nuevo nodo
             const currentUser = this.env.get('USER') || 'root';
             const newNode = NodeFactory.create(fileName, 'file', currentUser, targetDir, content);
 
             targetDir.children.push(newNode);
-            return { success: true, data: newNode };
+            return Result.ok<INode>(newNode);
         }
     }
 
@@ -158,37 +158,48 @@ export class FileSystem {
         const parentDir = PathResolver.resolve(dirPath, this.currentDirectory, this.root);
 
         if (!parentDir || parentDir.type !== 'dir') {
-            return { success: false, error: Errors.NOT_FOUND(path) };
+            // return { isSuccess: false, error: Errors.NOT_FOUND(path) };
+            return Result.fail<INode>(Errors.FS.NOT_FOUND(path));
         }
 
         if (!this.checkAccess(parentDir, 'write')) {
-            return { success: false, error: Errors.PERMISSION_DENIED(path) };
+            return Result.fail<INode>(Errors.FS.PERMISSION_DENIED(path));
         }
 
         if (parentDir.children.some(n => n.name === dirName)) {
-            return { success: false, error: Errors.ALREADY_EXISTS(path) };
+            return Result.fail<INode>(Errors.FS.ALREADY_EXISTS(path));
+            // return { isSuccess: false, error: Errors.ALREADY_EXISTS(path) };
         }
 
         const newNode = NodeFactory.create(dirName, 'dir', this.env.get('USER'), parentDir);
         parentDir.children.push(newNode);
 
-        return { success: true, data: newNode };
+        // return { isSuccess: true, _value: newNode };
+        return Result.ok<INode>(newNode);
     }
 
-    public changeDirectory(path: string): string | null {
+    // public changeDirectory(path: string): string | null {
+    //     const target = PathResolver.resolve(path, this.currentDirectory, this.root);
+    //     if (!target) return `cd: no such file or directory: ${path}`;
+    //     if (target.type !== 'dir') return `cd: not a directory: ${path}`;
+    //     this.currentDirectory = target;
+    //     return null;
+    // }
+
+    public changeDirectory(path: string): Result<void> {
         const target = PathResolver.resolve(path, this.currentDirectory, this.root);
-        if (!target) return `cd: no such file or directory: ${path}`;
-        if (target.type !== 'dir') return `cd: not a directory: ${path}`;
+        if (!target) return Result.fail<void>(Errors.FS.NOT_FOUND(path));
+        if (target.type !== 'dir') return Result.fail<void>(Errors.FS.NOT_A_DIRECTORY(path));
         this.currentDirectory = target;
-        return null;
+        return Result.ok<void>();
     }
 
     public cat(path: string): Result<string> {
         const node = PathResolver.resolve(path, this.currentDirectory, this.root);
-        if (!node) return { success: false, error: Errors.NOT_FOUND(path) };
-        if (node.type === 'dir') return { success: false, error: Errors.IS_DIRECTORY(path) };
-        if (!this.checkAccess(node, 'read')) return { success: false, error: Errors.PERMISSION_DENIED(path) };
-        return { success: true, data: node.content || "" };
+        if (!node) return Result.fail<string>(Errors.FS.NOT_FOUND(path));
+        if (node.type === 'dir') return Result.fail<string>(Errors.FS.IS_DIRECTORY(path));
+        if (!this.checkAccess(node, 'read')) return Result.fail<string>(Errors.FS.PERMISSION_DENIED(path));
+        return Result.ok<string>(node.content || "");
     }
 
     public getPresentWorkingDirectory(): string {
@@ -199,7 +210,7 @@ export class FileSystem {
             current = current.parent;
         }
         return path || "/";
-    }  
+    }
 
     public setOwnership(path: string, owner?: string, group?: string): boolean {
         const node = PathResolver.resolve(path, this.currentDirectory, this.root); // Método interno para buscar el archivo

@@ -1,22 +1,24 @@
-import { ICommand } from '../../types/types';
+import { ICommand } from '../../../../kernel/domain/entities/Command';
 
 export const Cat: ICommand = {
     name: 'cat',
     execute: ({ args, fs, hasFlag }) => {
-        if (args.length < 1) return "";
+        // En Bash, 'cat' sin argumentos se queda esperando stdin, 
+        // pero para tu simulador, retornar un string vacío o un aviso es lo ideal.
+        if (args.length < 1) return "cat: missing file operand";
 
-        // 1. Obtenemos el objeto Result
+        // 1. Obtenemos el objeto Result de la clase
         const result = fs.cat(args[0]);
 
-        // 2. Si falló, devolvemos el error directamente
-        if (!result.success) {
-            return result.error;
+        // 2. Comprobamos el fallo usando la propiedad correcta de la clase
+        if (result.isFailure) {
+            return `cat: ${result.error}`; // Ahora es 100% seguro acceder a .error
         }
 
-        // 3. Si tuvo éxito, trabajamos con result.data (el contenido)
-        const content = result.data;
+        // 3. Extraemos el contenido de forma segura con el método de la clase
+        const content = result.getValue();
 
-        // Lógica del flag -n (numerar líneas)
+        // 4. Lógica del flag -n (numerar líneas)
         if (hasFlag('-n')) {
             return content.split('\n')
                 .map((line, i) => `${(i + 1).toString().padStart(6)}  ${line}`)

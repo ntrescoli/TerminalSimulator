@@ -1,30 +1,44 @@
-export type Result<T = void> = 
-    | { success: true; data: T } 
-    | { success: false; error: string };
+// @/result/Result.ts
+export class Result<T> {
+    public readonly isSuccess: boolean;
+    public readonly isFailure: boolean;
+    private readonly _error?: string;
+    private readonly _value?: T;
 
-//     export class Result<T = void> {
-//   public readonly isSuccess: boolean;
-//   public readonly isFailure: boolean;
-//   public readonly error: string | null;
-//   private readonly _value?: T;
+    private constructor(isSuccess: boolean, error?: string, value?: T) {
+        this.isSuccess = isSuccess;
+        this.isFailure = !isSuccess;
+        this._error = error;
+        this._value = value;
+    }
 
-//   private constructor(isSuccess: boolean, error?: string | null, value?: T) {
-//     this.isSuccess = isSuccess;
-//     this.isFailure = !isSuccess;
-//     this.error = error || null;
-//     this._value = value;
-//   }
+    public static ok<U>(value?: U): Result<U> {
+        return new Result<U>(true, undefined, value);
+    }
 
-//   public getValue(): T {
-//     if (!this.isSuccess) throw new Error("No puedes obtener el valor de un resultado fallido.");
-//     return this._value as T;
-//   }
+    public static fail<U>(error: string): Result<U> {
+        return new Result<U>(false, error, undefined);
+    }
 
-//   public static ok<U>(value?: U): Result<U> {
-//     return new Result<U>(true, null, value);
-//   }
+    /**
+     * Extrae el valor en caso de éxito.
+     */
+    public getValue(): T {
+        if (!this.isSuccess) {
+            throw new Error("No se puede obtener el valor de un resultado fallido.");
+        }
+        return this._value!;
+    }
 
-//   public static fail<U>(error: string): Result<U> {
-//     return new Result<U>(false, error);
-//   }
-// }
+    /**
+     * Getter para el error. Al usar 'get error()', en tus comandos 
+     * accedes de forma natural usando 'result.error'.
+     */
+    public get error(): string {
+        if (!this.isFailure) {
+            throw new Error("No se puede obtener el error de un resultado exitoso.");
+        }
+        // IMPORTANTE: Asegúrate de retornar la propiedad privada con el guion bajo
+        return this._error || "Unknown error"; 
+    }
+}

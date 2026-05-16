@@ -2,6 +2,7 @@ import { Group } from '../../domain/entities/Group';
 import { User } from '../../domain/entities/User';
 import { IUserManagerRepository } from '../../domain/ports/out/IUserManagerRepository';
 import { FileSystem } from '../../../filesystem/application/services/FileSystem';
+import { Result } from '../../../../result/Result';
 
 /**
  * Guardado y Recuperación en Archivos Virtuales (passwd y groups)
@@ -11,13 +12,18 @@ export class UserManagerRepositoryImpl implements IUserManagerRepository {
 
     public getUsers(): User[] {
         const res = this.fs.cat('/etc/passwd');
-        return res.success ? this.parsePasswd(res.data) : [];
-    }
+        // return res.isSuccess ? this.parsePasswd(res.value) : [];
+        if (!res.isSuccess) return [];
+const content = typeof res.getValue === 'function' ? res.getValue() : (res as any).value;
+    return this.parsePasswd(content);
+            }
 
     public getGroups(): Group[] {
         const result = this.fs.cat('/etc/group');
-        return result.success ? this.parseGroups(result.data) : [];
-    }
+        // return result.isSuccess ? this.parseGroups(result.value) : [];
+        if (!result.isSuccess) return [];
+const content = typeof result.getValue === 'function' ? result.getValue() : (result as any).value;
+    return this.parseGroups(content);    }
 
     public saveUsers(users: User[]): void {
         const content = users

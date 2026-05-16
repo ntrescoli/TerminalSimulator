@@ -11,10 +11,8 @@ export const Touch: ICommand = {
         // 1. Llamamos al FileSystem (ahora devuelve Result<INode>)
         const result = fs.touch(path, content);
 
-        // 2. Si success es false, devolvemos el string del error
-        if (!result.success) {
-            return result.error;
-        }
+        // 2. Si success es false, devolvemos el string del error       
+        if (result.isFailure) return `touch: ${result.error}`; 
 
         // 3. Si tuvo éxito, devolvemos string vacío (comportamiento Unix)
         return "";

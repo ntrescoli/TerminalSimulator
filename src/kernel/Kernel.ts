@@ -152,7 +152,7 @@ export class Kernel {
         // 6. Manejo de la salida (Redirección o Retorno)
         if (targetFile) {
             const writeResult = this.fs.writeFile(targetFile, result, isAppend);
-            if (!writeResult.success) {
+            if (!writeResult.isSuccess) {
                 return writeResult.error;
             }
             return "";
