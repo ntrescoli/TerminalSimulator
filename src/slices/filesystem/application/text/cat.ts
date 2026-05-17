@@ -3,28 +3,35 @@ import { ICommand } from '../../../../kernel/domain/entities/Command';
 export const Cat: ICommand = {
     name: 'cat',
     execute: ({ args, fs, hasFlag }) => {
-        // En Bash, 'cat' sin argumentos se queda esperando stdin, 
-        // pero para tu simulador, retornar un string vacío o un aviso es lo ideal.
         if (args.length < 1) return "cat: missing file operand";
 
-        // 1. Obtenemos el objeto Result de la clase
-        const result = fs.cat(args[0]);
+        const outputs: string[] = [];
 
-        // 2. Comprobamos el fallo usando la propiedad correcta de la clase
-        if (result.isFailure) {
-            return `cat: ${result.error}`; // Ahora es 100% seguro acceder a .error
+        // Iteramos sobre todos los archivos pasados como argumentos
+        for (const filePath of args) {
+            const result = fs.cat(filePath);
+
+            if (result.isFailure) {
+                // Si falla, añadimos el mensaje de error a la salida y pasamos al siguiente
+                outputs.push(`cat: ${filePath}: ${result.getError()}`);
+                continue;
+            }
+
+            // Si tiene éxito, extraemos el contenido
+            outputs.push(result.getValue());
         }
 
-        // 3. Extraemos el contenido de forma segura con el método de la clase
-        const content = result.getValue();
+        // Concatenamos el contenido de todos los archivos procesados
+        // Usamos un salto de línea para asegurar una separación limpia entre archivos
+        const totalContent = outputs.join('\n');
 
-        // 4. Lógica del flag -n (numerar líneas)
+        // Aplicamos la lógica del flag -n sobre la cadena final ya concatenada
         if (hasFlag('-n')) {
-            return content.split('\n')
+            return totalContent.split('\n')
                 .map((line, i) => `${(i + 1).toString().padStart(6)}  ${line}`)
                 .join('\n');
         }
         
-        return content;
+        return totalContent;
     }
 };

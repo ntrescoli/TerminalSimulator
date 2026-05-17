@@ -7,6 +7,8 @@ import { Touch } from "./touch";
 import { File } from "./file";
 import { Rm } from "./rm";
 import { Rmdir } from "./rmdir";
+import { Cp } from "./cp";
+import { Mv } from "./mv";
 
 export const filesystemCmds = [
     Cd,
@@ -18,4 +20,6 @@ export const filesystemCmds = [
     File,
     Rm,
     Rmdir,
+    Cp,
+    Mv,
 ];

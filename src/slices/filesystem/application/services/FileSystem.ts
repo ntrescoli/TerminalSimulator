@@ -307,6 +307,116 @@ export class FileSystem {
         return Result.fail<string>(Errors.FS.UNKNOWN_TYPE(node.name));
     }
 
+    /**
+     * Método auxiliar para clonar un nodo en profundidad (Deep Copy)
+     */
+    private cloneNode(node: INode, newParent: INode | null = null): INode {
+        // Creamos una copia exacta del nodo actual utilizando tu factoría o constructor
+        // Asegúrate de adaptar esta línea a cómo creas tus nodos (NodeFactory, etc.)
+        const cloned = {
+            ...node,
+            parent: newParent,
+            // Clonamos recursivamente los hijos si es un directorio
+            children: [] as INode[]
+        };
+
+        if (node.children) {
+            cloned.children = node.children.map(child => this.cloneNode(child, cloned));
+        }
+
+        return cloned;
+    }
+
+    public copy(srcPath: string, destPath: string, recursive: boolean = false): Result<void> {
+        const srcNode = PathResolver.resolve(srcPath, this.currentDirectory, this.root);
+        if (!srcNode) return Result.fail<void>(`cp: cannot stat '${srcPath}': No such file or directory`);
+
+        // Protección contra copia recursiva
+        if (srcNode.type === 'dir' && !recursive) {
+            return Result.fail<void>(`cp: -r not specified; omitting directory '${srcPath}'`);
+        }
+
+        // Resolvemos el destino
+        let destNode = PathResolver.resolve(destPath, this.currentDirectory, this.root);
+        let targetParent: INode | null = null;
+        let newName = srcNode.name;
+
+        if (destNode && destNode.type === 'dir') {
+            // Caso A: El destino es un directorio existente -> copiamos DENTRO de él
+            targetParent = destNode;
+        } else {
+            // Caso B: El destino no existe o es un archivo -> el último segmento es el nuevo nombre
+            const lastSlash = destPath.lastIndexOf('/');
+            if (lastSlash === -1) {
+                targetParent = this.currentDirectory;
+                newName = destPath;
+            } else {
+                const parentPath = destPath.substring(0, lastSlash) || '/';
+                targetParent = PathResolver.resolve(parentPath, this.currentDirectory, this.root);
+                newName = destPath.substring(lastSlash + 1);
+            }
+        }
+
+        if (!targetParent || targetParent.type !== 'dir') {
+            return Result.fail<void>(`cp: cannot create regular file '${destPath}': Not a directory`);
+        }
+
+        // Clonamos el nodo en profundidad y lo añadimos al padre destino
+        const duplicate = this.cloneNode(srcNode, targetParent);
+        duplicate.name = newName;
+
+        // Si ya existía un archivo con ese nombre en el destino, lo reemplazamos
+        targetParent.children = targetParent.children.filter(c => c.name !== newName);
+        targetParent.children.push(duplicate);
+
+        return Result.ok<void>();
+    }
+
+    public move(srcPath: string, destPath: string): Result<void> {
+        const srcNode = PathResolver.resolve(srcPath, this.currentDirectory, this.root);
+        if (!srcNode) return Result.fail<void>(`mv: cannot stat '${srcPath}': No such file or directory`);
+
+        if (srcNode === this.root) return Result.fail<void>("mv: cannot move root directory '/'");
+
+        let destNode = PathResolver.resolve(destPath, this.currentDirectory, this.root);
+        let targetParent: INode | null = null;
+        let newName = srcNode.name;
+
+        if (destNode && destNode.type === 'dir') {
+            targetParent = destNode;
+        } else {
+            const lastSlash = destPath.lastIndexOf('/');
+            if (lastSlash === -1) {
+                targetParent = this.currentDirectory;
+                newName = destPath;
+            } else {
+                const parentPath = destPath.substring(0, lastSlash) || '/';
+                targetParent = PathResolver.resolve(parentPath, this.currentDirectory, this.root);
+                newName = destPath.substring(lastSlash + 1);
+            }
+        }
+
+        if (!targetParent || targetParent.type !== 'dir') {
+            return Result.fail<void>(`mv: cannot move to '${destPath}': Not a directory`);
+        }
+
+        // --- OPERACIÓN CORTAR Y PEGAR ---
+        // 1. Quitar del padre original
+        if (srcNode.parent) {
+            srcNode.parent.children = srcNode.parent.children.filter(c => c !== srcNode);
+        }
+
+        // 2. Asignar nuevo padre y nombre
+        srcNode.parent = targetParent;
+        srcNode.name = newName;
+
+        // 3. Insertar en el destino (reemplazando si ya existía)
+        targetParent.children = targetParent.children.filter(c => c.name !== newName);
+        targetParent.children.push(srcNode);
+
+        return Result.ok<void>();
+    }
+
     // --- CARGA INICIAL DE SEGURIDAD (CENTRALIZAR EN EL FUTURO) ---
 
     public loadDefaults() {
