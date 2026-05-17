@@ -9,6 +9,8 @@ import { DateCommand } from './date';
 import { Uptime } from './uptime';
 import { Who, W } from './who';
 import { Chown } from './chown';
+import { Cal } from './cal';
+import { Chgrp } from './chgrp';
 
 export const basicCmds = [
     Sudo,
@@ -22,5 +24,7 @@ export const basicCmds = [
     Uptime,
     Who,
     W,
-    Chown
+    Chown,
+    Cal,
+    Chgrp
 ];

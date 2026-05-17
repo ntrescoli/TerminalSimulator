@@ -44,16 +44,33 @@ export class FileSystem {
 
     // --- MÉTODOS DE DATOS ---
 
-    public getNodes(path: string = ".", showHidden: boolean = false): INode[] {
-        const node = this.resolvePath(path);
-        if (!node) throw new Error(`ls: cannot access '${path}': No such file or directory`);
-        if (node.type === 'file') return [node];
+    // public getNodes(path: string = ".", showHidden: boolean = false): INode[] {
+    //     const node = this.resolvePath(path);
+    //     if (!node) throw new Error(`ls: cannot access '${path}': No such file or directory`);
+    //     if (node.type === 'file') return [node];
 
+    //     let nodes = [...node.children];
+    //     if (!showHidden) {
+    //         nodes = nodes.filter(n => !n.name.startsWith('.'));
+    //     }
+    //     return nodes.sort((a, b) => a.name.localeCompare(b.name));
+    // }
+
+    public getNodes(path: string = ".", showHidden: boolean = false): Result<INode[]> {
+        const node = this.resolvePath(path);
+
+        if (!node) {
+            return Result.fail<INode[]>(`cannot access '${path}': No such file or directory`);
+        }
+        if (node.type === 'file') {
+            return Result.ok<INode[]>([node]);
+        }
         let nodes = [...node.children];
         if (!showHidden) {
             nodes = nodes.filter(n => !n.name.startsWith('.'));
         }
-        return nodes.sort((a, b) => a.name.localeCompare(b.name));
+
+        return Result.ok<INode[]>(nodes.sort((a, b) => a.name.localeCompare(b.name)));
     }
 
     public readdir(path: string): string[] {
@@ -129,18 +146,23 @@ export class FileSystem {
         const existing = targetDir.children.find(n => n.name === fileName);
 
         if (existing) {
-            // Error si es un directorio
             if (existing.type === 'dir') {
                 return Result.fail<INode>(Errors.FS.IS_DIRECTORY(path));
             }
 
-            // Validar permisos sobre el archivo existente
             if (!this.checkAccess(existing, 'write')) {
                 return Result.fail<INode>(Errors.FS.PERMISSION_DENIED(path));
             }
 
-            // Actualizar contenido
-            existing.content = content;
+            // 🌟 CORRECCIÓN REAL: touch NO debe sobreescribir el contenido con un string vacío 
+            // si el archivo ya tenía datos, a menos que se mande contenido explícitamente.
+            if (content !== "") {
+                existing.content = content;
+            }
+
+            // Aquí deberías actualizar el mtime de tu nodo existente
+            // existing.mtime = Date.now(); 
+
             return Result.ok<INode>(existing);
         } else {
             // 6. Crear nuevo nodo
@@ -287,14 +309,49 @@ export class FileSystem {
         return this.previousDirectory;
     }
 
-    public setOwnership(path: string, owner?: string, group?: string): boolean {
-        const node = this.resolvePath(path); // Método interno para buscar el archivo
-        if (!node) return false;
+    // public setOwnership(path: string, owner?: string, group?: string): boolean {
+    //     const node = this.resolvePath(path);
+    //     if (!node) return false;
 
-        if (owner) node.owner = owner;
-        if (group) node.group = group; // Asegúrate de que INode tenga este campo
+    //     if (owner !== undefined) node.owner = owner;
+    //     if (group !== undefined) node.group = group;
 
-        return true;
+    //     return true;
+    // }
+
+    /**
+     * Cambia el propietario y/o grupo de un nodo de forma segura.
+     * @returns Un Result que indica éxito o el mensaje de error específico de Unix.
+     */
+    public setOwnership(
+        path: string,
+        currentUser: string,
+        groupMembers: string[], // Pasamos los miembros del grupo destino para validar
+        owner?: string,
+        group?: string
+    ): Result<void> {
+        const node = this.resolvePath(path); // Tu método interno existente
+
+        if (!node) {
+            return Result.fail<void>(`cannot access '${path}': No such file or directory`);
+        }
+
+        if (currentUser !== 'root') {
+            // Regla 1: Solo el dueño del archivo puede cambiar sus atributos
+            if (node.owner !== currentUser) {
+                return Result.fail<void>(`changing group of '${path}': Operation not permitted`);
+            }
+
+            // Regla 2: Si cambias el grupo, debes pertenecer al grupo de destino
+            if (group !== undefined && !groupMembers.includes(currentUser)) {
+                return Result.fail<void>(`changing group of '${path}': Group membership required`);
+            }
+        }
+
+        if (owner !== undefined) node.owner = owner;
+        if (group !== undefined) node.group = group;
+
+        return Result.ok<void>();
     }
 
     public getModificationTime(path: string): number {

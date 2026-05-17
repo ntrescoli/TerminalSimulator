@@ -23,7 +23,14 @@ export class UserManagerService {
     private refreshUsers() {
         const mtime = this.fs.getModificationTime('/etc/passwd');
         if (mtime > this.lastUsersSync) {
-            this.cachedUsers = this.repository.getUsers();
+            const diskUsers = this.repository.getUsers();
+
+            // 🔥 CONTROL DE ASINCRONÍA: Solo pisamos la caché si el disco contiene usuarios.
+            // Si viene vacío (la lectura se cruzó con la escritura), protegemos la RAM.
+            if (diskUsers && diskUsers.length > 0) {
+                this.cachedUsers = diskUsers;
+            }
+
             this.lastUsersSync = mtime;
         }
     }
@@ -32,7 +39,13 @@ export class UserManagerService {
     private refreshGroups() {
         const mtime = this.fs.getModificationTime('/etc/group');
         if (mtime > this.lastGroupsSync) {
-            this.cachedGroups = this.repository.getGroups();
+            const diskGroups = this.repository.getGroups();
+
+            // 🔥 CONTROL DE ASINCRONÍA: Lo mismo para los grupos.
+            if (diskGroups && diskGroups.length > 0) {
+                this.cachedGroups = diskGroups;
+            }
+
             this.lastGroupsSync = mtime;
         }
     }
@@ -63,21 +76,31 @@ export class UserManagerService {
         this.refreshUsers();
         this.refreshGroups();
 
-        if (this.cachedUsers.some(u => u.username === user.username)) {
+        // Si por un error del comando o del ciclo de vida nos llega un array en vez de un usuario
+        if (Array.isArray(user)) {
+            return "userManager: cannot save an array of users via saveUser";
+        }
+
+        if (this.cachedUsers.some(u => u && !Array.isArray(u) && u.username === user.username)) {
             return `useradd: user '${user.username}' already exists`;
         }
 
-        // Lógica de negocio: Crear grupo primario
-        this.cachedGroups = [...this.cachedGroups, {
+        // Aseguramos que solo concatenamos objetos planos limpiamente
+        this.cachedGroups = [...this.cachedGroups.filter(g => g && !Array.isArray(g)), {
             groupName: user.username,
             gid: user.gid,
             members: [user.username]
         }];
 
-        this.cachedUsers = [...this.cachedUsers, user];
+        // 🔥 EL ARREGLO SÍNTOMA-RAÍZ: Aplanamos y eliminamos cualquier sub-array accidental
+        const cleanUsers = this.cachedUsers.filter(u => u && !Array.isArray(u));
+        this.cachedUsers = [...cleanUsers, user];
 
         this.repository.saveUsers(this.cachedUsers);
         this.repository.saveGroups(this.cachedGroups);
+
+        this.lastUsersSync = this.fs.getModificationTime('/etc/passwd');
+        this.lastGroupsSync = this.fs.getModificationTime('/etc/group');
         return null;
     }
 
@@ -103,20 +126,33 @@ export class UserManagerService {
     public saveGroup(group: Group): string | null {
         this.refreshGroups();
 
-        if (this.cachedGroups.find(g => g.groupName === group.groupName)) {
+        // 1. Blindaje contra arrays accidentales
+        if (Array.isArray(group)) {
+            return "userManager: cannot save an array of groups via saveGroup";
+        }
+
+        // 2. Filtrar posibles elementos corruptos o arrays anidados en la caché actual
+        const cleanGroups = this.cachedGroups.filter(g => g && !Array.isArray(g));
+
+        // 3. Validaciones de negocio usando la lista limpia
+        if (cleanGroups.some(g => g.groupName === group.groupName)) {
             return `addgroup: El grupo '${group.groupName}' ya existe.`;
         }
-        if (this.cachedGroups.find(g => g.gid === group.gid)) {
+        if (cleanGroups.some(g => g.gid === group.gid)) {
             return `addgroup: El GID '${group.gid}' ya está en uso.`;
         }
 
-        this.cachedGroups = [...this.cachedGroups, {
+        // 4. Inserción segura recreando el objeto plano
+        this.cachedGroups = [...cleanGroups, {
             groupName: group.groupName,
             gid: group.gid,
-            members: []
+            members: Array.isArray(group.members) ? group.members : []
         }];
 
+        // 5. Persistencia física
         this.repository.saveGroups(this.cachedGroups);
+        this.lastGroupsSync = this.fs.getModificationTime('/etc/group');
+
         return null;
     }
 
