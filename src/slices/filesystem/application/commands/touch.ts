@@ -12,7 +12,7 @@ export const Touch: ICommand = {
         const result = fs.touch(path, content);
 
         // 2. Si success es false, devolvemos el string del error       
-        if (result.isFailure) return `touch: ${result.error}`; 
+        if (result.isFailure) return `touch: ${result.getError()}`; 
 
         // 3. Si tuvo éxito, devolvemos string vacío (comportamiento Unix)
         return "";

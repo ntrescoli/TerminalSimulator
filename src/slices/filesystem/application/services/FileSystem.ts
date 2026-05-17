@@ -10,12 +10,14 @@ import { PathResolver } from './PathResolver';
 export class FileSystem {
     private root: INode;
     private currentDirectory: INode;
+    private previousDirectory: INode;
     private env: Environment;
 
     constructor(env: Environment) {
         this.env = env;
         this.root = NodeFactory.create('/', 'dir', 'root');
         this.currentDirectory = this.root;
+        this.previousDirectory = this.root;
     }
 
     public getCurrentDirectory(): INode {
@@ -43,7 +45,7 @@ export class FileSystem {
     // --- MÉTODOS DE DATOS ---
 
     public getNodes(path: string = ".", showHidden: boolean = false): INode[] {
-        const node = PathResolver.resolve(path, this.currentDirectory, this.root);
+        const node = this.resolvePath(path);
         if (!node) throw new Error(`ls: cannot access '${path}': No such file or directory`);
         if (node.type === 'file') return [node];
 
@@ -55,7 +57,7 @@ export class FileSystem {
     }
 
     public readdir(path: string): string[] {
-        const node = PathResolver.resolve(path, this.currentDirectory, this.root);
+        const node = this.resolvePath(path);
         if (node && node.type === 'dir' && node.children) {
             return node.children.map(child => child.name);
         }
@@ -63,15 +65,15 @@ export class FileSystem {
     }
 
     public getChildren(path: string): any[] {
-        const node = PathResolver.resolve(path, this.currentDirectory, this.root);
+        const node = this.resolvePath(path);
         if (node && node.type === 'dir' && node.children) {
             return node.children;
         }
         return [];
     }
 
-    // Eliminar en el futuro. Lo usa chmod, vigilar
     public resolvePath(path: string): INode | null {
+        // return PathResolver.resolve(path, this.currentDirectory, this.root);
         return PathResolver.resolve(path, this.currentDirectory, this.root);
     }
 
@@ -111,7 +113,7 @@ export class FileSystem {
         const fileName = lastSlash === -1 ? path : path.substring(lastSlash + 1);
 
         // 2. Resolver directorio padre
-        const targetDir = PathResolver.resolve(dirPath, this.currentDirectory, this.root);
+        const targetDir = this.resolvePath(dirPath);
 
         // 3. Validar existencia del directorio
         if (!targetDir || targetDir.type !== 'dir') {
@@ -155,10 +157,9 @@ export class FileSystem {
         const dirPath = lastSlash === -1 ? "." : path.substring(0, lastSlash) || "/";
         const dirName = lastSlash === -1 ? path : path.substring(lastSlash + 1);
 
-        const parentDir = PathResolver.resolve(dirPath, this.currentDirectory, this.root);
+        const parentDir = this.resolvePath(dirPath);
 
         if (!parentDir || parentDir.type !== 'dir') {
-            // return { isSuccess: false, error: Errors.NOT_FOUND(path) };
             return Result.fail<INode>(Errors.FS.NOT_FOUND(path));
         }
 
@@ -168,52 +169,126 @@ export class FileSystem {
 
         if (parentDir.children.some(n => n.name === dirName)) {
             return Result.fail<INode>(Errors.FS.ALREADY_EXISTS(path));
-            // return { isSuccess: false, error: Errors.ALREADY_EXISTS(path) };
         }
 
         const newNode = NodeFactory.create(dirName, 'dir', this.env.get('USER'), parentDir);
         parentDir.children.push(newNode);
 
-        // return { isSuccess: true, _value: newNode };
         return Result.ok<INode>(newNode);
     }
 
-    // public changeDirectory(path: string): string | null {
-    //     const target = PathResolver.resolve(path, this.currentDirectory, this.root);
-    //     if (!target) return `cd: no such file or directory: ${path}`;
-    //     if (target.type !== 'dir') return `cd: not a directory: ${path}`;
-    //     this.currentDirectory = target;
-    //     return null;
-    // }
+    public remove(path: string, recursive: boolean = false): Result<void> {
+        const node = this.resolvePath(path);
+
+        // 1. Validar que el archivo o carpeta exista
+        if (!node) {
+            return Result.fail<void>(Errors.FS.NOT_FOUND(path));
+        }
+
+        // 2. No se puede borrar la raíz '/' ni el directorio actual '.'
+        if (node === this.root) {
+            return Result.fail<void>("cannot remove root directory '/'");
+        }
+        if (node === this.currentDirectory) {
+            return Result.fail<void>("cannot remove current directory '.' or '..'");
+        }
+
+        // 3. Si es un directorio y no se especificó la flag recursiva (-r), Linux lo impide
+        if (node.type === 'dir' && !recursive) {
+            return Result.fail<void>(Errors.FS.IS_DIRECTORY(path)); // "is a directory"
+        }
+
+        // 4. Validar permisos de escritura en el directorio PADRE (para poder alterarlo)
+        if (node.parent && !this.checkAccess(node.parent, 'write')) {
+            return Result.fail<void>(Errors.FS.PERMISSION_DENIED(path));
+        }
+
+        // 5. Proceder al borrado: Lo eliminamos del array de hijos de su padre
+        if (node.parent) {
+            node.parent.children = node.parent.children.filter(child => child !== node);
+
+            // Rompemos la referencia para ayudar al Garbage Collector
+            node.parent = null;
+        }
+
+        return Result.ok<void>();
+    }
+
+    // @/slices/filesystem/application/services/FileSystem.ts
+
+    public removeDirectory(path: string): Result<void> {
+        const node = this.resolvePath(path);
+
+        // 1. Validar existencia
+        if (!node) {
+            return Result.fail<void>(Errors.FS.NOT_FOUND(path));
+        }
+
+        // 2. Validar que sea un directorio
+        if (node.type !== 'dir') {
+            return Result.fail<void>(`Failed to remove '${path}': Not a directory`);
+        }
+
+        // 3. Protección de directorios del sistema/actuales
+        if (node === this.root) {
+            return Result.fail<void>("cannot remove root directory '/'");
+        }
+        if (node === this.currentDirectory) {
+            return Result.fail<void>("cannot remove current directory '.'");
+        }
+
+        // 4. REGLA DE ORO DE RMDIR: Validar si está vacío
+        // Si manejas nodos '.' y '..' dentro de children, filtra la longitud:
+        // const actualChildren = node.children.filter(c => c.name !== '.' && c.name !== '..');
+        const isNotEmpty = node.children.length > 0;
+
+        if (isNotEmpty) {
+            return Result.fail<void>(`Failed to remove '${path}': Directory not empty`);
+        }
+
+        // 5. Validar permisos de escritura en el directorio padre
+        const parentDir = node.parent || this.resolvePath(path + '/..');
+        if (parentDir && !this.checkAccess(parentDir, 'write')) {
+            return Result.fail<void>(Errors.FS.PERMISSION_DENIED(path));
+        }
+
+        // 6. Eliminar el nodo por su nombre
+        if (parentDir) {
+            parentDir.children = parentDir.children.filter(child => child.name !== node.name);
+        }
+
+        return Result.ok<void>();
+    }
 
     public changeDirectory(path: string): Result<void> {
-        const target = PathResolver.resolve(path, this.currentDirectory, this.root);
+        let target: INode | null = null;
+        if (path === '-') {
+            target = this.previousDirectory;
+        } else {
+            target = this.resolvePath(path);
+        }
         if (!target) return Result.fail<void>(Errors.FS.NOT_FOUND(path));
         if (target.type !== 'dir') return Result.fail<void>(Errors.FS.NOT_A_DIRECTORY(path));
+        this.previousDirectory = this.currentDirectory;
         this.currentDirectory = target;
         return Result.ok<void>();
     }
 
     public cat(path: string): Result<string> {
-        const node = PathResolver.resolve(path, this.currentDirectory, this.root);
+        const node = this.resolvePath(path);
         if (!node) return Result.fail<string>(Errors.FS.NOT_FOUND(path));
         if (node.type === 'dir') return Result.fail<string>(Errors.FS.IS_DIRECTORY(path));
         if (!this.checkAccess(node, 'read')) return Result.fail<string>(Errors.FS.PERMISSION_DENIED(path));
         return Result.ok<string>(node.content || "");
     }
 
-    public getPresentWorkingDirectory(): string {
-        let current = this.currentDirectory;
-        let path = "";
-        while (current.parent !== null) {
-            path = "/" + current.name + path;
-            current = current.parent;
-        }
-        return path || "/";
+    // No se usa
+    public getPreviousDirectory(): INode {
+        return this.previousDirectory;
     }
 
     public setOwnership(path: string, owner?: string, group?: string): boolean {
-        const node = PathResolver.resolve(path, this.currentDirectory, this.root); // Método interno para buscar el archivo
+        const node = this.resolvePath(path); // Método interno para buscar el archivo
         if (!node) return false;
 
         if (owner) node.owner = owner;
@@ -223,7 +298,13 @@ export class FileSystem {
     }
 
     public getModificationTime(path: string): number {
-        return PathResolver.resolve(path, this.currentDirectory, this.root)?.mtime || 0;
+        return this.resolvePath(path)?.mtime || 0;
+    }
+
+    public getType(node: INode): Result<string> {
+        if (node.type === 'dir') return Result.ok<string>('dir');
+        if (node.type === 'file') return Result.ok<string>('file');
+        return Result.fail<string>(Errors.FS.UNKNOWN_TYPE(node.name));
     }
 
     // --- CARGA INICIAL DE SEGURIDAD (CENTRALIZAR EN EL FUTURO) ---

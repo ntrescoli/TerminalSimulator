@@ -9,6 +9,7 @@ export const Errors = {
         NOT_EMPTY: (path: string) => `bash: ${path}: Directory not empty`,
         INVALID_NAME: (name: string) => `bash: ${name}: invalid file name`,
         DISK_FULL: () => `bash: write error: No space left on device`,
+        UNKNOWN_TYPE: (name: string) => `bash: ${name}: unknown file type`,
     },
 
     // --- USER / GROUP MANAGEMENT ERRORS ---

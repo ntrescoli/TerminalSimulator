@@ -1,5 +1,6 @@
 import { Environment } from '../../../slices/system/domain/entities/Environment';
 import { UserManagerService } from '../../../slices/usermanager/application/services/UserManagerService';
+import { FileSystem } from '../../../slices/filesystem/application/services/FileSystem';
 
 export interface CommandContext {
     args: string[];           // Solo los parámetros (ej: ["home", "docs"])
@@ -13,6 +14,7 @@ export interface CommandContext {
     hasFlag: (flag: string) => boolean;
     pipeInput?: string; // <--- El contenido que viene del comando anterior
     kernel: any; // o el tipo Kernel
+    rawInput?: string;
 }
 
 export interface ICommand {

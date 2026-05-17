@@ -11,7 +11,7 @@ export const Mkdir: ICommand = {
         //     return result.error;
         // }
         
-        if (result.isFailure) return `mkdir: ${result.error}`; 
+        if (result.isFailure) return `mkdir: ${result.getError()}`; 
         // 3. Si tuvo éxito, devolvemos string vacío (comportamiento estándar de Unix)
         return "";
     }

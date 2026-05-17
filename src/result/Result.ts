@@ -34,7 +34,7 @@ export class Result<T> {
      * Getter para el error. Al usar 'get error()', en tus comandos 
      * accedes de forma natural usando 'result.error'.
      */
-    public get error(): string {
+    public getError(): string {
         if (!this.isFailure) {
             throw new Error("No se puede obtener el error de un resultado exitoso.");
         }

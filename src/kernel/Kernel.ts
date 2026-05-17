@@ -143,7 +143,8 @@ export class Kernel {
             userManager: this.userManager,
             pipeInput,
             kernel: this,
-            hasFlag: (f: string) => options.includes(f.startsWith('-') ? f : `-${f}`)
+            hasFlag: (f: string) => options.includes(f.startsWith('-') ? f : `-${f}`),
+            rawInput: commandLine
         };
 
         // 5. Ejecución
@@ -153,7 +154,7 @@ export class Kernel {
         if (targetFile) {
             const writeResult = this.fs.writeFile(targetFile, result, isAppend);
             if (!writeResult.isSuccess) {
-                return writeResult.error;
+                return writeResult.getError();
             }
             return "";
         }
@@ -211,7 +212,8 @@ export class Kernel {
     public getPromptText(): string {
         const user = this.env.get('USER') || 'guest';
         const host = this.env.get('HOSTNAME') || 'js-terminal';
-        const path = this.fs.getPresentWorkingDirectory();
+        // const path = this.fs.getPresentWorkingDirectory();
+        const path = PathResolver.getAbsolutePath(this.fs.getCurrentDirectory());
         return `${user}@${host}:${path}$ `;
     }
 
