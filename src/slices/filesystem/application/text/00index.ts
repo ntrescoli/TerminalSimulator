@@ -7,6 +7,7 @@ import { Head } from "./head";
 import { Tail } from "./tail";
 import { Cut } from "./cut";
 import { Sort } from "./sort";
+import { Uniq } from "./uniq";
 
 export const textCmds = [
     Cat,
@@ -17,5 +18,6 @@ export const textCmds = [
     Tail,
     Wc,
     Cut,
-    Sort
+    Sort,
+    Uniq,
 ];
