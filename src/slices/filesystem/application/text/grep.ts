@@ -18,7 +18,7 @@ export const Grep: ICommand = {
 
             // Si la lectura falló (no existe, es directorio, etc.), devolvemos el error formateado
             if (result.isFailure) {
-                return `grep: ${result.error}`;
+                return `grep: ${result.getError()}`;
             }
 
             // Si tuvo éxito, extraemos el string plano de forma segura

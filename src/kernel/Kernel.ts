@@ -187,38 +187,89 @@ export class Kernel {
         return parts;
     }
 
+    // private parseArgsAndFlags(tokens: string[], valuedFlags: string[] = []) {
+    //     const options: string[] = [];
+    //     const args: string[] = [];
+    //     const flagValues: { [key: string]: string } = {};
+
+    //     for (let i = 0; i < tokens.length; i++) {
+    //         const token = tokens[i];
+    //         if (token.startsWith('-') && token.length > 1) {
+    //             const isLong = token.startsWith('--');
+    //             const cluster = isLong ? [token.slice(2)] : token.slice(1).split('');
+
+    //             for (let j = 0; j < cluster.length; j++) {
+    //                 const char = cluster[j];
+    //                 const flagName = isLong ? `--${char}` : `-${char}`;
+    //                 options.push(flagName);
+
+    //                 if (valuedFlags.includes(char) || valuedFlags.includes(flagName)) {
+    //                     if (!isLong && token.slice(j + 1).length > 0) {
+    //                         flagValues[flagName] = token.slice(j + 1);
+    //                         break;
+    //                     } else if (i + 1 < tokens.length) {
+    //                         flagValues[flagName] = tokens[++i];
+    //                         break;
+    //                     }
+    //                 }
+    //             }
+    //         } else {
+    //             args.push(token);
+    //         }
+    //     }
+    //     return { options, args, flagValues };
+    // }
+
     private parseArgsAndFlags(tokens: string[], valuedFlags: string[] = []) {
-        const options: string[] = [];
-        const args: string[] = [];
-        const flagValues: { [key: string]: string } = {};
+    const options: string[] = [];
+    const args: string[] = [];
+    const flagValues: { [key: string]: string } = {};
 
-        for (let i = 0; i < tokens.length; i++) {
-            const token = tokens[i];
-            if (token.startsWith('-') && token.length > 1) {
-                const isLong = token.startsWith('--');
-                const cluster = isLong ? [token.slice(2)] : token.slice(1).split('');
+    for (let i = 0; i < tokens.length; i++) {
+        const token = tokens[i];
+        
+        // Es una flag (ej: -n, -n3, --shell)
+        if (token.startsWith('-') && token.length > 1) {
+            const isLong = token.startsWith('--');
+            // Si es flag larga, quitamos '--'. Si es corta, separamos las letras por si es un cluster (ej: -abc)
+            const cluster = isLong ? [token.slice(2)] : token.slice(1).split('');
+            let valueCaptured = false;
 
-                for (let j = 0; j < cluster.length; j++) {
-                    const char = cluster[j];
-                    const flagName = isLong ? `--${char}` : `-${char}`;
-                    options.push(flagName);
+            for (let j = 0; j < cluster.length; j++) {
+                const char = cluster[j];
+                const flagName = isLong ? `--${char}` : `-${char}`;
+                options.push(flagName);
 
-                    if (valuedFlags.includes(char) || valuedFlags.includes(flagName)) {
-                        if (!isLong && token.slice(j + 1).length > 0) {
-                            flagValues[flagName] = token.slice(j + 1);
-                            break;
-                        } else if (i + 1 < tokens.length) {
-                            flagValues[flagName] = tokens[++i];
-                            break;
-                        }
+                // ¿Esta flag espera recibir un valor obligatorio?
+                if (valuedFlags.includes(char) || valuedFlags.includes(flagName)) {
+                    
+                    // CASO A: El valor viene PEGADO (ej: -n3)
+                    if (!isLong && token.slice(j + 2).length > 0) {
+                        flagValues[flagName] = token.slice(j + 2); // Extrae el "3" saltando el guion y el caracter
+                        valueCaptured = true;
+                        break; // Rompemos el cluster de letras ya que consumimos el resto del token
+                    } 
+                    
+                    // CASO B: El valor viene SEPARADO (ej: -n 3)
+                    else if (i + 1 < tokens.length) {
+                        flagValues[flagName] = tokens[i + 1]; // Capturamos el siguiente token sin romper el índice antes de tiempo
+                        i++; // Avanzamos el puntero del bucle principal para saltarnos el valor en la siguiente iteración
+                        valueCaptured = true;
+                        break;
                     }
                 }
-            } else {
-                args.push(token);
             }
+            
+            // Si era una flag pero no requería valor (o no se capturó), el flujo continúa normal
+            if (valueCaptured) continue;
+
+        } else {
+            // No es una flag, es un argumento regular (un archivo, un usuario, etc.)
+            args.push(token);
         }
-        return { options, args, flagValues };
     }
+    return { options, args, flagValues };
+}
 
     // --- SISTEMA Y AUTOCOMPLETADO ---
 
