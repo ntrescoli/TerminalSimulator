@@ -4,6 +4,7 @@
  */
 export class Environment {
     private vars: Record<string, string>;
+    private aliases: Map<string, string> = new Map();
 
     constructor() {
         // Inicializamos vacío para permitir que el Kernel decida qué cargar
@@ -48,6 +49,22 @@ export class Environment {
      */
     public getAll(): Record<string, string> {
         return { ...this.vars };
+    }
+
+    public setAlias(name: string, command: string): void {
+        this.aliases.set(name, command);
+    }
+
+    public getAlias(name: string): string | undefined {
+        return this.aliases.get(name);
+    }
+
+    public removeAlias(name: string): boolean {
+        return this.aliases.delete(name);
+    }
+
+    public getAliases(): [string, string][] {
+        return Array.from(this.aliases.entries());
     }
 
     /**

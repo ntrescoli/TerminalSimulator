@@ -11,6 +11,8 @@ import { Who, W } from './who';
 import { Chown } from './chown';
 import { Cal } from './cal';
 import { Chgrp } from './chgrp';
+import { Alias } from './alias';
+import { Unalias } from './unalias';
 
 export const basicCmds = [
     Sudo,
@@ -26,5 +28,7 @@ export const basicCmds = [
     W,
     Chown,
     Cal,
-    Chgrp
+    Chgrp,
+    Alias,
+    Unalias
 ];

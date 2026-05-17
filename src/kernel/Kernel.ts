@@ -32,7 +32,8 @@ export class Kernel {
         this.envStateImpl = new EnvironmentStateSaverImpl(this.env);
         this.fs = new FileSystem(this.env);
         this.fsStateImpl = new FileSystemStateSaverImpl(this.fs);
-        // 2. Inyectamos la infraestructura de Usuarios
+        
+        // Inyectamos la infraestructura de Usuarios
         const userRepo = new UserManagerRepositoryImpl(this.fs);
         this.userManager = new UserManagerService(this.fs, userRepo);
         this.userStateImpl = new UserStateSaverImpl(this.userManager);
@@ -119,7 +120,19 @@ export class Kernel {
             finalCommandLine = finalCommandLine.replace(/>\s*[^\s]+$/, '').trim();
         }
 
-        // 2. Tokenización
+        // 🌟 INTERCEPCIÓN DE ALIAS DE SISTEMA
+        // Extraemos temporalmente la primera palabra antes de tokenizar para verificar si es un alias
+        const firstSpaceIndex = finalCommandLine.indexOf(' ');
+        const potentialAlias = firstSpaceIndex === -1 ? finalCommandLine : finalCommandLine.substring(0, firstSpaceIndex);
+        const restOfLine = firstSpaceIndex === -1 ? "" : finalCommandLine.substring(firstSpaceIndex);
+
+        // Si existe un alias registrado en el EnvironmentService, lo expandimos en la línea de comandos
+        const expandedCommand = this.env.getAlias(potentialAlias.trim());
+        if (expandedCommand) {
+            finalCommandLine = `${expandedCommand}${restOfLine}`.trim();
+        }
+
+        // 2. Tokenización (Opera de manera normal sobre el comando real o expandido)
         const tokens = this.tokenize(finalCommandLine);
         if (tokens.length === 0) return "";
 
@@ -212,7 +225,6 @@ export class Kernel {
     public getPromptText(): string {
         const user = this.env.get('USER') || 'guest';
         const host = this.env.get('HOSTNAME') || 'js-terminal';
-        // const path = this.fs.getPresentWorkingDirectory();
         const path = PathResolver.getAbsolutePath(this.fs.getCurrentDirectory());
         return `${user}@${host}:${path}$ `;
     }
@@ -259,7 +271,6 @@ export class Kernel {
     }
 
     public exportFullSystemState() {
-        // return this.jsonStorageImpl.saveData();
         return {
             env: this.envStateImpl.getState(),
             fileSystem: this.fsStateImpl.getState(),
