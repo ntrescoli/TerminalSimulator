@@ -5,6 +5,11 @@ export const History: ICommand = {
     execute: ({ kernel, hasFlag }) => {
         const history = kernel.getHistory();
 
+        if (hasFlag('-c')) {
+            kernel.clearHistory();
+            return "";
+        }
+
         // Si el usuario quiere extraerlo (exportar)
         if (hasFlag('-e') || hasFlag('--export')) {
             const content = history.join('\n');

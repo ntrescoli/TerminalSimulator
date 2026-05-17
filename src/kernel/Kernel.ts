@@ -317,6 +317,8 @@ export class Kernel {
 
     public getHistory(): string[] { return this.history; }
 
+    public clearHistory(): void { this.history = []; }
+
     public getUptime(): number {
         return Date.now() - this.startTime;
     }

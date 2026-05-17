@@ -5,6 +5,8 @@ import { Grep } from "./grep";
 import { Wc } from "./wc";
 import { Head } from "./head";
 import { Tail } from "./tail";
+import { Cut } from "./cut";
+import { Sort } from "./sort";
 
 export const textCmds = [
     Cat,
@@ -13,5 +15,7 @@ export const textCmds = [
     Diff,
     Head,
     Tail,
-    Wc
+    Wc,
+    Cut,
+    Sort
 ];
