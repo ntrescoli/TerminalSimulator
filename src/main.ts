@@ -21,7 +21,46 @@ const bootstrap = async () => {
     let pendingAuth: { type: string; originalLine: string } | null = null;
 
     const handleCommand = async (value: string) => {
-        const command = value.trim();
+        let command = value.trim();
+
+        // 🌟 EXPANSOR DE HISTORIAL '!' estilo Bash
+        if (command.startsWith('!') && command.length > 1 && !pendingAuth) {
+            const query = command.substring(1).trim();
+            let commandEncontrado: string | null = null;
+
+            // Caso A: !number (ej: !42) -> Busca el comando en esa posición exacta indexada
+            if (/^\d+$/.test(query)) {
+                const index = parseInt(query, 10) - 1; // En Linux suele empezar en 1
+                if (index >= 0 && index < commandHistory.length) {
+                    commandEncontrado = commandHistory[index];
+                }
+            }
+            // Caso B: !! -> Repite el mismísimo último comando ejecutado
+            else if (query === '!') {
+                if (commandHistory.length > 0) {
+                    commandEncontrado = commandHistory[commandHistory.length - 1];
+                }
+            }
+            // Caso C: !texto (ej: !sudo) -> Busca hacia atrás el último que empiece por ese texto
+            else {
+                for (let i = commandHistory.length - 1; i >= 0; i--) {
+                    if (commandHistory[i].startsWith(query)) {
+                        commandEncontrado = commandHistory[i];
+                        break;
+                    }
+                }
+            }
+
+            // Si lo encuentra, hace el "cambiazo" e informa al usuario en la terminal
+            if (commandEncontrado) {
+                command = commandEncontrado;
+                terminal.print(command); // Bash siempre imprime el comando expandido antes de ejecutarlo
+            } else {
+                terminal.print(`${command}: event not found`);
+                terminal.updatePrompt(kernel.getPromptText());
+                return;
+            }
+        }
 
         // Eco protegido en la terminal
         if (pendingAuth) {
@@ -59,25 +98,25 @@ const bootstrap = async () => {
         }
 
         // Si el Kernel vuelve a pedir autenticación (segunda vuelta fallida o nueva petición)
-if (response.startsWith("AUTH_REQUIRED:")) {
-        const [_, commandName, targetUser] = response.split(":");
-        const originalLineToSave = previousAuthLine ? previousAuthLine : command;
-        pendingAuth = { type: commandName, originalLine: originalLineToSave };
+        if (response.startsWith("AUTH_REQUIRED:")) {
+            const [_, commandName, targetUser] = response.split(":");
+            const originalLineToSave = previousAuthLine ? previousAuthLine : command;
+            pendingAuth = { type: commandName, originalLine: originalLineToSave };
 
-        // 🌟 LA REPARACIÓN: Guardamos el comando padre en el historial 
-        // antes de congelar la terminal para pedir la contraseña
-        if (!eraUnaContrasena) {
-            commandHistory.push(command);
+            // 🌟 LA REPARACIÓN: Guardamos el comando padre en el historial 
+            // antes de congelar la terminal para pedir la contraseña
+            if (!eraUnaContrasena) {
+                commandHistory.push(command);
+            }
+
+            const promptText = commandName === 'sudo'
+                ? `[sudo] password for ${targetUser}: `
+                : "Password: ";
+
+            terminal.updatePrompt(promptText);
+            terminal.setInputType('password');
+            return; // Ahora el return ya va con los deberes hechos
         }
-
-        const promptText = commandName === 'sudo'
-            ? `[sudo] password for ${targetUser}: `
-            : "Password: ";
-
-        terminal.updatePrompt(promptText);
-        terminal.setInputType('password');
-        return; // Ahora el return ya va con los deberes hechos
-    }
 
         if (response === 'COMMAND_CLEAR') {
             terminal.clear();
@@ -88,16 +127,16 @@ if (response.startsWith("AUTH_REQUIRED:")) {
         // 🌟 CONTROL DE HISTORIAL ABSOLUTO
         // Guardamos en las flechas el comando original completo (ej: 'sudo cat /etc/shadow')
         // pero JAMÁS la contraseña suelta que se acaba de introducir.
-// Ya no duplicamos si requirió auth, solo guardamos flujos directos de un solo paso
-    if (!eraUnaContrasena && response !== 'COMMAND_CLEAR' && !response.startsWith("AUTH_REQUIRED:")) {
-        commandHistory.push(command);
-    }
-    
-    historyIndex = -1; 
+        // Ya no duplicamos si requirió auth, solo guardamos flujos directos de un solo paso
+        if (!eraUnaContrasena && response !== 'COMMAND_CLEAR' && !response.startsWith("AUTH_REQUIRED:")) {
+            commandHistory.push(command);
+        }
 
-    if (!pendingAuth) {
-        terminal.updatePrompt(kernel.getPromptText());
-    }
+        historyIndex = -1;
+
+        if (!pendingAuth) {
+            terminal.updatePrompt(kernel.getPromptText());
+        }
     };
 
     // 🌟 EVENT LISTENERS DE TECLADO OPTIMIZADOS
