@@ -104,3 +104,5 @@ Para agregar nuevos comandos, consulta [CONTRIBUTING.md](./docs/CONTRIBUTING.md)
 
 - La arquitectura hexadonal dentro de la VM se organiza en slices
 - El slice de users y groups usa la infrastructure para escribir los archivos falsos passwd y group
+- Hay problemas con la detección de texto. crear usuarios que empiezan igual da problemas, flags
+como -l se detecta igual que -ldklmsdof. Es por usar "includes", ya que no detecta texto exacto aislado.

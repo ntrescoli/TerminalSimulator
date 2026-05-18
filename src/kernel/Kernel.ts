@@ -242,15 +242,6 @@ export class Kernel {
             rawInput: commandLine // Mantenemos la línea original intacta para que sudo la limpie a su gusto
         };
 
-        if (name === 'su' || name === 'sudo') {
-    console.log(`🔍 KERNEL: Procesando comando '${name}':`, {
-        argumentosPasados: context.args,
-        flagsDetectadas: context.options,
-        valoresDeFlags: context.flagValues,
-        lineaOriginalRecibida: context.rawInput
-    });
-}
-
         // 5. Ejecución
         const result = await cmd.execute(context);
 
