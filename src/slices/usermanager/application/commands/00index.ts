@@ -5,6 +5,8 @@ import { Su } from "./su";
 import { UserAdd } from "./useradd";
 import { DelUser } from "./deluser";
 import { DelGroup } from "./delgroup";
+import { Finger } from "./finger";
+import { Passwd } from "./passwd";
 
 export const usersCmds = [
     Su,
@@ -13,5 +15,7 @@ export const usersCmds = [
     AddUser,
     AddGroup,
     DelUser,
-    DelGroup
+    DelGroup,
+    Finger,
+    Passwd
 ];

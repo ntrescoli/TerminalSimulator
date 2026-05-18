@@ -1,7 +1,23 @@
 {
   "users": [
-    { "username": "root", "uid": 0, "gid": 0, "home": "/root", "shell": "/bin/bash", "fullName": "root" },
-    { "username": "ubuntu", "uid": 1000, "gid": 1000, "home": "/home/ubuntu", "shell": "/bin/bash", "fullName": "Ubuntu User" }
+    { 
+      "username": "root", 
+      "password": "$6$rounds=5000$jsTerminalSalt$3580e2ffffffffff", 
+      "uid": 0, 
+      "gid": 0, 
+      "home": "/root", 
+      "shell": "/bin/bash", 
+      "fullName": "root" 
+    },
+    { 
+      "username": "ubuntu", 
+      "password": "$6$rounds=5000$jsTerminalSalt$32bd2519ffffffff", 
+      "uid": 1000, 
+      "gid": 1000, 
+      "home": "/home/ubuntu", 
+      "shell": "/bin/bash", 
+      "fullName": "Ubuntu User" 
+    }
   ],
   "groups": [
     { "groupName": "root", "gid": 0, "members": [] },
@@ -31,12 +47,28 @@
     },
     "children": [
       { "name": "bin", "type": "dir", "owner": "root", "group": "root", "permissions": { "user": { "read": true, "write": true, "execute": true }, "group": { "read": true, "write": false, "execute": true }, "others": { "read": true, "write": false, "execute": true } }, "children": [] },
-      { "name": "etc", "type": "dir", "owner": "root", "group": "root", 
+      { 
+        "name": "etc", 
+        "type": "dir", 
+        "owner": "root", 
+        "group": "root", 
         "permissions": { "user": { "read": true, "write": true, "execute": true }, "group": { "read": true, "write": false, "execute": true }, "others": { "read": true, "write": false, "execute": true } },
         "children": [
           { "name": "hostname", "type": "file", "owner": "root", "group": "root", "content": "ubuntu-desktop", "permissions": { "user": { "read": true, "write": true, "execute": false }, "group": { "read": true, "write": false, "execute": false }, "others": { "read": true, "write": false, "execute": false } } },
           { "name": "passwd", "type": "file", "owner": "root", "group": "root", "content": "root:x:0:0:root:/root:/bin/bash\nubuntu:x:1000:1000:Ubuntu User:/home/ubuntu:/bin/bash", "permissions": { "user": { "read": true, "write": true, "execute": false }, "group": { "read": true, "write": false, "execute": false }, "others": { "read": true, "write": false, "execute": false } } },
-          { "name": "group", "type": "file", "owner": "root", "group": "root", "content": "root:x:0:\nsudo:x:27:ubuntu\nubuntu:x:1000:ubuntu", "permissions": { "user": { "read": true, "write": true, "execute": false }, "group": { "read": true, "write": false, "execute": false }, "others": { "read": true, "write": false, "execute": false } } }
+          { "name": "group", "type": "file", "owner": "root", "group": "root", "content": "root:x:0:\nsudo:x:27:ubuntu\nubuntu:x:1000:ubuntu", "permissions": { "user": { "read": true, "write": true, "execute": false }, "group": { "read": true, "write": false, "execute": false }, "others": { "read": true, "write": false, "execute": false } } },
+          { 
+            "name": "shadow", 
+            "type": "file", 
+            "owner": "root", 
+            "group": "root", 
+            "content": "root:$6$rounds=5000$jsTerminalSalt$3580e2ffffffffff:20592:0:99999:7:::\nubuntu:$6$rounds=5000$jsTerminalSalt$32bd2519ffffffff:20592:0:99999:7:::\n", 
+            "permissions": { 
+              "user": { "read": true, "write": true, "execute": false }, 
+              "group": { "read": false, "write": false, "execute": false }, 
+              "others": { "read": false, "write": false, "execute": false } 
+            } 
+          }
         ]
       },
       { "name": "home", "type": "dir", "owner": "root", "group": "root", "permissions": { "user": { "read": true, "write": true, "execute": true }, "group": { "read": true, "write": false, "execute": true }, "others": { "read": true, "write": false, "execute": true } }, "children": [

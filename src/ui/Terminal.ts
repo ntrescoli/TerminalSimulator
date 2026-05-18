@@ -75,4 +75,11 @@ export class TerminalUI {
     clear() {
         this.outputElement.innerHTML = '';
     }
+
+    /**
+     * Cambia el tipo de input (text o password) dinámicamente
+     */
+    setInputType(type: 'text' | 'password') {
+        this.inputElement.type = type;
+    }
 }

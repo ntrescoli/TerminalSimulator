@@ -43,7 +43,8 @@ export class Kernel {
         const stateSavers = [
             this.envStateImpl,
             this.fsStateImpl,
-            this.userStateImpl
+            this.userStateImpl,
+            this.groupStateImpl
         ];
 
         this.jsonStorageImpl = new JsonStorageRepositoryImpl(stateSavers);
@@ -101,6 +102,82 @@ export class Kernel {
         return await this.processCommandLine(trimmedInput);
     }
 
+    // private async processCommandLine(commandLine: string, pipeInput: string = ""): Promise<string> {
+    //     let finalCommandLine = commandLine.trim();
+    //     let targetFile: string | null = null;
+    //     let isAppend = false;
+
+    //     // 1. Detectar Redirecciones (Priorizamos >> sobre >)
+    //     const appendMatch = finalCommandLine.match(/>>\s*([^\s]+)$/);
+    //     const overwriteMatch = finalCommandLine.match(/>\s*([^\s]+)$/);
+
+    //     if (appendMatch) {
+    //         isAppend = true;
+    //         targetFile = appendMatch[1];
+    //         finalCommandLine = finalCommandLine.replace(/>>\s*[^\s]+$/, '').trim();
+    //     } else if (overwriteMatch) {
+    //         isAppend = false;
+    //         targetFile = overwriteMatch[1];
+    //         finalCommandLine = finalCommandLine.replace(/>\s*[^\s]+$/, '').trim();
+    //     }
+
+    //     // 🌟 INTERCEPCIÓN DE ALIAS DE SISTEMA
+    //     // Extraemos temporalmente la primera palabra antes de tokenizar para verificar si es un alias
+    //     const firstSpaceIndex = finalCommandLine.indexOf(' ');
+    //     const potentialAlias = firstSpaceIndex === -1 ? finalCommandLine : finalCommandLine.substring(0, firstSpaceIndex);
+    //     const restOfLine = firstSpaceIndex === -1 ? "" : finalCommandLine.substring(firstSpaceIndex);
+
+    //     // Si existe un alias registrado en el EnvironmentService, lo expandimos en la línea de comandos
+    //     const expandedCommand = this.env.getAlias(potentialAlias.trim());
+    //     if (expandedCommand) {
+    //         finalCommandLine = `${expandedCommand}${restOfLine}`.trim();
+    //     }
+
+    //     // 2. Tokenización (Opera de manera normal sobre el comando real o expandido)
+    //     const tokens = this.tokenize(finalCommandLine);
+    //     if (tokens.length === 0) return "";
+
+    //     const name = tokens[0].toLowerCase();
+    //     const rawTokens = tokens.slice(1);
+
+    //     const cmd = this.commands.get(name);
+    //     if (!cmd) return `-bash: ${name}: command not found`;
+
+    //     // 3. Parseo de argumentos y flags
+    //     const { options, args, flagValues } = this.parseArgsAndFlags(rawTokens, cmd.valuedFlags);
+
+    //     // 4. Creación del contexto
+    //     const context: CommandContext = {
+    //         args,
+    //         options,
+    //         flagValues,
+    //         rawArgs: rawTokens,
+    //         fs: this.fs,
+    //         env: this.env,
+    //         userManager: this.userManager,
+    //         pipeInput,
+    //         kernel: this,
+    //         hasFlag: (f: string) => options.includes(f.startsWith('-') ? f : `-${f}`),
+    //         rawInput: commandLine
+    //     };
+
+    //     // 5. Ejecución
+    //     const result = await cmd.execute(context);
+
+    //     // 6. Manejo de la salida (Redirección o Retorno)
+    //     if (targetFile) {
+    //         const writeResult = this.fs.writeFile(targetFile, result, isAppend);
+    //         if (!writeResult.isSuccess) {
+    //             return writeResult.getError();
+    //         }
+    //         return "";
+    //     }
+
+    //     return result;
+    // }
+
+    // --- UTILIDADES DE PARSEO ---
+
     private async processCommandLine(commandLine: string, pipeInput: string = ""): Promise<string> {
         let finalCommandLine = commandLine.trim();
         let targetFile: string | null = null;
@@ -121,18 +198,16 @@ export class Kernel {
         }
 
         // 🌟 INTERCEPCIÓN DE ALIAS DE SISTEMA
-        // Extraemos temporalmente la primera palabra antes de tokenizar para verificar si es un alias
         const firstSpaceIndex = finalCommandLine.indexOf(' ');
         const potentialAlias = firstSpaceIndex === -1 ? finalCommandLine : finalCommandLine.substring(0, firstSpaceIndex);
         const restOfLine = firstSpaceIndex === -1 ? "" : finalCommandLine.substring(firstSpaceIndex);
 
-        // Si existe un alias registrado en el EnvironmentService, lo expandimos en la línea de comandos
         const expandedCommand = this.env.getAlias(potentialAlias.trim());
         if (expandedCommand) {
             finalCommandLine = `${expandedCommand}${restOfLine}`.trim();
         }
 
-        // 2. Tokenización (Opera de manera normal sobre el comando real o expandido)
+        // 2. Tokenización
         const tokens = this.tokenize(finalCommandLine);
         if (tokens.length === 0) return "";
 
@@ -142,8 +217,15 @@ export class Kernel {
         const cmd = this.commands.get(name);
         if (!cmd) return `-bash: ${name}: command not found`;
 
-        // 3. Parseo de argumentos y flags
-        const { options, args, flagValues } = this.parseArgsAndFlags(rawTokens, cmd.valuedFlags);
+        // 🌟 ADAPTACIÓN PARA SUDO INTERACTIVO:
+        // Combinamos las flags que ya espere el comando con la flag de password interactiva si es 'sudo'
+        const baseValuedFlags = cmd.valuedFlags || [];
+        const finalValuedFlags = name === 'sudo' 
+            ? [...baseValuedFlags, 'sudo-pass', '--sudo-pass'] 
+            : baseValuedFlags;
+
+        // 3. Parseo de argumentos y flags utilizando la lista extendida
+        const { options, args, flagValues } = this.parseArgsAndFlags(rawTokens, finalValuedFlags);
 
         // 4. Creación del contexto
         const context: CommandContext = {
@@ -157,8 +239,17 @@ export class Kernel {
             pipeInput,
             kernel: this,
             hasFlag: (f: string) => options.includes(f.startsWith('-') ? f : `-${f}`),
-            rawInput: commandLine
+            rawInput: commandLine // Mantenemos la línea original intacta para que sudo la limpie a su gusto
         };
+
+        if (name === 'su' || name === 'sudo') {
+    console.log(`🔍 KERNEL: Procesando comando '${name}':`, {
+        argumentosPasados: context.args,
+        flagsDetectadas: context.options,
+        valoresDeFlags: context.flagValues,
+        lineaOriginalRecibida: context.rawInput
+    });
+}
 
         // 5. Ejecución
         const result = await cmd.execute(context);
@@ -174,9 +265,7 @@ export class Kernel {
 
         return result;
     }
-
-    // --- UTILIDADES DE PARSEO ---
-
+    
     private tokenize(input: string): string[] {
         const regex = /"([^"]*)"|'([^']*)'|([^\s]+)/g;
         const parts: string[] = [];
@@ -186,39 +275,6 @@ export class Kernel {
         }
         return parts;
     }
-
-    // private parseArgsAndFlags(tokens: string[], valuedFlags: string[] = []) {
-    //     const options: string[] = [];
-    //     const args: string[] = [];
-    //     const flagValues: { [key: string]: string } = {};
-
-    //     for (let i = 0; i < tokens.length; i++) {
-    //         const token = tokens[i];
-    //         if (token.startsWith('-') && token.length > 1) {
-    //             const isLong = token.startsWith('--');
-    //             const cluster = isLong ? [token.slice(2)] : token.slice(1).split('');
-
-    //             for (let j = 0; j < cluster.length; j++) {
-    //                 const char = cluster[j];
-    //                 const flagName = isLong ? `--${char}` : `-${char}`;
-    //                 options.push(flagName);
-
-    //                 if (valuedFlags.includes(char) || valuedFlags.includes(flagName)) {
-    //                     if (!isLong && token.slice(j + 1).length > 0) {
-    //                         flagValues[flagName] = token.slice(j + 1);
-    //                         break;
-    //                     } else if (i + 1 < tokens.length) {
-    //                         flagValues[flagName] = tokens[++i];
-    //                         break;
-    //                     }
-    //                 }
-    //             }
-    //         } else {
-    //             args.push(token);
-    //         }
-    //     }
-    //     return { options, args, flagValues };
-    // }
 
     private parseArgsAndFlags(tokens: string[], valuedFlags: string[] = []) {
     const options: string[] = [];

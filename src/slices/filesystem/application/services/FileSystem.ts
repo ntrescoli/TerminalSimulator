@@ -304,6 +304,28 @@ export class FileSystem {
         return Result.ok<string>(node.content || "");
     }
 
+    /**
+     * Realiza una lectura directa de un archivo del sistema ignorando las restricciones 
+     * de permisos del usuario actual. Exclusivo para componentes del Kernel.
+     */
+    public catSystem(path: string): Result<string> {
+        // 1. Aquí usas la lógica exacta que ya tienes en tu 'cat' para resolver la ruta 
+        // y encontrar el nodo del archivo (usando tu PathResolver o lógica interna).
+        const node = this.resolvePath(path);
+
+        if (!node) {
+            return Result.fail<string>("File not found"); // O como manejes tus errores
+        }
+
+        if (node.type !== 'file') {
+            return Result.fail<string>("Not a file");
+        }
+
+        // 🌟 LA CLAVE: Devolvemos el contenido DIRECTAMENTE, 
+        // sin pasar por el 'if (hasPermission(...))' que te estaba bloqueando.
+        return Result.ok<string>(node.content);
+    }
+
     // No se usa
     public getPreviousDirectory(): INode {
         return this.previousDirectory;
