@@ -29,11 +29,10 @@ export const Chown: ICommand = {
             return `chown: invalid group: '${newGroup}'`;
         }
 
-        // 5. Aplicar el cambio en el FileSystem
-        // Asumimos que tienes un método updateNode en tu fs
-        const success = fs.setOwnership(targetPath, newOwner, newGroup);
+        // 5. Aplicar el cambio en el FileSystem usando la firma actual de setOwnership.
+        const success = fs.setOwnership(targetPath, 'root', [], newOwner, newGroup);
 
-        if (!success) {
+        if (!success.isSuccess) {
             return `chown: cannot access '${targetPath}': No such file or directory`;
         }
 

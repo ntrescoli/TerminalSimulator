@@ -19,7 +19,7 @@ export const Rm: ICommand = {
 
         if (result.isFailure) {
             // Comportamiento -f: si no existe el archivo/carpeta, morimos en silencio
-            if (force && result.getError().includes("Not found")) {
+            if (force && /not found|No such file or directory/i.test(result.getError())) {
                 return "";
             }
             
