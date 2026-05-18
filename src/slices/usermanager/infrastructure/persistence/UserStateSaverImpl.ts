@@ -14,20 +14,8 @@ export class UserStateSaverImpl implements ISliceStateSaver {
         return this.userManager.getUsers();
     }
 
-    loadState(data: any) {     
-        // this.userManager.saveUser(data) 
-        console.log("🔍 STATE SAVER: Datos crudos recibidos desde el JSON:", data);
-
-    if (data && Array.isArray(data)) {
-        // Aquí es donde tu saver le pasa los datos al servicio o repositorio
-        // Vamos a ver si el array mapeado mantiene las contraseñas
-        data.forEach((u: any) => {
-            console.log(`🔍 STATE SAVER: Procesando usuario '${u.username}':`, {
-                tienePasswordEnJson: !!u.password,
-                passwordValor: u.password
-            });
-        });
-    } 
+    loadState(data: any) {
+        this.userManager.saveUser(data)
     }
 
 }

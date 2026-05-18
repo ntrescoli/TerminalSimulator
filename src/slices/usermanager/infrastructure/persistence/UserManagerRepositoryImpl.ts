@@ -18,10 +18,6 @@ export class UserManagerRepositoryImpl implements IUserManagerRepository {
     const shadowRes = this.fs.catSystem('/etc/shadow');
     if (shadowRes.isSuccess) {
         const shadowMap = this.parseShadow(shadowRes.getValue());
-        
-        console.log("🔍 REPOSITORIO: Contenido del mapa de /etc/shadow parseado:", 
-            Array.from(shadowMap.entries())
-        );
 
         users.forEach(u => {
             if (shadowMap.has(u.username)) {
@@ -29,10 +25,6 @@ export class UserManagerRepositoryImpl implements IUserManagerRepository {
             }
         });
     }
-
-    console.log("🔍 REPOSITORIO: Usuarios devueltos con contraseñas acopladas:", 
-        users.map(u => ({ username: u.username, pass: u.password }))
-    );
 
     return users;
 }
