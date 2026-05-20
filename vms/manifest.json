@@ -1,0 +1,14 @@
+[
+  {
+    "id": "default",
+    "name": "Ubuntu Desktop",
+    "description": "Máquina estándar con usuario ubuntu y shell bash.",
+    "file": "/vms/default.json"
+  },
+  {
+    "id": "webserver",
+    "name": "Servidor Web",
+    "description": "Máquina mínima con root, webmaster y un sitio web en /var/www.",
+    "file": "/vms/webserver.json"
+  }
+]

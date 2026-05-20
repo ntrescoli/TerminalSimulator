@@ -102,6 +102,7 @@ Para agregar nuevos comandos, consulta [CONTRIBUTING.md](./docs/CONTRIBUTING.md)
 
 ## Notas
 
+- Testeo provisional: iniciar con http://localhost:5173/hypervisor.html muestra una seleccion de json iniciales
 - La arquitectura hexadonal dentro de la VM se organiza en slices
 - El slice de users y groups usa la infrastructure para escribir los archivos falsos passwd y group
 - Hay problemas con la detección de texto. crear usuarios que empiezan igual da problemas, flags

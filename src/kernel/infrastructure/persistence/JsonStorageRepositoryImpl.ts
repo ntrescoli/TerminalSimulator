@@ -5,13 +5,13 @@ export class JsonStorageRepositoryImpl implements IStorageRepository {
     private readonly savers: Map<string, ISliceStateSaver> = new Map();
     private history: string[] = []; // El historial sí puede ser nativo del Kernel si se maneja aquí
 
-    constructor(savers: ISliceStateSaver[]) {
+    constructor(savers: ISliceStateSaver[], private readonly configUrl = '/vms/default.json') {
         savers.forEach(saver => this.savers.set(saver.key, saver));
     }
 
     public async loadData(): Promise<void> {
         try {
-            const response = await fetch('vms/default.json');
+            const response = await fetch(this.configUrl);
             if (!response.ok) throw new Error();
             const config = await response.json();
 

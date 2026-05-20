@@ -65,6 +65,48 @@ body {
     background: #5e2750;
 }
 
+.hidden {
+    display: none;
+}
+
+.launcher-panel {
+    width: 100%;
+    max-width: 900px;
+    margin-bottom: 18px;
+    padding: 16px;
+    background: rgba(48, 10, 36, 0.95);
+    border-radius: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+}
+
+.launcher-panel h1 {
+    margin: 0 0 8px 0;
+    font-size: 1.4rem;
+}
+
+.launcher-panel select,
+.launcher-panel button {
+    min-width: 220px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1px solid #5e2750;
+    background: #1f0a1d;
+    color: var(--text-color);
+}
+
+.launcher-panel button {
+    cursor: pointer;
+}
+
+.status {
+    width: 100%;
+    font-size: 0.95rem;
+    color: #8ae234;
+}
+
 .history-line {
     display: flex;
     gap: 10px;

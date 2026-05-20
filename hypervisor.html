@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hypervisor Simulator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main id="hypervisor-app">
+        <section class="launcher-panel">
+            <div>
+                <h1>Hypervisor Launcher</h1>
+                <p>Selecciona un estado inicial y lanza la máquina virtual.</p>
+            </div>
+
+            <label for="vm-select">Condición inicial</label>
+            <select id="vm-select"></select>
+            <button id="launch-vm">Lanzar máquina</button>
+            <div id="launch-status" class="status"></div>
+        </section>
+
+        <section id="terminal-container" class="hidden">
+            <div id="output"></div>
+            <div class="input-line">
+                <span id="prompt" class="prompt"></span>
+                <input type="text" id="terminal-input" autofocus spellcheck="false" autocomplete="off">
+            </div>
+        </section>
+    </main>
+
+    <script type="module" src="/src/hypervisor/main.ts"></script>
+</body>
+</html>

@@ -7,8 +7,8 @@ export class DefaultStorageRepositoryImpl {
     ) { }
 
     public loadDefaults() {
-        this.fs.root = NodeFactory.create('/', 'dir', 'root');
-        this.fs.currentDirectory = this.fs.root;
+        this.fs.setRoot(NodeFactory.create('/', 'dir', 'root'));
+        this.fs.setCurrentDirectory(NodeFactory.create('/', 'dir', 'root'));
 
         this.fs.mkdir('home');
         this.fs.mkdir('bin');

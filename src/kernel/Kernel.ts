@@ -17,7 +17,7 @@ export class Kernel {
     private readonly orchestrator: SystemOrchestrator;
     private readonly persistence: PersistenceManager;
 
-    constructor() {
+    constructor(initialStateUrl = '/vms/default.json') {
         this.startTime = Date.now();
 
         const env = new Environment();
@@ -28,7 +28,7 @@ export class Kernel {
         this.orchestrator = new SystemOrchestrator(fs, env, userManager);
         this.executor = new CommandExecutor(env);
         this.registry = new CommandRegistry();
-        this.persistence = new PersistenceManager(this.orchestrator);
+        this.persistence = new PersistenceManager(this.orchestrator, initialStateUrl);
     }
 
     public async boot(): Promise<void> {

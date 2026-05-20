@@ -12,7 +12,7 @@ export class PersistenceManager {
     private readonly groupStateImpl: GroupStateSaverImpl;
     private readonly jsonStorageImpl: JsonStorageRepositoryImpl;
 
-    constructor(orchestrator: SystemOrchestrator) {
+    constructor(orchestrator: SystemOrchestrator, initialStateUrl = '/vms/default.json') {
         this.envStateImpl = new EnvironmentStateSaverImpl(orchestrator.environment);
         this.fsStateImpl = new FileSystemStateSaverImpl(orchestrator.fileSystem);
         this.userStateImpl = new UserStateSaverImpl(orchestrator.userManager);
@@ -25,7 +25,7 @@ export class PersistenceManager {
             this.groupStateImpl,
         ];
 
-        this.jsonStorageImpl = new JsonStorageRepositoryImpl(stateSavers);
+        this.jsonStorageImpl = new JsonStorageRepositoryImpl(stateSavers, initialStateUrl);
     }
 
     public async initSystem(orchestrator: SystemOrchestrator): Promise<void> {
