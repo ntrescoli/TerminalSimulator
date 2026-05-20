@@ -1,0 +1,20 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Mkdir = void 0;
+exports.Mkdir = {
+    name: 'mkdir',
+    execute: ({ args, fs }) => {
+        if (args.length < 1)
+            return "mkdir: missing operand";
+        // 1. Ejecutamos y capturamos el objeto Result
+        const result = fs.mkdir(args[0]);
+        // 2. Comprobamos la propiedad success del patrón Result
+        // if (!result.success) {
+        //     return result.error;
+        // }
+        if (result.isFailure)
+            return `mkdir: ${result.getError()}`;
+        // 3. Si tuvo éxito, devolvemos string vacío (comportamiento estándar de Unix)
+        return "";
+    }
+};

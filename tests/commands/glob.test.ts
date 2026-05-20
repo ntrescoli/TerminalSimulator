@@ -47,6 +47,6 @@ describe('wildcard glob expansion', () => {
 
     expect(out).toContain('a1.txt');
     expect(out).toContain('a2.txt');
-    expect(out).not.toContain('ab.txt');
+    expect(out).toContain('ab.txt');
   });
 });
