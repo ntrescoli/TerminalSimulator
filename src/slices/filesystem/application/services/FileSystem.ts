@@ -1,7 +1,7 @@
 import { Result } from '../../../../result/Result';
 import { Errors } from '../../../../result/errors';
-import { Environment } from '../../../system/domain/entities/Environment';
-import { INode } from '../../domain/entities/Node';
+import type { Environment } from '../../../system/domain/entities/Environment';
+import type { INode } from '../../domain/entities/Node';
 
 import { AccessControl } from './AccessControl';
 import { NodeFactory } from './NodeFactory';
@@ -11,7 +11,7 @@ export class FileSystem {
     private root: INode;
     private currentDirectory: INode;
     private previousDirectory: INode;
-    private env: Environment;
+    private readonly env: Environment;
 
     constructor(env: Environment) {
         this.env = env;
@@ -56,7 +56,7 @@ export class FileSystem {
     //     return nodes.sort((a, b) => a.name.localeCompare(b.name));
     // }
 
-    public getNodes(path: string = ".", showHidden: boolean = false): Result<INode[]> {
+    public getNodes(path = '.', showHidden = false): Result<INode[]> {
         const node = this.resolvePath(path);
 
         if (!node) {
@@ -100,7 +100,7 @@ export class FileSystem {
      * Escribe contenido en un archivo.
      * @param append Si es true, añade al final. Si es false, sobrescribe.
      */
-    public writeFile(path: string, content: string, append: boolean = false): Result<INode> {
+    public writeFile(path: string, content: string, append = false): Result<INode> {
         const processedContent = content.replace(/\\n/g, '\n');
 
         // Si queremos añadir contenido, primero intentamos leer lo que ya hay
@@ -123,10 +123,10 @@ export class FileSystem {
      * Crea un archivo o actualiza su contenido.
      * Devuelve Result<INode> para que el llamador tenga acceso al nodo creado/modificado.
      */
-    public touch(path: string, content: string = ""): Result<INode> {
+    public touch(path: string, content = ''): Result<INode> {
         // 1. Separar ruta y nombre
         const lastSlash = path.lastIndexOf('/');
-        const dirPath = lastSlash === -1 ? "." : path.substring(0, lastSlash) || "/";
+        const dirPath = lastSlash === -1 ? '.' : path.substring(0, lastSlash) || '/';
         const fileName = lastSlash === -1 ? path : path.substring(lastSlash + 1);
 
         // 2. Resolver directorio padre
@@ -156,7 +156,7 @@ export class FileSystem {
 
             // 🌟 CORRECCIÓN REAL: touch NO debe sobreescribir el contenido con un string vacío 
             // si el archivo ya tenía datos, a menos que se mande contenido explícitamente.
-            if (content !== "") {
+            if (content !== '') {
                 existing.content = content;
             }
 
@@ -176,7 +176,7 @@ export class FileSystem {
 
     public mkdir(path: string): Result<INode> {
         const lastSlash = path.lastIndexOf('/');
-        const dirPath = lastSlash === -1 ? "." : path.substring(0, lastSlash) || "/";
+        const dirPath = lastSlash === -1 ? '.' : path.substring(0, lastSlash) || '/';
         const dirName = lastSlash === -1 ? path : path.substring(lastSlash + 1);
 
         const parentDir = this.resolvePath(dirPath);
@@ -199,7 +199,7 @@ export class FileSystem {
         return Result.ok<INode>(newNode);
     }
 
-    public remove(path: string, recursive: boolean = false): Result<void> {
+    public remove(path: string, recursive = false): Result<void> {
         const node = this.resolvePath(path);
 
         // 1. Validar que el archivo o carpeta exista
@@ -301,7 +301,7 @@ export class FileSystem {
         if (!node) return Result.fail<string>(Errors.FS.NOT_FOUND(path));
         if (node.type === 'dir') return Result.fail<string>(Errors.FS.IS_DIRECTORY(path));
         if (!this.checkAccess(node, 'read')) return Result.fail<string>(Errors.FS.PERMISSION_DENIED(path));
-        return Result.ok<string>(node.content || "");
+        return Result.ok<string>(node.content || '');
     }
 
     /**
@@ -314,11 +314,11 @@ export class FileSystem {
         const node = this.resolvePath(path);
 
         if (!node) {
-            return Result.fail<string>("File not found"); // O como manejes tus errores
+            return Result.fail<string>('File not found'); // O como manejes tus errores
         }
 
         if (node.type !== 'file') {
-            return Result.fail<string>("Not a file");
+            return Result.fail<string>('Not a file');
         }
 
         // 🌟 LA CLAVE: Devolvemos el contenido DIRECTAMENTE, 
@@ -350,7 +350,7 @@ export class FileSystem {
         currentUser: string,
         groupMembers: string[], // Pasamos los miembros del grupo destino para validar
         owner?: string,
-        group?: string
+        group?: string,
     ): Result<void> {
         const node = this.resolvePath(path); // Tu método interno existente
 
@@ -396,7 +396,7 @@ export class FileSystem {
             ...node,
             parent: newParent,
             // Clonamos recursivamente los hijos si es un directorio
-            children: [] as INode[]
+            children: [] as INode[],
         };
 
         if (node.children) {
@@ -406,7 +406,7 @@ export class FileSystem {
         return cloned;
     }
 
-    public copy(srcPath: string, destPath: string, recursive: boolean = false): Result<void> {
+    public copy(srcPath: string, destPath: string, recursive = false): Result<void> {
         const srcNode = PathResolver.resolve(srcPath, this.currentDirectory, this.root);
         if (!srcNode) return Result.fail<void>(`cp: cannot stat '${srcPath}': No such file or directory`);
 
@@ -416,7 +416,7 @@ export class FileSystem {
         }
 
         // Resolvemos el destino
-        let destNode = PathResolver.resolve(destPath, this.currentDirectory, this.root);
+        const destNode = PathResolver.resolve(destPath, this.currentDirectory, this.root);
         let targetParent: INode | null = null;
         let newName = srcNode.name;
 
@@ -457,7 +457,7 @@ export class FileSystem {
 
         if (srcNode === this.root) return Result.fail<void>("mv: cannot move root directory '/'");
 
-        let destNode = PathResolver.resolve(destPath, this.currentDirectory, this.root);
+        const destNode = PathResolver.resolve(destPath, this.currentDirectory, this.root);
         let targetParent: INode | null = null;
         let newName = srcNode.name;
 
@@ -502,13 +502,13 @@ export class FileSystem {
         this.root = NodeFactory.create('/', 'dir', 'root');
         this.currentDirectory = this.root;
 
-        this.mkdir("home");
-        this.mkdir("bin");
-        this.mkdir("etc");
-        this.mkdir("var");
-        this.writeFile("/etc/passwd", "root:x:0:0:root:/root:/bin/bash\nguest:x:1000:1000:guest:/home/guest:/bin/bash");
-        this.writeFile("/etc/group", "root:x:0:\nsudo:x:27:guest,nico\n");
-        this.writeFile("home/readme.txt", "Bienvenido al sistema de archivos avanzado.");
+        this.mkdir('home');
+        this.mkdir('bin');
+        this.mkdir('etc');
+        this.mkdir('var');
+        this.writeFile('/etc/passwd', 'root:x:0:0:root:/root:/bin/bash\nguest:x:1000:1000:guest:/home/guest:/bin/bash');
+        this.writeFile('/etc/group', 'root:x:0:\nsudo:x:27:guest,nico\n');
+        this.writeFile('home/readme.txt', 'Bienvenido al sistema de archivos avanzado.');
     }
 
 }

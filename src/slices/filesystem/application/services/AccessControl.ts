@@ -1,4 +1,4 @@
-import { INode } from '../../domain/entities/Node';
+import type { INode } from '../../domain/entities/Node';
 
 export class AccessControl {
     /**
@@ -8,7 +8,7 @@ export class AccessControl {
         node: INode,
         user: string,
         action: 'read' | 'write' | 'execute',
-        nodePath: string // Pasamos la ruta para verificar protecciones de sistema
+        nodePath: string, // Pasamos la ruta para verificar protecciones de sistema
     ): boolean {
         // 1. Root siempre tiene la razón
         if (user === 'root') return true;

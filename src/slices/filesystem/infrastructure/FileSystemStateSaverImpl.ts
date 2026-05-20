@@ -1,11 +1,11 @@
-import { ISliceStateSaver } from '@/kernel/domain/ports/out/ISliceStateSaver';
-import { FileSystem } from '../application/services/FileSystem';
-import { INode } from '../domain/entities/Node';
+import type { ISliceStateSaver } from '@/kernel/domain/ports/out/ISliceStateSaver';
+import type { FileSystem } from '../application/services/FileSystem';
+import type { INode } from '../domain/entities/Node';
 
 export class FileSystemStateSaverImpl implements ISliceStateSaver {
     readonly key = 'fileSystem';
 
-    constructor(private fs: FileSystem) { }
+    constructor(private readonly fs: FileSystem) { }
 
     /**
      * EXPORTACIÓN: Transforma el árbol de INodes en un objeto JSON.
@@ -22,7 +22,7 @@ export class FileSystemStateSaverImpl implements ISliceStateSaver {
                 permissions: node.permissions,
                 content: node.content,
                 createdAt: node.createdAt,
-                children: []
+                children: [],
             };
 
             if (node.children && Array.isArray(node.children)) {
@@ -65,17 +65,17 @@ export class FileSystemStateSaverImpl implements ISliceStateSaver {
             permissions: nodeData.permissions || {
                 user: { read: true, write: true, execute: nodeData.type === 'dir' },
                 group: { read: true, write: false, execute: false },
-                others: { read: true, write: false, execute: false }
+                others: { read: true, write: false, execute: false },
             },
-            content: nodeData.content || "",
+            content: nodeData.content || '',
             createdAt: nodeData.createdAt || Date.now(),
             parent: parent,
-            children: []
+            children: [],
         };
 
         if (nodeData.children && Array.isArray(nodeData.children)) {
             newNode.children = nodeData.children.map((childData: any) =>
-                this.reconstructTree(childData, newNode)
+                this.reconstructTree(childData, newNode),
             );
         }
 

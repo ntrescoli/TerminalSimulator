@@ -1,10 +1,10 @@
-import { ICommand } from '../../../../kernel/domain/entities/Command';
+import type { ICommand } from '../../../../kernel/domain/entities/Command';
 
 export const Rmdir: ICommand = {
     name: 'rmdir',
     execute: ({ args, fs }) => {
         if (args.length < 1) {
-            return "rmdir: missing operand";
+            return 'rmdir: missing operand';
         }
 
         const errors: string[] = [];
@@ -16,6 +16,6 @@ export const Rmdir: ICommand = {
             }
         }
 
-        return errors.length > 0 ? errors.join('\n') : "";
-    }
+        return errors.length > 0 ? errors.join('\n') : '';
+    },
 };

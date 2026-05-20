@@ -1,32 +1,32 @@
-import { ICommand } from '../../../../kernel/domain/entities/Command';
+import type { ICommand } from '../../../../kernel/domain/entities/Command';
 
 export const Wc: ICommand = {
     name: 'wc',
     // No añadimos valuedFlags porque -l, -w y -c son booleanas, no esperan un parámetro.
 
     execute: async ({ args, hasFlag, fs, pipeInput }) => {
-        let filePath = args[0] ? args[0].trim() : "";
+        const filePath = args[0] ? args[0].trim() : '';
 
         // 1. Obtener el contenido (priorizando tuberías)
-        let content = "";
+        let content = '';
         if (pipeInput) {
             content = pipeInput;
         } else {
-            if (!filePath) return "wc: missing file operand";
+            if (!filePath) return 'wc: missing file operand';
             
             const node = fs.resolvePath(filePath);
             if (!node || node.type !== 'file') {
                 return `wc: ${filePath}: No such file or directory`;
             }
-            content = node.content || "";
+            content = node.content || '';
         }
 
         // 2. Calcular las métricas
         // Líneas: contamos los saltos de línea (si el archivo está vacío, son 0)
-        const lineCount = content === "" ? 0 : content.split('\n').length;
+        const lineCount = content === '' ? 0 : content.split('\n').length;
         
         // Palabras: filtramos espacios, tabuladores y saltos de línea
-        const wordCount = content.trim() === "" ? 0 : content.trim().split(/\s+/).length;
+        const wordCount = content.trim() === '' ? 0 : content.trim().split(/\s+/).length;
         
         // Bytes/Caracteres
         const byteCount = content.length;
@@ -40,7 +40,7 @@ export const Wc: ICommand = {
         const noFlags = !showLines && !showWords && !showBytes;
 
         // 4. Formatear la salida
-        let outputParts: string[] = [];
+        const outputParts: string[] = [];
         
         if (showLines || noFlags) outputParts.push(lineCount.toString());
         if (showWords || noFlags) outputParts.push(wordCount.toString());
@@ -52,5 +52,5 @@ export const Wc: ICommand = {
         }
 
         return outputParts.join('\t');
-    }
+    },
 };

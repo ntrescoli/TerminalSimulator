@@ -1,4 +1,4 @@
-import { ICommand } from '../../../../kernel/domain/entities/Command';
+import type { ICommand } from '../../../../kernel/domain/entities/Command';
 
 export const Chown: ICommand = {
     name: 'chown',
@@ -6,11 +6,11 @@ export const Chown: ICommand = {
     execute: async ({ args, fs, env, userManager }) => {
         // 1. Solo root puede cambiar propietarios
         if (env.get('USER') !== 'root') {
-            return "chown: changing ownership: Operation not permitted";
+            return 'chown: changing ownership: Operation not permitted';
         }
 
         if (args.length < 2) {
-            return "usage: chown [OWNER][:[GROUP]] FILE...";
+            return 'usage: chown [OWNER][:[GROUP]] FILE...';
         }
 
         const ownerArg = args[0];
@@ -36,6 +36,6 @@ export const Chown: ICommand = {
             return `chown: cannot access '${targetPath}': No such file or directory`;
         }
 
-        return ""; // Éxito (silencioso como en Linux)
-    }
+        return ''; // Éxito (silencioso como en Linux)
+    },
 };

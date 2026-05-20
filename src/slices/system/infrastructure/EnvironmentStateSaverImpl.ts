@@ -1,10 +1,10 @@
-import { ISliceStateSaver } from '@/kernel/domain/ports/out/ISliceStateSaver';
-import { Environment } from '../domain/entities/Environment';
+import type { ISliceStateSaver } from '@/kernel/domain/ports/out/ISliceStateSaver';
+import type { Environment } from '../domain/entities/Environment';
 
 export class EnvironmentStateSaverImpl implements ISliceStateSaver {
     readonly key = 'env';
 
-    constructor(private env: Environment) { }
+    constructor(private readonly env: Environment) { }
 
     /**
      * Devuelve una copia de todas las variables actuales.

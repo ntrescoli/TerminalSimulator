@@ -1,4 +1,4 @@
-import { ICommand } from '../../../../kernel/domain/entities/Command';
+import type { ICommand } from '../../../../kernel/domain/entities/Command';
 
 export const DateCommand: ICommand = {
     name: 'date',
@@ -28,14 +28,14 @@ export const DateCommand: ICommand = {
             minute: '2-digit',
             second: '2-digit',
             hour12: false,
-            timeZoneName: 'short'
+            timeZoneName: 'short',
         };
 
         const dateStr = now.toLocaleString('es-ES', options).replace(/,/g, '');
         const year = now.getFullYear();
 
         return `${dateStr} ${year}`;
-    }
+    },
 };
 
 /**

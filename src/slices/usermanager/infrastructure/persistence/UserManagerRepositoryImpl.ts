@@ -1,13 +1,13 @@
-import { Group } from '../../domain/entities/Group';
-import { User } from '../../domain/entities/User';
-import { IUserManagerRepository } from '../../domain/ports/out/IUserManagerRepository';
-import { FileSystem } from '../../../filesystem/application/services/FileSystem';
+import type { Group } from '../../domain/entities/Group';
+import type { User } from '../../domain/entities/User';
+import type { IUserManagerRepository } from '../../domain/ports/out/IUserManagerRepository';
+import type { FileSystem } from '../../../filesystem/application/services/FileSystem';
 
 /**
  * Guardado y Recuperación en Archivos Virtuales (passwd y groups)
  */
 export class UserManagerRepositoryImpl implements IUserManagerRepository {
-    constructor(private fs: FileSystem) { }
+    constructor(private readonly fs: FileSystem) { }
 
     public getUsers(): User[] {
     const res = this.fs.cat('/etc/passwd');
@@ -55,7 +55,7 @@ export class UserManagerRepositoryImpl implements IUserManagerRepository {
                 // 1. El que venga en la entidad modificado (ej: por passwd)
                 // 2. El que ya existiera en el archivo shadow previamente
                 // 3. Un hash de password por defecto si es un usuario totalmente nuevo sin contraseña asignada
-                const hash = u.password || currentShadowMap.get(u.username) || "$6$rounds=5000$jsTerminalSalt$c37ce20fffffffff";
+                const hash = u.password || currentShadowMap.get(u.username) || '$6$rounds=5000$jsTerminalSalt$c37ce20fffffffff';
                 return `${u.username}:${hash}:${daysSinceEpoch}:0:99999:7:::`;
             })
             .join('\n') + '\n';
@@ -75,7 +75,7 @@ export class UserManagerRepositoryImpl implements IUserManagerRepository {
     private parsePasswd(content: string): User[] {
         return content.split('\n')
             .map(l => l.trim())
-            .filter(l => l !== "" && !l.startsWith("#"))
+            .filter(l => l !== '' && !l.startsWith('#'))
             .map(line => {
                 const [username, , uid, gid, fullName, home, shell] = line.split(':');
                 return {
@@ -84,7 +84,7 @@ export class UserManagerRepositoryImpl implements IUserManagerRepository {
                     gid: parseInt(gid, 10) || 0,
                     fullName: fullName || username,
                     home: home || `/home/${username}`,
-                    shell: shell || '/bin/bash'
+                    shell: shell || '/bin/bash',
                 };
             });
     }
@@ -94,7 +94,7 @@ export class UserManagerRepositoryImpl implements IUserManagerRepository {
 
         content.split('\n')
             .map(l => l.trim())
-            .filter(l => l !== "" && !l.startsWith("#"))
+            .filter(l => l !== '' && !l.startsWith('#'))
             .forEach(line => {
                 const [username, passwordHash] = line.split(':');
                 // 🌟 Evaluamos de forma segura si existen las posiciones en el split, 
@@ -110,7 +110,7 @@ export class UserManagerRepositoryImpl implements IUserManagerRepository {
     private parseGroups(content: string): Group[] {
         return content.split('\n')
             .map(l => l.trim())
-            .filter(l => l !== "" && !l.startsWith("#"))
+            .filter(l => l !== '' && !l.startsWith('#'))
             .map(line => {
                 const [groupName, , gid, membersStr] = line.split(':');
                 const members = membersStr?.trim() ? membersStr.split(',') : [];

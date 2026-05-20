@@ -1,4 +1,4 @@
-import { ICommand } from '../../../../kernel/domain/entities/Command';
+import type { ICommand } from '../../../../kernel/domain/entities/Command';
 
 export const Env: ICommand = {
     name: 'env',
@@ -7,5 +7,5 @@ export const Env: ICommand = {
         return Object.entries(allVars)
             .map(([key, val]) => `${key}=${val}`)
             .join('\n');
-    }
+    },
 };

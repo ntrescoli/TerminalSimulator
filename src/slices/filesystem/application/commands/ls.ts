@@ -1,4 +1,4 @@
-import { ICommand } from '../../../../kernel/domain/entities/Command';
+import type { ICommand } from '../../../../kernel/domain/entities/Command';
 
 export const Ls: ICommand = {
     name: 'ls',
@@ -19,7 +19,7 @@ export const Ls: ICommand = {
                 return `ls: ${result.getError()}`;
             }
 
-            let nodes = result.getValue();
+            const nodes = result.getValue();
 
             if (hasFlag('-S')) {
                 nodes.sort((a, b) => (b.content?.length || 0) - (a.content?.length || 0));
@@ -44,7 +44,7 @@ export const Ls: ICommand = {
                         month: 'short',
                         day: '2-digit',
                         hour: '2-digit',
-                        minute: '2-digit'
+                        minute: '2-digit',
                     });
                     const name = formatName(n, hasFlag('-F'));
                     return `${perms}  1 ${owner} ${group} ${size.padStart(8)} ${date} ${name}`;
@@ -62,7 +62,7 @@ export const Ls: ICommand = {
 
         const separator = hasFlag('-1') ? '\n' : (useHeaders ? '\n\n' : '  ');
         return outputs.join(separator);
-    }
+    },
 };
 
 /**
@@ -72,7 +72,7 @@ function formatPermSet(p: { read: boolean; write: boolean; execute: boolean }): 
     return [
         p.read ? 'r' : '-',
         p.write ? 'w' : '-',
-        p.execute ? 'x' : '-'
+        p.execute ? 'x' : '-',
     ].join('');
 }
 

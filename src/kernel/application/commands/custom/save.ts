@@ -1,4 +1,4 @@
-import { ICommand } from '../../../domain/entities/Command';
+import type { ICommand } from '../../../domain/entities/Command';
 
 export const Save: ICommand = {
     name: 'save',
@@ -20,9 +20,9 @@ export const Save: ICommand = {
             document.body.removeChild(link);
             URL.revokeObjectURL(url);
 
-            return "Estado completo del sistema (FS, Users, History) exportado.";
+            return 'Estado completo del sistema (FS, Users, History) exportado.';
         } catch (error) {
-            return "Error al exportar: " + error;
+            return 'Error al exportar: ' + error;
         }
-    }
+    },
 };

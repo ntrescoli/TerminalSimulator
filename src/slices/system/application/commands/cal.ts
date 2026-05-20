@@ -1,4 +1,4 @@
-import { ICommand } from '../../../../kernel/domain/entities/Command';
+import type { ICommand } from '../../../../kernel/domain/entities/Command';
 
 export const Cal: ICommand = {
     name: 'cal',
@@ -12,7 +12,7 @@ export const Cal: ICommand = {
             // Si solo hay un argumento, Bash lo interpreta como el AÑO completo
             const parsedYear = parseInt(args[0], 10);
             if (isNaN(parsedYear) || parsedYear < 1 || parsedYear > 9999) {
-                return `cal: illegal year value: use 1-9999`;
+                return 'cal: illegal year value: use 1-9999';
             }
             // Para no saturar la terminal imprimiendo los 12 meses, 
             // los sistemas simplificados suelen mostrar el mes actual de ese año.
@@ -26,7 +26,7 @@ export const Cal: ICommand = {
                 return `cal: ${args[0]} is not a valid month (1-12)`;
             }
             if (isNaN(parsedYear) || parsedYear < 1 || parsedYear > 9999) {
-                return `cal: illegal year value: use 1-9999`;
+                return 'cal: illegal year value: use 1-9999';
             }
 
             month = parsedMonth - 1; // Ajustamos al formato 0-11 de JS
@@ -35,8 +35,8 @@ export const Cal: ICommand = {
 
         // 2. Nombres de los meses para la cabecera
         const monthNames = [
-            "January", "February", "March", "April", "May", "June",
-            "July", "August", "September", "October", "November", "December"
+            'January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December',
         ];
 
         // 3. Cálculos de los días del mes
@@ -49,27 +49,27 @@ export const Cal: ICommand = {
         // Cabecera: "    Month Year" centrado
         const headerText = `${monthNames[month]} ${year}`;
         const padding = Math.max(0, Math.floor((20 - headerText.length) / 2));
-        output.push(" ".repeat(padding) + headerText);
+        output.push(' '.repeat(padding) + headerText);
 
         // Días de la semana abreviados al estilo Unix estándar
-        output.push("Su Mo Tu We Th Fr Sa");
+        output.push('Su Mo Tu We Th Fr Sa');
 
         // Rellenar los huecos vacíos del inicio de la primera semana
-        let currentWeek = "   ".repeat(firstDayOfMonth);
+        let currentWeek = '   '.repeat(firstDayOfMonth);
 
         // Iterar día por día e introducirlos en la cuadrícula
         for (let day = 1; day <= totalDaysInMonth; day++) {
             // Formateamos el número para que ocupe siempre 2 caracteres (ej: " 5" o "12")
             const dayStr = day.toString().padStart(2, ' ');
-            currentWeek += dayStr + " ";
+            currentWeek += dayStr + ' ';
 
             // Si la semana se llena (llegamos al Sábado) o es el último día del mes, cerramos la línea
             if ((firstDayOfMonth + day) % 7 === 0 || day === totalDaysInMonth) {
                 output.push(currentWeek.trimEnd());
-                currentWeek = ""; // Reset de semana
+                currentWeek = ''; // Reset de semana
             }
         }
 
         return output.join('\n');
-    }
+    },
 };

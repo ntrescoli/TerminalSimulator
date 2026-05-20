@@ -1,4 +1,4 @@
-import { IPermissions } from './Permissions';
+import type { IPermissions } from './Permissions';
 
 // directorios y archivos
 export type NodeType = 'file' | 'dir';

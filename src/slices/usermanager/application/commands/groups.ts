@@ -1,4 +1,4 @@
-import { ICommand } from '../../../../kernel/domain/entities/Command';
+import type { ICommand } from '../../../../kernel/domain/entities/Command';
 
 export const Groups: ICommand = {
     name: 'groups',
@@ -15,5 +15,5 @@ export const Groups: ICommand = {
         if (userGroups.length === 0) return `${targetUser} : no groups found`;
         
         return `${targetUser} : ${userGroups.join(' ')}`;
-    }
+    },
 };

@@ -1,8 +1,8 @@
-import { ICommand } from '../../domain/entities/Command';
+import type { ICommand } from '../../domain/entities/Command';
 import { commandList } from '../commands';
 
 export class CommandRegistry {
-    private commands: Map<string, ICommand> = new Map();
+    private readonly commands: Map<string, ICommand> = new Map();
 
     constructor() {
         this.loadCommands();

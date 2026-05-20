@@ -1,5 +1,5 @@
-import { ISliceStateSaver } from '@/kernel/domain/ports/out/ISliceStateSaver';
-import { UserManagerService } from '../../application/services/UserManagerService';
+import type { ISliceStateSaver } from '@/kernel/domain/ports/out/ISliceStateSaver';
+import type { UserManagerService } from '../../application/services/UserManagerService';
 
 /**
  * Exportación y carga en formato JSON (orquestado en la infraestructura del Kernel)
@@ -7,7 +7,7 @@ import { UserManagerService } from '../../application/services/UserManagerServic
 export class GroupStateSaverImpl implements ISliceStateSaver {
     readonly key = 'groups';
 
-    constructor(private userManager: UserManagerService) { }
+    constructor(private readonly userManager: UserManagerService) { }
 
     getState() {
         // primero sincronizar passwd y groups???

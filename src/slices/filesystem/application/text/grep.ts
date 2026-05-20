@@ -1,4 +1,4 @@
-import { ICommand } from '../../../../kernel/domain/entities/Command';
+import type { ICommand } from '../../../../kernel/domain/entities/Command';
 
 export const Grep: ICommand = {
     name: 'grep',
@@ -6,9 +6,9 @@ export const Grep: ICommand = {
         const pattern = args[0];
         const filePath = args[1];
 
-        if (!pattern) return "usage: grep [pattern] [file]";
+        if (!pattern) return 'usage: grep [pattern] [file]';
 
-        let content = "";
+        let content = '';
 
         // 1. Resolvemos el origen del contenido: Entrada entubada (pipe) o archivo físico
         if (pipeInput) {
@@ -24,7 +24,7 @@ export const Grep: ICommand = {
             // Si tuvo éxito, extraemos el string plano de forma segura
             content = result.getValue();
         } else {
-            return "grep: missing input";
+            return 'grep: missing input';
         }
 
         // 2. Procesamiento de banderas (Flags) de Grep
@@ -36,7 +36,7 @@ export const Grep: ICommand = {
         let regex: RegExp;
         try {
             regex = new RegExp(pattern, caseInsensitive ? 'i' : '');
-        } catch (e) {
+        } catch {
             return `grep: invalid regular expression: ${pattern}`;
         }
         
@@ -50,5 +50,5 @@ export const Grep: ICommand = {
         if (countMode) return lines.length.toString();
         
         return lines.join('\n');
-    }
+    },
 };

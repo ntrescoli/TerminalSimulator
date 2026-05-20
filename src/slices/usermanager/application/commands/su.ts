@@ -1,4 +1,4 @@
-import { ICommand } from '../../../../kernel/domain/entities/Command';
+import type { ICommand } from '../../../../kernel/domain/entities/Command';
 
 export const Su: ICommand = {
     name: 'su',
@@ -20,8 +20,8 @@ export const Su: ICommand = {
 
         // 🌟 NUEVA REGLA: Si la cuenta destino no tiene contraseña (caso de useradd nico)
         // Un usuario común no puede autenticarse porque la cuenta está bloqueada de inicio.
-        if (!user.password || user.password.trim() === "" || user.password.startsWith('!')) {
-            return "su: Authentication failure (Account is locked. Use passwd to set a password first).";
+        if (!user.password || user.password.trim() === '' || user.password.startsWith('!')) {
+            return 'su: Authentication failure (Account is locked. Use passwd to set a password first).';
         }
 
         // 2. Comprobar si ya nos enviaron la contraseña desde el Frontend (Segunda vuelta)
@@ -34,7 +34,7 @@ export const Su: ICommand = {
         const inputHash = userManager.hashPassword(passwordProvided);
 
         if (inputHash !== user.password) {
-            return "su: Authentication failure";
+            return 'su: Authentication failure';
         }
 
         // 4. Éxito
@@ -43,5 +43,5 @@ export const Su: ICommand = {
         env.set('PWD', user.home);
 
         return `Cambiando al usuario ${user.username}...`;
-    }
+    },
 };

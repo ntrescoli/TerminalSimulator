@@ -1,10 +1,10 @@
-import { ICommand } from '../../../../kernel/domain/entities/Command';
+import type { ICommand } from '../../../../kernel/domain/entities/Command';
 
 export const Rm: ICommand = {
     name: 'rm',
     execute: ({ args, hasFlag, fs }) => {
         if (args.length < 1) {
-            return "rm: missing operand";
+            return 'rm: missing operand';
         }
 
         const recursive = hasFlag('-r') || hasFlag('-R');
@@ -23,6 +23,6 @@ export const Rm: ICommand = {
             }
         }
 
-        return errors.length > 0 ? errors.join('\n') : "";
-    }
+        return errors.length > 0 ? errors.join('\n') : '';
+    },
 };

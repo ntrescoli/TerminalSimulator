@@ -1,4 +1,4 @@
-import { ICommand } from '../../../../kernel/domain/entities/Command';
+import type { ICommand } from '../../../../kernel/domain/entities/Command';
 
 export const AddGroup: ICommand = {
     name: 'addgroup',
@@ -7,12 +7,12 @@ export const AddGroup: ICommand = {
     execute: async ({ args, flagValues, userManager, env }) => {
         // 1. Validación de privilegios (Solo root puede crear grupos)
         if (env.get('USER') !== 'root') {
-            return "addgroup: Only root can do that";
+            return 'addgroup: Only root can do that';
         }
 
         // 2. Validación de argumentos
         if (args.length < 1) {
-            return "addgroup: Se requiere un nombre de grupo.\nUso: addgroup [OPCIONES] NOMBRE";
+            return 'addgroup: Se requiere un nombre de grupo.\nUso: addgroup [OPCIONES] NOMBRE';
         }
 
         const groupName = args[0];
@@ -21,7 +21,7 @@ export const AddGroup: ICommand = {
         let gid: number;
         if (flagValues['-g']) {
             gid = parseInt(flagValues['-g']);
-            if (isNaN(gid)) return "addgroup: el GID debe ser un número";
+            if (isNaN(gid)) return 'addgroup: el GID debe ser un número';
         } else {
             // Calculamos el siguiente GID disponible
             const allGroups = userManager.getGroups();
@@ -35,11 +35,11 @@ export const AddGroup: ICommand = {
         const error = userManager.saveGroup({
             groupName,
             gid,
-            members: [] // Nuevo grupo nace sin miembros
+            members: [], // Nuevo grupo nace sin miembros
         });
 
         if (error) return error;
 
         return `Añadiendo el grupo '${groupName}' (GID ${gid})... Hecho.`;
-    }
+    },
 };

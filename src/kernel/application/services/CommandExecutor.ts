@@ -1,10 +1,10 @@
-import { FileSystem } from '../../../slices/filesystem/application/services/FileSystem';
-import { Environment } from '../../../slices/system/domain/entities/Environment';
-import { UserManagerService } from '../../../slices/usermanager/application/services/UserManagerService';
-import { CommandContext, ICommand } from '../../domain/entities/Command';
+import type { FileSystem } from '../../../slices/filesystem/application/services/FileSystem';
+import type { Environment } from '../../../slices/system/domain/entities/Environment';
+import type { UserManagerService } from '../../../slices/usermanager/application/services/UserManagerService';
+import type { CommandContext, ICommand } from '../../domain/entities/Command';
 
 export class CommandExecutor {
-    constructor(private env: Environment) {}
+    constructor(private readonly env: Environment) {}
 
     public async execute(
         input: string,
@@ -12,10 +12,10 @@ export class CommandExecutor {
         fs: FileSystem,
         userManager: UserManagerService,
         kernel: any = null,
-        signal?: AbortSignal
+        signal?: AbortSignal,
     ): Promise<string> {
         const trimmedInput = input.trim();
-        if (!trimmedInput) return "";
+        if (!trimmedInput) return '';
 
         if (signal?.aborted) {
             return 'COMMAND_ABORTED';
@@ -23,7 +23,7 @@ export class CommandExecutor {
 
         if (trimmedInput.includes('|')) {
             const commandLines = trimmedInput.split('|').map(s => s.trim());
-            let lastOutput = "";
+            let lastOutput = '';
             for (const cmdText of commandLines) {
                 if (signal?.aborted) {
                     return 'COMMAND_ABORTED';
@@ -33,7 +33,7 @@ export class CommandExecutor {
             return lastOutput;
         }
 
-        return await this.processCommandLine(trimmedInput, commands, fs, userManager, "", kernel, signal);
+        return await this.processCommandLine(trimmedInput, commands, fs, userManager, '', kernel, signal);
     }
 
     private async processCommandLine(
@@ -41,9 +41,9 @@ export class CommandExecutor {
         commands: Map<string, ICommand>,
         fs: FileSystem,
         userManager: UserManagerService,
-        pipeInput: string = "",
+        pipeInput = '',
         kernel: any = null,
-        signal?: AbortSignal
+        signal?: AbortSignal,
     ): Promise<string> {
         let finalCommandLine = commandLine.trim();
         let targetFile: string | null = null;
@@ -64,7 +64,7 @@ export class CommandExecutor {
 
         const firstSpaceIndex = finalCommandLine.indexOf(' ');
         const potentialAlias = firstSpaceIndex === -1 ? finalCommandLine : finalCommandLine.substring(0, firstSpaceIndex);
-        const restOfLine = firstSpaceIndex === -1 ? "" : finalCommandLine.substring(firstSpaceIndex);
+        const restOfLine = firstSpaceIndex === -1 ? '' : finalCommandLine.substring(firstSpaceIndex);
 
         const expandedCommand = this.env.getAlias(potentialAlias.trim());
         if (expandedCommand) {
@@ -72,7 +72,7 @@ export class CommandExecutor {
         }
 
         const tokens = this.tokenize(finalCommandLine);
-        if (tokens.length === 0) return "";
+        if (tokens.length === 0) return '';
 
         const name = tokens[0].toLowerCase();
         const rawTokens = tokens.slice(1);
@@ -105,7 +105,7 @@ export class CommandExecutor {
             signal,
             kernel,
             hasFlag: (f: string) => options.includes(f.startsWith('-') ? f : `-${f}`),
-            rawInput: commandLine
+            rawInput: commandLine,
         };
 
         const result = await cmd.execute(context);
@@ -119,7 +119,7 @@ export class CommandExecutor {
             if (!writeResult.isSuccess) {
                 return writeResult.getError();
             }
-            return "";
+            return '';
         }
 
         return result;
@@ -258,7 +258,7 @@ export class CommandExecutor {
             }
 
             return allowed.size > 0 ? allowed : undefined;
-        } catch (e) {
+        } catch {
             return undefined;
         }
     }

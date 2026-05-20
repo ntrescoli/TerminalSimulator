@@ -1,4 +1,4 @@
-import { ICommand } from '../../../../kernel/domain/entities/Command';
+import type { ICommand } from '../../../../kernel/domain/entities/Command';
 
 export const Unalias: ICommand = {
     name: 'unalias',
@@ -6,7 +6,7 @@ export const Unalias: ICommand = {
 
     execute: async ({ args, env }) => {
         if (args.length < 1) {
-            return "unalias: usage: unalias name [name ...]";
+            return 'unalias: usage: unalias name [name ...]';
         }
 
         for (const name of args) {
@@ -16,6 +16,6 @@ export const Unalias: ICommand = {
             }
         }
 
-        return "";
-    }
+        return '';
+    },
 };

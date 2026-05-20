@@ -1,7 +1,7 @@
-import { FileSystem } from '../../../slices/filesystem/application/services/FileSystem';
+import type { FileSystem } from '../../../slices/filesystem/application/services/FileSystem';
 import { PathResolver } from '../../../slices/filesystem/application/services/PathResolver';
-import { Environment } from '../../../slices/system/domain/entities/Environment';
-import { UserManagerService } from '../../../slices/usermanager/application/services/UserManagerService';
+import type { Environment } from '../../../slices/system/domain/entities/Environment';
+import type { UserManagerService } from '../../../slices/usermanager/application/services/UserManagerService';
 
 export class SystemOrchestrator {
     readonly fileSystem: FileSystem;
@@ -11,7 +11,7 @@ export class SystemOrchestrator {
     constructor(
         fileSystem: FileSystem,
         environment: Environment,
-        userManager: UserManagerService
+        userManager: UserManagerService,
     ) {
         this.fileSystem = fileSystem;
         this.environment = environment;
@@ -40,7 +40,7 @@ export class SystemOrchestrator {
             searchDirNode = PathResolver.resolve(
                 pathPrefix,
                 this.fileSystem.getCurrentDirectory(),
-                this.fileSystem.getRoot()
+                this.fileSystem.getRoot(),
             );
         } else {
             searchDirNode = this.fileSystem.getCurrentDirectory();

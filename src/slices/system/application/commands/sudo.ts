@@ -1,11 +1,11 @@
-import { ICommand } from '../../../../kernel/domain/entities/Command';
+import type { ICommand } from '../../../../kernel/domain/entities/Command';
 
 export const Sudo: ICommand = {
     name: 'sudo',
 
     execute: async ({ args, kernel, env, userManager, flagValues, ...context }) => {
 
-        if (args.length === 0) return "usage: sudo <command> [arguments]";
+        if (args.length === 0) return 'usage: sudo <command> [arguments]';
 
         const currentUser = env.get('USER') || 'guest';
 
@@ -37,7 +37,7 @@ if (!passwordProvided && (context as any).rawInput) {
             const inputHash = userManager.hashPassword(passwordProvided);
 
             if (!userEntity || inputHash !== userEntity.password) {
-                return "sudo: 1 incorrect password attempt";
+                return 'sudo: 1 incorrect password attempt';
             }
         }
 
@@ -60,5 +60,5 @@ if (!passwordProvided && (context as any).rawInput) {
             env.set('USER', originalUser);
             env.set('SUDO_USER', '');
         }
-    }
+    },
 };

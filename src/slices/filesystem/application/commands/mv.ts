@@ -1,4 +1,4 @@
-import { ICommand } from '../../../../kernel/domain/entities/Command';
+import type { ICommand } from '../../../../kernel/domain/entities/Command';
 
 export const Mv: ICommand = {
     name: 'mv',
@@ -6,7 +6,7 @@ export const Mv: ICommand = {
         if (args.length < 2) {
             return args.length === 1
                 ? `mv: missing destination file operand after '${args[0]}'`
-                : "mv: missing file operand";
+                : 'mv: missing file operand';
         }
 
         const src = args[0];
@@ -18,6 +18,6 @@ export const Mv: ICommand = {
             return result.getError();
         }
 
-        return ""; // Silencioso en caso de éxito
-    }
+        return ''; // Silencioso en caso de éxito
+    },
 };

@@ -30,5 +30,5 @@ export const basicCmds = [
     Cal,
     Chgrp,
     Alias,
-    Unalias
+    Unalias,
 ];

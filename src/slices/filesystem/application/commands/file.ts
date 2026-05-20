@@ -1,9 +1,9 @@
-import { ICommand } from '../../../../kernel/domain/entities/Command';
+import type { ICommand } from '../../../../kernel/domain/entities/Command';
 
 export const File: ICommand = {
     name: 'file',
     execute: ({ args, fs }) => {
-        if (args.length < 1) return "file: missing file operand";
+        if (args.length < 1) return 'file: missing file operand';
 
         const path = args[0];
 
@@ -18,5 +18,5 @@ export const File: ICommand = {
 
         // 3. Si tuvo éxito, devolvemos string vacío (comportamiento Unix)
         return result.getValue() === 'dir' ? `${path}: directory` : `${path}: regular file`;
-    }
+    },
 };

@@ -10,5 +10,5 @@ export const commandList = [
     ...filesystemCmds,
     ...textCmds,
     ...usersCmds,
-    ...customCmds
+    ...customCmds,
 ];

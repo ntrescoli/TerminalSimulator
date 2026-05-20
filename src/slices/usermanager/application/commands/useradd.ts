@@ -70,20 +70,20 @@
 //     }
 // };
 
-import { ICommand } from '../../../../kernel/domain/entities/Command';
+import type { ICommand } from '../../../../kernel/domain/entities/Command';
 
 export const UserAdd: ICommand = {
     name: 'useradd',
     valuedFlags: ['u', 's'],
     
-    execute: async ({ args, flagValues, userManager, fs, env }) => {
+    execute: async ({ args, flagValues, userManager, fs: _fs, env }) => {
         // 1. Validaciones de privilegios
         if (env.get('USER') !== 'root') {
-            return "useradd: Only root can do that";
+            return 'useradd: Only root can do that';
         }
 
         if (args.length < 1) {
-            return "useradd: missing username";
+            return 'useradd: missing username';
         }
 
         const username = args[0];
@@ -97,7 +97,7 @@ export const UserAdd: ICommand = {
         let nextId: number;
         if (flagValues['-u'] || flagValues['--u']) {
             nextId = parseInt(flagValues['-u'] || flagValues['--u']);
-            if (isNaN(nextId)) return "useradd: invalid numeric argument for -u";
+            if (isNaN(nextId)) return 'useradd: invalid numeric argument for -u';
             
             if (allUsers.some(u => u.uid === nextId)) {
                 return `useradd: UID ${nextId} already exists`;
@@ -117,14 +117,14 @@ export const UserAdd: ICommand = {
             home: `/home/${username}`,
             shell: flagValues['-s'] || flagValues['--s'] || '/bin/bash',
             fullName: username,
-            password: '!' // 🌟 Cuenta bloqueada por defecto hasta asignación manual
+            password: '!', // 🌟 Cuenta bloqueada por defecto hasta asignación manual
         };
 
         // 4. Delegación al Servicio
         const error = userManager.saveUser(newUser);
         if (error) return error;
 
-        const shellInfo = (flagValues['-s'] || flagValues['--s']) ? ` with shell ${newUser.shell}` : "";
+        const shellInfo = (flagValues['-s'] || flagValues['--s']) ? ` with shell ${newUser.shell}` : '';
         return `useradd: user '${username}' added (UID: ${nextId})${shellInfo}\nNotice: Account is locked until a password is set via 'passwd'.`;
-    }
+    },
 };

@@ -1,6 +1,6 @@
-import { FileSystem } from '../../../slices/filesystem/application/services/FileSystem';
-import { Environment } from '../../../slices/system/domain/entities/Environment';
-import { UserManagerService } from '../../../slices/usermanager/application/services/UserManagerService';
+import type { FileSystem } from '../../../slices/filesystem/application/services/FileSystem';
+import type { Environment } from '../../../slices/system/domain/entities/Environment';
+import type { UserManagerService } from '../../../slices/usermanager/application/services/UserManagerService';
 
 export interface CommandContext {
     args: string[];           // Solo los parámetros (ej: ["home", "docs"])

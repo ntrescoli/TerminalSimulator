@@ -1,11 +1,11 @@
-import { ICommand } from '../../../../kernel/domain/entities/Command';
+import type { ICommand } from '../../../../kernel/domain/entities/Command';
 
 export const DelUser: ICommand = {
     name: 'deluser',
     // description: 'Elimina un usuario del sistema',
-    execute: async ({ args, userManager, env, fs }) => {
-        if (env.get('USER') !== 'root') return "deluser: Only root can do that";
-        if (args.length === 0) return "deluser: enter a username";
+    execute: async ({ args, userManager, env, fs: _fs }) => {
+        if (env.get('USER') !== 'root') return 'deluser: Only root can do that';
+        if (args.length === 0) return 'deluser: enter a username';
 
         const username = args[0];
 
@@ -25,5 +25,5 @@ export const DelUser: ICommand = {
         // fs.rmdir(`/home/${username}`); 
 
         return `Removing user '${username}'... Done.`;
-    }
+    },
 };

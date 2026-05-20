@@ -4,7 +4,7 @@ import { createTestContext } from '../testUtils';
 
 describe('command: chown', () => {
   it('changes file ownership when run by root', async () => {
-    const { base, env, fs, userManager } = createTestContext();
+    const { base, env: _env, fs, userManager } = createTestContext();
     fs.touch('f', 'x');
     const file = fs.resolvePath('f');
     if (file) file.owner = 'guest';

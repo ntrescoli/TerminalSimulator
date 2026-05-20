@@ -5,7 +5,7 @@ describe('import-check', () => {
     const modPaths = [
       '../testUtils',
       '../../src/kernel/application/services/CommandRegistry',
-      '../../src/kernel/application/services/CommandExecutor'
+      '../../src/kernel/application/services/CommandExecutor',
     ];
 
     for (const p of modPaths) {

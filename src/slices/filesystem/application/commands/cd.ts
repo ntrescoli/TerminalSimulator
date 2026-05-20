@@ -1,4 +1,4 @@
-import { ICommand } from '../../../../kernel/domain/entities/Command';
+import type { ICommand } from '../../../../kernel/domain/entities/Command';
 import { PathResolver } from '../services/PathResolver';
 
 export const Cd: ICommand = {
@@ -12,6 +12,6 @@ export const Cd: ICommand = {
         if (path === '-') return PathResolver.getAbsolutePath(fs.getCurrentDirectory());
 
         env.set('PWD', PathResolver.getAbsolutePath(fs.getCurrentDirectory()));
-        return "";
-    }
+        return '';
+    },
 };

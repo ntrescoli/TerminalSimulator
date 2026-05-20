@@ -1,4 +1,4 @@
-import { ICommand } from '../../../../kernel/domain/entities/Command';
+import type { ICommand } from '../../../../kernel/domain/entities/Command';
 
 export const Who: ICommand = {
     name: 'who',
@@ -18,7 +18,7 @@ export const Who: ICommand = {
         // El formato típico de salida: USER TTY DATE TIME (HOST)
         // tty7 es la terminal gráfica, pts/0 son terminales virtuales (ssh/web)
         return `${currentUser.padEnd(10)} pts/0        ${month} ${day} ${time} (${hostname})`;
-    }
+    },
 };
 
 export const W: ICommand = {
@@ -39,5 +39,5 @@ export const W: ICommand = {
         // El formato típico de salida: USER TTY DATE TIME (HOST)
         // tty7 es la terminal gráfica, pts/0 son terminales virtuales (ssh/web)
         return `${currentUser.padEnd(10)} pts/0        ${month} ${day} ${time} (${hostname})`;
-    }
+    },
 };

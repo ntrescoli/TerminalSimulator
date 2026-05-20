@@ -1,8 +1,8 @@
-import { IStorageRepository } from '@/kernel/domain/ports/out/IStorageRepository';
-import { ISliceStateSaver } from '@/kernel/domain/ports/out/ISliceStateSaver';
+import type { ISliceStateSaver } from '@/kernel/domain/ports/out/ISliceStateSaver';
+import type { IStorageRepository } from '@/kernel/domain/ports/out/IStorageRepository';
 
 export class JsonStorageRepositoryImpl implements IStorageRepository {
-    private savers: Map<string, ISliceStateSaver> = new Map();
+    private readonly savers: Map<string, ISliceStateSaver> = new Map();
     private history: string[] = []; // El historial sí puede ser nativo del Kernel si se maneja aquí
 
     constructor(savers: ISliceStateSaver[]) {
@@ -25,8 +25,8 @@ export class JsonStorageRepositoryImpl implements IStorageRepository {
             if (config.history) {
                 this.history = config.history;
             }
-        } catch (error) {
-            console.warn("Storage: Error loading configuration, applying generic defaults.");
+        } catch {
+            console.warn('Storage: Error loading configuration, applying generic defaults.');
             // Aquí puedes disparar estados vacíos iniciales en los savers si lo deseas
         }
     }

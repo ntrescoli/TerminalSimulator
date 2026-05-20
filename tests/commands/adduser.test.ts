@@ -10,7 +10,7 @@ describe('command: adduser', () => {
     expect(out).toContain("Adding user 'joe' to group 'staff'");
   });
 
-  it("suggests using useradd when only username provided", async () => {
+  it('suggests using useradd when only username provided', async () => {
     const { base } = createTestContext();
     base.args = ['joe'];
     const AddUser = await loadCommand('../src/slices/usermanager/application/commands/adduser');

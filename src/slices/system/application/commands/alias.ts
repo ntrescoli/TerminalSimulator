@@ -1,14 +1,14 @@
-import { ICommand } from '../../../../kernel/domain/entities/Command';
+import type { ICommand } from '../../../../kernel/domain/entities/Command';
 
 export const Alias: ICommand = {
     name: 'alias',
     valuedFlags: [],
 
-    execute: async ({ args, rawArgs, env, rawInput }) => {
+    execute: async ({ args, rawArgs: _rawArgs, env, rawInput }) => {
         // Caso 1: Ejecutar 'alias' a secas -> Listar todos
         if (args.length === 0) {
             const allAliases = env.getAliases();
-            if (allAliases.length === 0) return "";
+            if (allAliases.length === 0) return '';
             
             return allAliases
                 .map(([name, cmd]) => `alias ${name}='${cmd}'`)
@@ -42,12 +42,12 @@ export const Alias: ICommand = {
             commandValue = commandValue.substring(1, commandValue.length - 1);
         }
 
-        if (name === "") {
-            return "alias: invalid alias name";
+        if (name === '') {
+            return 'alias: invalid alias name';
         }
 
         // Guardamos el comando perfectamente limpio en el entorno
         env.setAlias(name, commandValue);
-        return ""; 
-    }
+        return ''; 
+    },
 };

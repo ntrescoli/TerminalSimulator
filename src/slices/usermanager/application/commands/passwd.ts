@@ -1,4 +1,4 @@
-import { ICommand } from '../../../../kernel/domain/entities/Command';
+import type { ICommand } from '../../../../kernel/domain/entities/Command';
 
 export const Passwd: ICommand = {
     name: 'passwd',
@@ -15,11 +15,11 @@ export const Passwd: ICommand = {
 
         // 2. Control de permisos al estilo Linux
         if (currentUser !== 'root' && currentUser !== targetUser) {
-            return "passwd: Permission denied (You are not root)";
+            return 'passwd: Permission denied (You are not root)';
         }
 
         // 3. Capturar la contraseña de los argumentos
-        let newPassword = args[1] ? args[1].trim() : "";
+        let newPassword = args[1] ? args[1].trim() : '';
         
         if (!newPassword && args[0] && targetUser === currentUser) {
             newPassword = args[0].trim();
@@ -27,16 +27,16 @@ export const Passwd: ICommand = {
         }
 
         if (!newPassword || newPassword === targetUser) {
-            return "Usage: passwd [username] [new_password]\n(Note: password cannot be empty)";
+            return 'Usage: passwd [username] [new_password]\n(Note: password cannot be empty)';
         }
 
         // 4. Verificar que el usuario existe en /etc/passwd
         const passwdNode = fs.resolvePath('/etc/passwd');
         if (!passwdNode || passwdNode.type !== 'file') {
-            return "passwd: User database (/etc/passwd) not found";
+            return 'passwd: User database (/etc/passwd) not found';
         }
 
-        const passwdContent = passwdNode.content || "";
+        const passwdContent = passwdNode.content || '';
         const userExists = passwdContent.split('\n').some(line => line.startsWith(`${targetUser}:`));
 
         if (!userExists) {
@@ -53,5 +53,5 @@ export const Passwd: ICommand = {
         }
 
         return `passwd: password updated successfully for user '${targetUser}'`;
-    }
+    },
 };

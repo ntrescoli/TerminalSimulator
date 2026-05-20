@@ -1,31 +1,31 @@
-import { ICommand } from '../../../../kernel/domain/entities/Command';
+import type { ICommand } from '../../../../kernel/domain/entities/Command';
 
 export const Uniq: ICommand = {
     name: 'uniq',
 
     execute: async ({ args, hasFlag, fs, pipeInput }) => {
-        let filePath = args[0] ? args[0].trim() : "";
-        let content = "";
+        const filePath = args[0] ? args[0].trim() : '';
+        let content = '';
 
         // 1. Obtener contenido
         if (pipeInput) {
             content = pipeInput;
         } else {
-            if (!filePath) return "uniq: missing file operand";
+            if (!filePath) return 'uniq: missing file operand';
             
             const node = fs.resolvePath(filePath);
             if (!node || node.type !== 'file') {
                 return `uniq: ${filePath}: No such file or directory`;
             }
-            content = node.content || "";
+            content = node.content || '';
         }
 
-        let lines = content.split('\n');
-        if (lines.length > 1 && lines[lines.length - 1] === "") {
+        const lines = content.split('\n');
+        if (lines.length > 1 && lines[lines.length - 1] === '') {
             lines.pop();
         }
 
-        if (lines.length === 0) return "";
+        if (lines.length === 0) return '';
 
         // 2. Lógica de filtrado de consecutivos estilo Linux
         const showCount = hasFlag('c');
@@ -58,5 +58,5 @@ export const Uniq: ICommand = {
         }
 
         return result.join('\n');
-    }
+    },
 };

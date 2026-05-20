@@ -1,7 +1,7 @@
 export class TerminalUI {
-    private outputElement: HTMLElement;
-    private inputElement: HTMLInputElement;
-    private promptElement: HTMLElement;
+    private readonly outputElement: HTMLElement;
+    private readonly inputElement: HTMLInputElement;
+    private readonly promptElement: HTMLElement;
 
     constructor(output: HTMLElement, input: HTMLInputElement, prompt: HTMLElement) {
         this.outputElement = output;
@@ -19,7 +19,7 @@ export class TerminalUI {
     /**
      * Imprime una línea en la terminal
      */
-    print(text: string, className: string = '') {
+    print(text: string, className = '') {
         const line = document.createElement('div');
         if (className) line.classList.add(className);
         

@@ -1,6 +1,6 @@
 export class CommandHistoryNavigator {
-    private currentIndex: number = -1;
-    private history: string[];
+    private currentIndex = -1;
+    private readonly history: string[];
 
     constructor(history: string[]) {
         this.history = history;

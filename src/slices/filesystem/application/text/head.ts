@@ -1,4 +1,4 @@
-import { ICommand } from '../../../../kernel/domain/entities/Command';
+import type { ICommand } from '../../../../kernel/domain/entities/Command';
 
 export const Head: ICommand = {
     name: 'head',
@@ -14,22 +14,22 @@ export const Head: ICommand = {
         }
 
         // Gracias al Kernel, args[0] SIEMPRE será la ruta del archivo limpia de flags
-        let filePath = args[0] ? args[0].trim() : "";
+        const filePath = args[0] ? args[0].trim() : '';
 
-        let content = "";
+        let content = '';
         if (pipeInput) {
             content = pipeInput;
         } else {
-            if (!filePath) return "head: missing file operand";
+            if (!filePath) return 'head: missing file operand';
             
             const node = fs.resolvePath(filePath);
             if (!node || node.type !== 'file') {
                 return `head: cannot open '${filePath}' for reading: No such file or directory`;
             }
-            content = node.content || "";
+            content = node.content || '';
         }
 
         const lines = content.split('\n');
         return lines.slice(0, maxLines).join('\n');
-    }
+    },
 };

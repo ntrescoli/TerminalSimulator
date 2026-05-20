@@ -1,17 +1,17 @@
-import { IStorageRepository } from '@/kernel/domain/ports/out/IStorageRepository';
-import { Environment } from '@/slices/system/domain/entities/Environment';
-import { UserManagerService } from '@/slices/usermanager/application/services/UserManagerService';
-import { FileSystem } from '../../../slices/filesystem/application/services/FileSystem';
+import type { IStorageRepository } from '@/kernel/domain/ports/out/IStorageRepository';
+import type { Environment } from '@/slices/system/domain/entities/Environment';
+import type { UserManagerService } from '@/slices/usermanager/application/services/UserManagerService';
+import type { FileSystem } from '../../../slices/filesystem/application/services/FileSystem';
 
 export class DefaultStorageRepositoryImpl implements IStorageRepository {
     constructor(
-        private env: Environment,
-        private fs: FileSystem, 
-        private userManager: UserManagerService
+        private readonly env: Environment,
+        private readonly fs: FileSystem, 
+        private readonly userManager: UserManagerService,
     ) { }
 
     public loadData() {
-        console.warn("Kernel: Error loading config, using defaults.");
+        console.warn('Kernel: Error loading config, using defaults.');
         // Environment
         this.env.loadDefaults();
         // FileSystem
@@ -21,7 +21,7 @@ export class DefaultStorageRepositoryImpl implements IStorageRepository {
     }
 
     public saveData(){
-        return 'This is a free plan. Upgrade to Pro to enable savestates.'
+        return 'This is a free plan. Upgrade to Pro to enable savestates.';
     }
 
 }

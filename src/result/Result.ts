@@ -25,7 +25,7 @@ export class Result<T> {
      */
     public getValue(): T {
         if (!this.isSuccess) {
-            throw new Error("No se puede obtener el valor de un resultado fallido.");
+            throw new Error('No se puede obtener el valor de un resultado fallido.');
         }
         return this._value!;
     }
@@ -36,9 +36,9 @@ export class Result<T> {
      */
     public getError(): string {
         if (!this.isFailure) {
-            throw new Error("No se puede obtener el error de un resultado exitoso.");
+            throw new Error('No se puede obtener el error de un resultado exitoso.');
         }
         // IMPORTANTE: Asegúrate de retornar la propiedad privada con el guion bajo
-        return this._error || "Unknown error"; 
+        return this._error || 'Unknown error'; 
     }
 }

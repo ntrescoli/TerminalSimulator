@@ -8,14 +8,14 @@ import { PersistenceManager } from './application/services/PersistenceManager';
 import { SystemOrchestrator } from './application/services/SystemOrchestrator';
 
 export class Kernel {
-    private startTime: number;
+    private readonly startTime: number;
     private history: string[] = [];
-    private isReady: boolean = false;
+    private isReady = false;
 
-    private executor: CommandExecutor;
-    private registry: CommandRegistry;
-    private orchestrator: SystemOrchestrator;
-    private persistence: PersistenceManager;
+    private readonly executor: CommandExecutor;
+    private readonly registry: CommandRegistry;
+    private readonly orchestrator: SystemOrchestrator;
+    private readonly persistence: PersistenceManager;
 
     constructor() {
         this.startTime = Date.now();
@@ -37,9 +37,9 @@ export class Kernel {
         this.isReady = true;
     }
 
-    public async execute(input: string, skipHistory: boolean = false, signal?: AbortSignal): Promise<string> {
+    public async execute(input: string, skipHistory = false, signal?: AbortSignal): Promise<string> {
         const trimmedInput = input.trim();
-        if (!trimmedInput) return "";
+        if (!trimmedInput) return '';
 
         if (!skipHistory) {
             this.history.push(trimmedInput);
@@ -52,7 +52,7 @@ export class Kernel {
                 this.orchestrator.fileSystem,
                 this.orchestrator.userManager,
                 this,
-                signal
+                signal,
             );
         } catch (error: any) {
             if (error?.name === 'AbortError') {

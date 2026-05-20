@@ -1,5 +1,5 @@
-import { Group } from "../../entities/Group";
-import { User } from "../../entities/User";
+import type { Group } from '../../entities/Group';
+import type { User } from '../../entities/User';
 
 // Intermediario entre dominio e infrastructure
 export interface IUserManagerRepository {

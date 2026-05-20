@@ -1,4 +1,4 @@
-import { ICommand } from '../../../../kernel/domain/entities/Command';
+import type { ICommand } from '../../../../kernel/domain/entities/Command';
 import { PathResolver } from '../../../filesystem/application/services/PathResolver';
 
 export const Cmp: ICommand = {
@@ -8,7 +8,7 @@ export const Cmp: ICommand = {
     execute: async ({ args, fs }) => {
         // 1. Validar que nos pasen los dos archivos a comparar
         if (args.length < 2) {
-            return "cmp: usage: cmp file1 file2";
+            return 'cmp: usage: cmp file1 file2';
         }
 
         const path1 = args[0].trim();
@@ -29,12 +29,12 @@ export const Cmp: ICommand = {
             return `cmp: ${path2}: No such file or directory`;
         }
 
-        const content1 = node1.content || "";
-        const content2 = node2.content || "";
+        const content1 = node1.content || '';
+        const content2 = node2.content || '';
 
         // Si son exactamente iguales, terminamos en silencio (Éxito en Linux)
         if (content1 === content2) {
-            return "";
+            return '';
         }
 
         // 4. Buscar la primera diferencia carácter por carácter
@@ -64,5 +64,5 @@ export const Cmp: ICommand = {
         } else {
             return `cmp: EOF on ${path1} after byte ${currentByte - 1}, line ${currentLine}`;
         }
-    }
+    },
 };

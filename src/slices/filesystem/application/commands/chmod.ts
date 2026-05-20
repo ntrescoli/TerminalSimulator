@@ -1,10 +1,10 @@
-import { ICommand } from '../../../../kernel/domain/entities/Command';
+import type { ICommand } from '../../../../kernel/domain/entities/Command';
 
 export const Chmod: ICommand = {
     name: 'chmod',
     // description: 'Cambia los permisos de acceso a ficheros o directorios',
     execute: async ({ args, fs, env }) => {
-        if (args.length < 2) return "usage: chmod <mode> <file>";
+        if (args.length < 2) return 'usage: chmod <mode> <file>';
 
         const modeArg = args[0];
         const path = args[1];
@@ -31,11 +31,11 @@ export const Chmod: ICommand = {
             }
 
             node.permissions = newPermissions;
-            return ""; // Éxito silencioso
-        } catch (e: any) {
+            return ''; // Éxito silencioso
+        } catch {
             return `chmod: invalid mode: '${modeArg}'`;
         }
-    }
+    },
 };
 
 /**
@@ -46,13 +46,13 @@ function parseOctal(octal: string) {
     const mapDigit = (digit: number) => ({
         read: !!(digit & 4),
         write: !!(digit & 2),
-        execute: !!(digit & 1)
+        execute: !!(digit & 1),
     });
 
     return {
         user: mapDigit(digits[0]),
         group: mapDigit(digits[1]),
-        others: mapDigit(digits[2])
+        others: mapDigit(digits[2]),
     };
 }
 
@@ -73,7 +73,7 @@ function parseSymbolic(current: any, mode: string) {
     if (who.includes('g')) targets.push('group');
     if (who.includes('o')) targets.push('others');
 
-    const permKeys: ("read" | "write" | "execute")[] = [];
+    const permKeys: ('read' | 'write' | 'execute')[] = [];
     if (what.includes('r')) permKeys.push('read');
     if (what.includes('w')) permKeys.push('write');
     if (what.includes('x')) permKeys.push('execute');

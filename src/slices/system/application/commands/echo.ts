@@ -1,4 +1,4 @@
-import { ICommand } from '../../../../kernel/domain/entities/Command';
+import type { ICommand } from '../../../../kernel/domain/entities/Command';
 
 export const Echo: ICommand = {
     name: 'echo',
@@ -10,5 +10,5 @@ export const Echo: ICommand = {
             }
             return arg;
         }).join(' ');
-    }
+    },
 };

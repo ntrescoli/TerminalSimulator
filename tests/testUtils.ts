@@ -53,7 +53,7 @@ export async function loadCommand(modulePath: string) {
     'Command', 'default', 'Touch', 'Mkdir', 'Ls', 'Cd', 'Mv', 'Cp', 'Rm', 'Rmdir', 'File', 'Pwd',
     'AddUser', 'AddGroup', 'UserAdd', 'Useradd', 'Addgroup', 'DelUser', 'DelGroup', 'Groups',
     'Whoami', 'Who', 'Uptime', 'History', 'Help', 'Env', 'Echo', 'DateCommand', 'Clear', 'Unalias',
-    'Sudo', 'Su', 'Alias', 'Cal', 'Chown', 'Chgrp'
+    'Sudo', 'Su', 'Alias', 'Cal', 'Chown', 'Chgrp',
   ];
   for (const name of candidates) {
     if (mod[name]) return mod[name];

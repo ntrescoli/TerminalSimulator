@@ -1,7 +1,7 @@
-import { Group } from '../../domain/entities/Group';
-import { User } from '../../domain/entities/User';
-import { IUserManagerRepository } from '../../domain/ports/out/IUserManagerRepository';
-import { FileSystem } from '../../../filesystem/application/services/FileSystem';
+import type { Group } from '../../domain/entities/Group';
+import type { User } from '../../domain/entities/User';
+import type { IUserManagerRepository } from '../../domain/ports/out/IUserManagerRepository';
+import type { FileSystem } from '../../../filesystem/application/services/FileSystem';
 
 /**
  * Gestiona la lógica de negocio de usuarios y grupos controlando la sincronización
@@ -10,11 +10,11 @@ import { FileSystem } from '../../../filesystem/application/services/FileSystem'
 export class UserManagerService {
     private cachedUsers: User[] = [];
     private cachedGroups: Group[] = [];
-    private lastUsersSync: number = -1;
-    private lastShadowSync: number = -1; // 🌟 Nueva marca para trackear /etc/shadow
-    private lastGroupsSync: number = -1;
+    private lastUsersSync = -1;
+    private lastShadowSync = -1; // 🌟 Nueva marca para trackear /etc/shadow
+    private lastGroupsSync = -1;
 
-    constructor(private fs: FileSystem, private repository: IUserManagerRepository) { }
+    constructor(private readonly fs: FileSystem, private readonly repository: IUserManagerRepository) { }
 
     //  --- SINCRONIZACIÓN DE CACHÉ ---
 
@@ -98,7 +98,7 @@ export class UserManagerService {
         this.refreshGroups();
 
         if (Array.isArray(user)) {
-            return "userManager: cannot save an array of users via saveUser";
+            return 'userManager: cannot save an array of users via saveUser';
         }
 
         if (this.cachedUsers.some(u => u && !Array.isArray(u) && u.username === user.username)) {
@@ -108,7 +108,7 @@ export class UserManagerService {
         this.cachedGroups = [...this.cachedGroups.filter(g => g && !Array.isArray(g)), {
             groupName: user.username,
             gid: user.gid,
-            members: [user.username]
+            members: [user.username],
         }];
 
         const cleanUsers = this.cachedUsers.filter(u => u && !Array.isArray(u));
@@ -127,8 +127,8 @@ export class UserManagerService {
         this.refreshUsers();
         this.refreshGroups();
 
-        if (username === 'root') return "deluser: cannot remove root";
-        if (!this.cachedUsers.some(u => u.username === username)) return "user not found";
+        if (username === 'root') return 'deluser: cannot remove root';
+        if (!this.cachedUsers.some(u => u.username === username)) return 'user not found';
 
         const newUsers = this.cachedUsers.filter(u => u.username !== username);
 
@@ -148,7 +148,7 @@ export class UserManagerService {
         this.refreshGroups();
 
         if (Array.isArray(group)) {
-            return "userManager: cannot save an array of groups via saveGroup";
+            return 'userManager: cannot save an array of groups via saveGroup';
         }
 
         const cleanGroups = this.cachedGroups.filter(g => g && !Array.isArray(g));
@@ -163,7 +163,7 @@ export class UserManagerService {
         this.cachedGroups = [...cleanGroups, {
             groupName: group.groupName,
             gid: group.gid,
-            members: Array.isArray(group.members) ? group.members : []
+            members: Array.isArray(group.members) ? group.members : [],
         }];
 
         this.repository.saveGroups(this.cachedGroups);
@@ -201,7 +201,7 @@ export class UserManagerService {
         this.refreshGroups();
 
         const group = this.cachedGroups.find(g => g.groupName === groupName);
-        if (!group) return "group not found";
+        if (!group) return 'group not found';
         if (group.members.includes(username)) return null;
 
         group.members.push(username);
@@ -212,7 +212,7 @@ export class UserManagerService {
 
     public hashPassword(password: string): string {
         let hash = 0;
-        if (password.length === 0) return "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
+        if (password.length === 0) return 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855';
 
         for (let i = 0; i < password.length; i++) {
             const chr = password.charCodeAt(i);
@@ -226,12 +226,12 @@ export class UserManagerService {
     public loadDefaults(): void {
         const defaultUsers: User[] = [
             { username: 'root', password: 'root', uid: 0, gid: 0, home: '/root', shell: '/bin/bash', fullName: 'root' },
-            { username: 'guest', password: 'guest', uid: 1000, gid: 1000, home: '/home/guest', shell: '/bin/bash', fullName: 'Guest User' }
+            { username: 'guest', password: 'guest', uid: 1000, gid: 1000, home: '/home/guest', shell: '/bin/bash', fullName: 'Guest User' },
         ];
 
         const defaultGroups: Group[] = [
             { groupName: 'root', gid: 0, members: ['root'] },
-            { groupName: 'guest', gid: 1000, members: ['guest'] }
+            { groupName: 'guest', gid: 1000, members: ['guest'] },
         ];
 
         this.repository.saveUsers(defaultUsers);

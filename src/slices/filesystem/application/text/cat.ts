@@ -1,9 +1,9 @@
-import { ICommand } from '../../../../kernel/domain/entities/Command';
+import type { ICommand } from '../../../../kernel/domain/entities/Command';
 
 export const Cat: ICommand = {
     name: 'cat',
     execute: ({ args, fs, hasFlag }) => {
-        if (args.length < 1) return "cat: missing file operand";
+        if (args.length < 1) return 'cat: missing file operand';
 
         const outputs: string[] = [];
 
@@ -33,5 +33,5 @@ export const Cat: ICommand = {
         }
         
         return totalContent;
-    }
+    },
 };

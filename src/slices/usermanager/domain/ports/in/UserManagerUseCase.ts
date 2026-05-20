@@ -1,5 +1,5 @@
-import { Group } from "../../entities/Group";
-import { User } from "../../entities/User";
+import type { Group } from '../../entities/Group';
+import type { User } from '../../entities/User';
 
 // Intermediario entre application y domain (TODAVIA NO SE APLICA)
 export interface UserManagerUseCase {

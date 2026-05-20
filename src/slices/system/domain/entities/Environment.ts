@@ -4,7 +4,7 @@
  */
 export class Environment {
     private vars: Record<string, string>;
-    private aliases: Map<string, string> = new Map();
+    private readonly aliases: Map<string, string> = new Map();
 
     constructor() {
         // Inicializamos vacío para permitir que el Kernel decida qué cargar
@@ -80,7 +80,7 @@ export class Environment {
             PWD: '/',
             TERM: 'xterm-256color',
             LANG: 'en_US.UTF-8',
-            SUDO_USER: ''
+            SUDO_USER: '',
         };
     }
 }

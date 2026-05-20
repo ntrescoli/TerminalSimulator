@@ -1,18 +1,18 @@
-import { Kernel } from '../kernel/Kernel';
-import { AuthenticationManager } from './AuthenticationManager';
-import { CommandHistoryExpander } from './CommandHistoryExpander';
-import { CommandHistoryNavigator } from './CommandHistoryNavigator';
-import { TerminalUI } from './Terminal';
+import type { Kernel } from '../kernel/Kernel';
+import type { AuthenticationManager } from './AuthenticationManager';
+import type { CommandHistoryExpander } from './CommandHistoryExpander';
+import type { CommandHistoryNavigator } from './CommandHistoryNavigator';
+import type { TerminalUI } from './Terminal';
 
 export class TerminalInputHandler {
     private currentAbortController: AbortController | null = null;
 
     constructor(
-        private kernel: Kernel,
-        private terminal: TerminalUI,
-        private authManager: AuthenticationManager,
-        private historyExpander: CommandHistoryExpander,
-        private historyNavigator: CommandHistoryNavigator
+        private readonly kernel: Kernel,
+        private readonly terminal: TerminalUI,
+        private readonly authManager: AuthenticationManager,
+        private readonly historyExpander: CommandHistoryExpander,
+        private readonly historyNavigator: CommandHistoryNavigator,
     ) {}
 
     public attach(inputElement: HTMLInputElement): void {

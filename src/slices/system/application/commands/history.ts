@@ -1,4 +1,4 @@
-import { ICommand } from '../../../../kernel/domain/entities/Command';
+import type { ICommand } from '../../../../kernel/domain/entities/Command';
 
 export const History: ICommand = {
     name: 'history',
@@ -7,7 +7,7 @@ export const History: ICommand = {
 
         if (hasFlag('-c')) {
             kernel.clearHistory();
-            return "";
+            return '';
         }
 
         // Si el usuario quiere extraerlo (exportar)
@@ -22,12 +22,12 @@ export const History: ICommand = {
             link.click();
             
             URL.revokeObjectURL(url);
-            return "Historial extraído y descargado como bash_history.txt";
+            return 'Historial extraído y descargado como bash_history.txt';
         }
 
         // Listado normal con índices (como en bash real)
         return history
             .map((cmd: string, index: number) => `${(index + 1).toString().padStart(5)}  ${cmd}`)
             .join('\n');
-    }
+    },
 };

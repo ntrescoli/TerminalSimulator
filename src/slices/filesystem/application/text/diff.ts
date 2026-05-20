@@ -1,4 +1,4 @@
-import { ICommand } from '../../../../kernel/domain/entities/Command';
+import type { ICommand } from '../../../../kernel/domain/entities/Command';
 import { PathResolver } from '../../../filesystem/application/services/PathResolver';
 
 // No funciona exactamente como el diff de Linux, pero se acerca bastante. El formato de salida es similar al formato "unificado" de diff, pero con algunas diferencias para simplificar la implementación. En particular, no se muestran líneas sin cambios entre las líneas modificadas, y se muestra el número de línea original en ambos archivos para cada cambio.
@@ -9,7 +9,7 @@ export const Diff: ICommand = {
     execute: async ({ args, fs }) => {
         // 1. Validar argumentos
         if (args.length < 2) {
-            return "diff: usage: diff file1 file2";
+            return 'diff: usage: diff file1 file2';
         }
 
         const path1 = args[0].trim();
@@ -30,15 +30,15 @@ export const Diff: ICommand = {
         }
 
         // 3. Separar por líneas (eliminando el último salto de línea vacío si existe)
-        const lines1 = (node1.content || "").split('\n');
-        const lines2 = (node2.content || "").split('\n');
+        const lines1 = (node1.content || '').split('\n');
+        const lines2 = (node2.content || '').split('\n');
 
         // Si son idénticos, terminamos en silencio
         if (node1.content === node2.content) {
-            return "";
+            return '';
         }
 
-        let output: string[] = [];
+        const output: string[] = [];
         const maxLines = Math.max(lines1.length, lines2.length);
 
         let i = 0;
@@ -50,7 +50,7 @@ export const Diff: ICommand = {
             if (l1 !== undefined && l2 !== undefined && l1 !== l2) {
                 output.push(`${i + 1}c${i + 1}`); // Formato clásico: LíneaX c LíneaY (change)
                 output.push(`< ${l1}`);
-                output.push("---");
+                output.push('---');
                 output.push(`> ${l2}`);
             } 
             // Caso B: El archivo 1 es más largo (Líneas borradas en el archivo 2)
@@ -68,5 +68,5 @@ export const Diff: ICommand = {
         }
 
         return output.join('\n');
-    }
+    },
 };

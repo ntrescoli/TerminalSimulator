@@ -1,4 +1,4 @@
-import { INode } from '../../domain/entities/Node';
+import type { INode } from '../../domain/entities/Node';
 
 export class PathResolver {
     /**
@@ -7,13 +7,13 @@ export class PathResolver {
     public static resolve(
         path: string, 
         currentDirectory: INode, 
-        root: INode
+        root: INode,
     ): INode | null {
-        if (!path || path === ".") return currentDirectory;
-        if (path === "/") return root;
+        if (!path || path === '.') return currentDirectory;
+        if (path === '/') return root;
 
         // Soporte para home
-        let cleanPath = path.startsWith('~') ? path.replace('~', '/home') : path;
+        const cleanPath = path.startsWith('~') ? path.replace('~', '/home') : path;
         
         // Determinar punto de inicio
         let current = cleanPath.startsWith('/') ? root : currentDirectory;
@@ -37,11 +37,11 @@ export class PathResolver {
      */
     public static getAbsolutePath(node: INode): string {
         let current: INode | null = node;
-        let path = "";
+        let path = '';
         while (current !== null && current.parent !== null) {
-            path = "/" + current.name + path;
+            path = '/' + current.name + path;
             current = current.parent;
         }
-        return path || "/";
+        return path || '/';
     }
 }

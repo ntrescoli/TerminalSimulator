@@ -3,14 +3,14 @@ import { EnvironmentStateSaverImpl } from '../../../slices/system/infrastructure
 import { GroupStateSaverImpl } from '../../../slices/usermanager/infrastructure/persistence/GroupStateSaverImpl';
 import { UserStateSaverImpl } from '../../../slices/usermanager/infrastructure/persistence/UserStateSaverImpl';
 import { JsonStorageRepositoryImpl } from '../../infrastructure/persistence/JsonStorageRepositoryImpl';
-import { SystemOrchestrator } from './SystemOrchestrator';
+import type { SystemOrchestrator } from './SystemOrchestrator';
 
 export class PersistenceManager {
-    private envStateImpl: EnvironmentStateSaverImpl;
-    private fsStateImpl: FileSystemStateSaverImpl;
-    private userStateImpl: UserStateSaverImpl;
-    private groupStateImpl: GroupStateSaverImpl;
-    private jsonStorageImpl: JsonStorageRepositoryImpl;
+    private readonly envStateImpl: EnvironmentStateSaverImpl;
+    private readonly fsStateImpl: FileSystemStateSaverImpl;
+    private readonly userStateImpl: UserStateSaverImpl;
+    private readonly groupStateImpl: GroupStateSaverImpl;
+    private readonly jsonStorageImpl: JsonStorageRepositoryImpl;
 
     constructor(orchestrator: SystemOrchestrator) {
         this.envStateImpl = new EnvironmentStateSaverImpl(orchestrator.environment);
@@ -22,7 +22,7 @@ export class PersistenceManager {
             this.envStateImpl,
             this.fsStateImpl,
             this.userStateImpl,
-            this.groupStateImpl
+            this.groupStateImpl,
         ];
 
         this.jsonStorageImpl = new JsonStorageRepositoryImpl(stateSavers);
@@ -31,7 +31,7 @@ export class PersistenceManager {
     public async initSystem(orchestrator: SystemOrchestrator): Promise<void> {
         try {
             await this.jsonStorageImpl.loadData();
-        } catch (error) {
+        } catch {
             console.warn('PersistenceManager: Error loading config, using defaults.');
             orchestrator.loadDefaults();
         }
@@ -47,7 +47,7 @@ export class PersistenceManager {
             fileSystem: this.fsStateImpl.getState(),
             users: this.userStateImpl.getState(),
             groups: this.groupStateImpl.getState(),
-            history
+            history,
         };
     }
 }

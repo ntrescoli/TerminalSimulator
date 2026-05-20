@@ -1,4 +1,4 @@
-import { INode } from '../../domain/entities/Node';
+import type { INode } from '../../domain/entities/Node';
 
 export class NodeFactory {
     /**
@@ -9,7 +9,7 @@ export class NodeFactory {
         type: 'dir' | 'file', 
         owner: string, 
         parent: INode | null = null, 
-        content: string = ""
+        content = '',
     ): INode {
         return {
             name,
@@ -23,8 +23,8 @@ export class NodeFactory {
             permissions: {
                 user: { read: true, write: true, execute: type === 'dir' },
                 group: { read: true, write: false, execute: type === 'dir' },
-                others: { read: true, write: false, execute: type === 'dir' }
-            }
+                others: { read: true, write: false, execute: type === 'dir' },
+            },
         };
     }
     

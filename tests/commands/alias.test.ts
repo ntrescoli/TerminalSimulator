@@ -6,7 +6,7 @@ describe('command: alias', () => {
   it('defines a new alias and returns empty output', async () => {
     const { base, env } = createTestContext();
     base.args = ['ll=ls -la'];
-    base.rawInput = `alias ll='ls -la'`;
+    base.rawInput = 'alias ll=\'ls -la\'';
 
     const out = await Alias.execute(base as any);
     expect(out).toBe('');

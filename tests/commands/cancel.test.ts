@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { CommandExecutor } from '../../src/kernel/application/services/CommandExecutor';
-import { ICommand } from '../../src/kernel/domain/entities/Command';
+import type { ICommand } from '../../src/kernel/domain/entities/Command';
 import { FileSystem } from '../../src/slices/filesystem/application/services/FileSystem';
 import { Environment } from '../../src/slices/system/domain/entities/Environment';
 import { createTestContext } from '../testUtils';

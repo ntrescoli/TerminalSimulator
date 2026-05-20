@@ -1,4 +1,4 @@
-import { ICommand } from '../../../../kernel/domain/entities/Command';
+import type { ICommand } from '../../../../kernel/domain/entities/Command';
 
 export const Cp: ICommand = {
     name: 'cp',
@@ -6,7 +6,7 @@ export const Cp: ICommand = {
         if (args.length < 2) {
             return args.length === 1 
                 ? `cp: missing destination file operand after '${args[0]}'`
-                : "cp: missing file operand";
+                : 'cp: missing file operand';
         }
 
         const src = args[0];
@@ -19,6 +19,6 @@ export const Cp: ICommand = {
             return result.getError();
         }
 
-        return ""; // Silencioso en caso de éxito
-    }
+        return ''; // Silencioso en caso de éxito
+    },
 };

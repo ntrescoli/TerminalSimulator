@@ -1,11 +1,11 @@
-import { ICommand } from '../../../../kernel/domain/entities/Command';
+import type { ICommand } from '../../../../kernel/domain/entities/Command';
 
 export const Chgrp: ICommand = {
     name: 'chgrp',
     execute: async ({ args, fs, env, userManager }) => {
         // 1. Validar argumentos mínimos requeridos
         if (args.length < 2) {
-            return "usage: chgrp GROUP FILE...";
+            return 'usage: chgrp GROUP FILE...';
         }
 
         const targetGroup = args[0];
@@ -24,7 +24,7 @@ export const Chgrp: ICommand = {
             currentUser, 
             groupObject.members, 
             undefined, // No alteramos el dueño (owner)
-            targetGroup // Cambiamos el grupo
+            targetGroup, // Cambiamos el grupo
         );
 
         // 4. Si el FileSystem deniega la operación o no encuentra el archivo, formateamos con el prefijo 'chgrp:'
@@ -32,6 +32,6 @@ export const Chgrp: ICommand = {
             return `chgrp: ${result.getError()}`;
         }
 
-        return ""; // Éxito silencioso (Estilo Unix estándar)
-    }
+        return ''; // Éxito silencioso (Estilo Unix estándar)
+    },
 };

@@ -1,4 +1,4 @@
-import { ICommand } from '../../../../kernel/domain/entities/Command';
+import type { ICommand } from '../../../../kernel/domain/entities/Command';
 
 export const Finger: ICommand = {
     name: 'finger',
@@ -10,11 +10,11 @@ export const Finger: ICommand = {
         
         const passwdNode = fs.resolvePath('/etc/passwd');
         if (!passwdNode || passwdNode.type !== 'file') {
-            return "finger: cannot read system user database";
+            return 'finger: cannot read system user database';
         }
 
-        const content = passwdNode.content || "";
-        const lines = content.split('\n').filter(l => l.trim() !== "");
+        const content = passwdNode.content || '';
+        const lines = content.split('\n').filter(l => l.trim() !== '');
 
         // CASO A: Ficha detallada de un usuario específico -> finger root
         if (args.length > 0) {
@@ -35,12 +35,12 @@ export const Finger: ICommand = {
                 `Login: ${username}\t\t\t\tName: ${realName}`,
                 `Directory: ${homeDir}\t\t\tShell: ${shell}`,
                 `UID: ${uid}\t\t\t\tStatus: Active`,
-                `Project: No profile project file specified.`
+                'Project: No profile project file specified.',
             ].join('\n');
         }
 
         // CASO B: Listado general abreviado de todos los usuarios del sistema -> finger
-        let output = ["Login\t\tName\t\tTTY\tIdle\tLogin Time"];
+        const output = ['Login\t\tName\t\tTTY\tIdle\tLogin Time'];
         
         lines.forEach(line => {
             const parts = line.split(':');
@@ -53,5 +53,5 @@ export const Finger: ICommand = {
         });
 
         return output.join('\n');
-    }
+    },
 };
