@@ -11,21 +11,29 @@ export class CommandExecutor {
         commands: Map<string, ICommand>,
         fs: FileSystem,
         userManager: UserManagerService,
-        kernel: any = null
+        kernel: any = null,
+        signal?: AbortSignal
     ): Promise<string> {
         const trimmedInput = input.trim();
         if (!trimmedInput) return "";
+
+        if (signal?.aborted) {
+            return 'COMMAND_ABORTED';
+        }
 
         if (trimmedInput.includes('|')) {
             const commandLines = trimmedInput.split('|').map(s => s.trim());
             let lastOutput = "";
             for (const cmdText of commandLines) {
-                lastOutput = await this.processCommandLine(cmdText, commands, fs, userManager, lastOutput, kernel);
+                if (signal?.aborted) {
+                    return 'COMMAND_ABORTED';
+                }
+                lastOutput = await this.processCommandLine(cmdText, commands, fs, userManager, lastOutput, kernel, signal);
             }
             return lastOutput;
         }
 
-        return await this.processCommandLine(trimmedInput, commands, fs, userManager, "", kernel);
+        return await this.processCommandLine(trimmedInput, commands, fs, userManager, "", kernel, signal);
     }
 
     private async processCommandLine(
@@ -34,7 +42,8 @@ export class CommandExecutor {
         fs: FileSystem,
         userManager: UserManagerService,
         pipeInput: string = "",
-        kernel: any = null
+        kernel: any = null,
+        signal?: AbortSignal
     ): Promise<string> {
         let finalCommandLine = commandLine.trim();
         let targetFile: string | null = null;
@@ -77,6 +86,10 @@ export class CommandExecutor {
             : baseValuedFlags;
 
         const allowedFlags = this.extractAllowedFlagsFromCommand(cmd, finalValuedFlags);
+        if (signal?.aborted) {
+            return 'COMMAND_ABORTED';
+        }
+
         const { options, args, flagValues } = this.parseArgsAndFlags(rawTokens, finalValuedFlags, allowedFlags);
         const expandedArgs = this.expandGlobPatterns(args, fs);
 
@@ -89,12 +102,17 @@ export class CommandExecutor {
             env: this.env,
             userManager,
             pipeInput,
+            signal,
             kernel,
             hasFlag: (f: string) => options.includes(f.startsWith('-') ? f : `-${f}`),
             rawInput: commandLine
         };
 
         const result = await cmd.execute(context);
+
+        if (signal?.aborted) {
+            return 'COMMAND_ABORTED';
+        }
 
         if (targetFile) {
             const writeResult = fs.writeFile(targetFile, result, isAppend);

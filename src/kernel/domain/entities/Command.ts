@@ -1,6 +1,6 @@
+import { FileSystem } from '../../../slices/filesystem/application/services/FileSystem';
 import { Environment } from '../../../slices/system/domain/entities/Environment';
 import { UserManagerService } from '../../../slices/usermanager/application/services/UserManagerService';
-import { FileSystem } from '../../../slices/filesystem/application/services/FileSystem';
 
 export interface CommandContext {
     args: string[];           // Solo los parámetros (ej: ["home", "docs"])
@@ -13,6 +13,7 @@ export interface CommandContext {
     // Función de utilidad rápida para el comando
     hasFlag: (flag: string) => boolean;
     pipeInput?: string; // <--- El contenido que viene del comando anterior
+    signal?: AbortSignal;
     kernel: any; // o el tipo Kernel
     rawInput?: string;
 }

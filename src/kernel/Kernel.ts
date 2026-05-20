@@ -37,7 +37,7 @@ export class Kernel {
         this.isReady = true;
     }
 
-    public async execute(input: string, skipHistory: boolean = false): Promise<string> {
+    public async execute(input: string, skipHistory: boolean = false, signal?: AbortSignal): Promise<string> {
         const trimmedInput = input.trim();
         if (!trimmedInput) return "";
 
@@ -45,13 +45,21 @@ export class Kernel {
             this.history.push(trimmedInput);
         }
 
-        return this.executor.execute(
-            trimmedInput,
-            this.registry.getAllCommands(),
-            this.orchestrator.fileSystem,
-            this.orchestrator.userManager,
-            this
-        );
+        try {
+            return await this.executor.execute(
+                trimmedInput,
+                this.registry.getAllCommands(),
+                this.orchestrator.fileSystem,
+                this.orchestrator.userManager,
+                this,
+                signal
+            );
+        } catch (error: any) {
+            if (error?.name === 'AbortError') {
+                return 'COMMAND_ABORTED';
+            }
+            throw error;
+        }
     }
 
     public getPromptText(): string {

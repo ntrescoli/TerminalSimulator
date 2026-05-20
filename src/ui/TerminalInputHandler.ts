@@ -5,6 +5,8 @@ import { CommandHistoryNavigator } from './CommandHistoryNavigator';
 import { TerminalUI } from './Terminal';
 
 export class TerminalInputHandler {
+    private currentAbortController: AbortController | null = null;
+
     constructor(
         private kernel: Kernel,
         private terminal: TerminalUI,
@@ -20,6 +22,25 @@ export class TerminalInputHandler {
     }
 
     private async handleKeyDown(e: KeyboardEvent, inputElement: HTMLInputElement): Promise<void> {
+        if (e.ctrlKey && e.key.toLowerCase() === 'c') {
+            e.preventDefault();
+
+            if (this.currentAbortController && !this.currentAbortController.signal.aborted) {
+                this.currentAbortController.abort();
+                this.currentAbortController = null;
+                this.terminal.print('^C');
+                this.terminal.updatePrompt(this.kernel.getPromptText());
+                inputElement.value = '';
+                return;
+            }
+
+            if (inputElement.value.length > 0) {
+                this.terminal.print('^C');
+                inputElement.value = '';
+            }
+            return;
+        }
+
         if (e.key === 'Enter') {
             e.preventDefault();
             await this.handleEnter(inputElement);
@@ -68,22 +89,50 @@ export class TerminalInputHandler {
     }
 
     private async handleEnter(inputElement: HTMLInputElement): Promise<void> {
-        const rawValue = inputElement.value;
-        let command = rawValue.trim();
-        const hadAuthPending = this.authManager.hasPendingAuth();
+        const abortController = new AbortController();
+        this.currentAbortController = abortController;
 
-        if (command === '' && !hadAuthPending) {
-            this.terminal.updatePrompt(this.kernel.getPromptText());
-            inputElement.value = '';
-            return;
-        }
+        try {
+            const rawValue = inputElement.value;
+            let command = rawValue.trim();
+            const hadAuthPending = this.authManager.hasPendingAuth();
 
-        if (hadAuthPending) {
-            this.terminal.copyInputToOutput('********');
-            const fullCommand = this.authManager.buildAuthenticatedCommand(command);
-            this.authManager.clearPendingAuth();
-            this.terminal.setInputType('text');
-            const response = await this.kernel.execute(fullCommand, true);
+            if (command === '' && !hadAuthPending) {
+                this.terminal.updatePrompt(this.kernel.getPromptText());
+                inputElement.value = '';
+                return;
+            }
+
+            if (hadAuthPending) {
+                this.terminal.copyInputToOutput('********');
+                const fullCommand = this.authManager.buildAuthenticatedCommand(command);
+                this.authManager.clearPendingAuth();
+                this.terminal.setInputType('text');
+                const response = await this.kernel.execute(fullCommand, true, abortController.signal);
+
+                if (response.startsWith('AUTH_REQUIRED:')) {
+                    const [, commandName, targetUser] = response.split(':');
+                    this.authManager.initiatePendingAuth(commandName, command);
+                    this.terminal.updatePrompt(this.authManager.getPromptText(targetUser));
+                    this.terminal.setInputType('password');
+                    inputElement.value = '';
+                    return;
+                }
+
+                this.processResponse(response);
+                inputElement.value = '';
+                this.historyNavigator.reset();
+                return;
+            }
+
+            const expanded = this.historyExpander.expand(command, this.kernel.getHistory());
+            if (expanded) {
+                command = expanded;
+                this.terminal.print(command);
+            }
+
+            this.terminal.copyInputToOutput(command);
+            const response = await this.kernel.execute(command, false, abortController.signal);
 
             if (response.startsWith('AUTH_REQUIRED:')) {
                 const [, commandName, targetUser] = response.split(':');
@@ -97,30 +146,9 @@ export class TerminalInputHandler {
             this.processResponse(response);
             inputElement.value = '';
             this.historyNavigator.reset();
-            return;
+        } finally {
+            this.currentAbortController = null;
         }
-
-        const expanded = this.historyExpander.expand(command, this.kernel.getHistory());
-        if (expanded) {
-            command = expanded;
-            this.terminal.print(command);
-        }
-
-        this.terminal.copyInputToOutput(command);
-        const response = await this.kernel.execute(command);
-
-        if (response.startsWith('AUTH_REQUIRED:')) {
-            const [, commandName, targetUser] = response.split(':');
-            this.authManager.initiatePendingAuth(commandName, command);
-            this.terminal.updatePrompt(this.authManager.getPromptText(targetUser));
-            this.terminal.setInputType('password');
-            inputElement.value = '';
-            return;
-        }
-
-        this.processResponse(response);
-        inputElement.value = '';
-        this.historyNavigator.reset();
     }
 
     private processResponse(response: string): void {
