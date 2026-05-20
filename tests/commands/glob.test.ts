@@ -34,4 +34,19 @@ describe('wildcard glob expansion', () => {
     expect(out).toContain('note.txt');
     expect(out).not.toContain('image.png');
   });
+
+  it('matches single-character wildcard ? correctly', async () => {
+    const { fs, env, userManager } = createTestContext();
+    fs.touch('a1.txt', '1');
+    fs.touch('a2.txt', '2');
+    fs.touch('ab.txt', '3');
+
+    const registry = new CommandRegistry();
+    const executor = new CommandExecutor(env);
+    const out = await executor.execute('ls a?.txt', registry.getAllCommands(), fs, userManager);
+
+    expect(out).toContain('a1.txt');
+    expect(out).toContain('a2.txt');
+    expect(out).not.toContain('ab.txt');
+  });
 });

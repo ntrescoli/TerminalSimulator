@@ -160,7 +160,7 @@ export class CommandExecutor {
         const expanded: string[] = [];
 
         for (const arg of args) {
-            if (!arg.includes('*')) {
+            if (!arg.includes('*') && !arg.includes('?')) {
                 expanded.push(arg);
                 continue;
             }
@@ -198,7 +198,8 @@ export class CommandExecutor {
 
     private globToRegExp(pattern: string): RegExp {
         const escaped = pattern.replace(/([.+^${}()|[\]\\])/g, '\\$1');
-        const regexString = `^${escaped.replace(/\*/g, '.*')}$`;
+        // '*' -> match any sequence, '?' -> match exactly one char
+        const regexString = `^${escaped.replace(/\*/g, '.*').replace(/\?/g, '.')}$`;
         return new RegExp(regexString);
     }
 }
