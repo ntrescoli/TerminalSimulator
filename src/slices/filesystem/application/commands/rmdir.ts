@@ -7,15 +7,15 @@ export const Rmdir: ICommand = {
             return "rmdir: missing operand";
         }
 
-        const path = args[0];
-        const result = fs.removeDirectory(path);
+        const errors: string[] = [];
 
-        if (result.isFailure) {
-            // Replicamos el prefijo de error nativo de Bash
-            return `rmdir: ${result.getError()}`;
+        for (const path of args) {
+            const result = fs.removeDirectory(path);
+            if (result.isFailure) {
+                errors.push(`rmdir: ${result.getError()}`);
+            }
         }
 
-        // Éxito silencioso al estilo Unix
-        return "";
+        return errors.length > 0 ? errors.join('\n') : "";
     }
 };

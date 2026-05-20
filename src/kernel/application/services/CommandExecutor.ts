@@ -77,9 +77,10 @@ export class CommandExecutor {
             : baseValuedFlags;
 
         const { options, args, flagValues } = this.parseArgsAndFlags(rawTokens, finalValuedFlags);
+        const expandedArgs = this.expandGlobPatterns(args, fs);
 
         const context: CommandContext = {
-            args,
+            args: expandedArgs,
             options,
             flagValues,
             rawArgs: rawTokens,
@@ -153,5 +154,51 @@ export class CommandExecutor {
         }
 
         return { options, args, flagValues };
+    }
+
+    private expandGlobPatterns(args: string[], fs: FileSystem): string[] {
+        const expanded: string[] = [];
+
+        for (const arg of args) {
+            if (!arg.includes('*')) {
+                expanded.push(arg);
+                continue;
+            }
+
+            const lastSlashIndex = arg.lastIndexOf('/');
+            const prefix = lastSlashIndex === -1 ? '' : arg.substring(0, lastSlashIndex + 1);
+            const dirPath = lastSlashIndex === -1 ? '.' : arg.substring(0, lastSlashIndex) || '/';
+            const pattern = lastSlashIndex === -1 ? arg : arg.substring(lastSlashIndex + 1);
+
+            const dirNode = fs.resolvePath(dirPath);
+            if (!dirNode || dirNode.type !== 'dir') {
+                expanded.push(arg);
+                continue;
+            }
+
+            const regex = this.globToRegExp(pattern);
+            const matches = dirNode.children
+                .filter(child => {
+                    if (child.name.startsWith('.') && !pattern.startsWith('.')) {
+                        return false;
+                    }
+                    return regex.test(child.name);
+                })
+                .map(child => `${prefix}${child.name}`);
+
+            if (matches.length > 0) {
+                expanded.push(...matches);
+            } else {
+                expanded.push(arg);
+            }
+        }
+
+        return expanded;
+    }
+
+    private globToRegExp(pattern: string): RegExp {
+        const escaped = pattern.replace(/([.+^${}()|[\]\\])/g, '\\$1');
+        const regexString = `^${escaped.replace(/\*/g, '.*')}$`;
+        return new RegExp(regexString);
     }
 }

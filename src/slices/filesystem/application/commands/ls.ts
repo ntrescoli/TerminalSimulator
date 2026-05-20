@@ -3,68 +3,65 @@ import { ICommand } from '../../../../kernel/domain/entities/Command';
 export const Ls: ICommand = {
     name: 'ls',
     execute: ({ args, hasFlag, fs }) => {
-        const path = args[0] || '.';
-        
-        // 1. Llamamos al FileSystem y obtenemos el objeto Result
-        const result = fs.getNodes(path, hasFlag('-a'));
+        const targets = args.length ? args : ['.'];
+        const outputs: string[] = [];
 
-        // 2. Si falló la resolución, formateamos el error genérico añadiendo el prefijo "ls:"
-        if (result.isFailure) {
-            return `ls: ${result.getError()}`;
+        const directoryCount = targets.reduce((count, target) => {
+            const node = fs.resolvePath(target);
+            return count + (node?.type === 'dir' ? 1 : 0);
+        }, 0);
+
+        const useHeaders = directoryCount > 1 || (directoryCount > 0 && targets.length > 1);
+
+        for (const target of targets) {
+            const result = fs.getNodes(target, hasFlag('-a'));
+            if (result.isFailure) {
+                return `ls: ${result.getError()}`;
+            }
+
+            let nodes = result.getValue();
+
+            if (hasFlag('-S')) {
+                nodes.sort((a, b) => (b.content?.length || 0) - (a.content?.length || 0));
+            } else if (hasFlag('-r')) {
+                nodes.reverse();
+            }
+
+            let formatted: string;
+
+            if (hasFlag('-l')) {
+                formatted = nodes.map(n => {
+                    const type = n.type === 'dir' ? 'd' : '-';
+                    const perms = type +
+                        formatPermSet(n.permissions.user) +
+                        formatPermSet(n.permissions.group) +
+                        formatPermSet(n.permissions.others);
+                    const owner = n.owner.padEnd(10);
+                    const group = (n.group || n.owner).padEnd(10);
+                    const rawSize = n.type === 'dir' ? 4096 : (n.content?.length || 0);
+                    const size = hasFlag('-h') ? formatHumanSize(rawSize) : rawSize.toString();
+                    const date = new Date(n.createdAt).toLocaleDateString('es-ES', {
+                        month: 'short',
+                        day: '2-digit',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    const name = formatName(n, hasFlag('-F'));
+                    return `${perms}  1 ${owner} ${group} ${size.padStart(8)} ${date} ${name}`;
+                }).join('\n');
+            } else {
+                formatted = nodes.map(n => formatName(n, hasFlag('-F'))).join(hasFlag('-1') ? '\n' : '  ');
+            }
+
+            if (useHeaders) {
+                outputs.push(`${target}:`, formatted);
+            } else {
+                outputs.push(formatted);
+            }
         }
 
-        // 3. Si tuvo éxito, extraemos la lista de nodos de forma segura
-        let nodes = result.getValue();
-
-        // 4. Ordenación de los nodos
-        if (hasFlag('-S')) {
-            nodes.sort((a, b) => (b.content?.length || 0) - (a.content?.length || 0));
-        } else if (hasFlag('-r')) {
-            // El sort alfabético inicial se puede revertir directamente
-            nodes.reverse();
-        }
-
-        // 5. Formateo de salida larga (-l)
-        if (hasFlag('-l')) {
-            return nodes.map(n => {
-                // TIPO DE NODO
-                const type = n.type === 'dir' ? 'd' : '-';
-
-                // RENDERIZADO DE PERMISOS REALES
-                const perms = type + 
-                    formatPermSet(n.permissions.user) + 
-                    formatPermSet(n.permissions.group) + 
-                    formatPermSet(n.permissions.others);
-
-                // DUEÑO Y GRUPO
-                const owner = n.owner.padEnd(10);
-                const group = (n.group || n.owner).padEnd(10);
-
-                // TAMAÑO
-                const rawSize = n.type === 'dir' ? 4096 : (n.content?.length || 0);
-                const size = hasFlag('-h') ? formatHumanSize(rawSize) : rawSize.toString();
-
-                // FECHA
-                const date = new Date(n.createdAt).toLocaleDateString('es-ES', {
-                    month: 'short',
-                    day: '2-digit',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-
-                const name = formatName(n, hasFlag('-F'));
-
-                // Formato estándar de salida larga Unix
-                return `${perms}  1 ${owner} ${group} ${size.padStart(8)} ${date} ${name}`;
-            }).join('\n');
-        }
-
-        // 6. Formateo de salidas alternativas de una sola columna o en línea
-        if (hasFlag('-1')) {
-            return nodes.map(n => formatName(n, hasFlag('-F'))).join('\n');
-        }
-        
-        return nodes.map(n => formatName(n, hasFlag('-F'))).join('  ');
+        const separator = hasFlag('-1') ? '\n' : (useHeaders ? '\n\n' : '  ');
+        return outputs.join(separator);
     }
 };
 
