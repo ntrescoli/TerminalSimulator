@@ -1,18 +1,25 @@
 # Terminal Simulator 🖥️
 
-Un simulador interactivo de terminal Linux/Ubuntu funcional en el navegador. Escrito en TypeScript con Vite.
+Simulador interactivo de terminal Linux/Ubuntu en el navegador. Escrito en **TypeScript** con **Vite**.
 
 ## 📋 Descripción
 
 Terminal Simulator es una aplicación web que emula un terminal Linux completo con:
-- Sistema de archivos virtual
-- Gestión de usuarios y permisos
-- Historial de comandos
-- Variables de entorno
-- Soporte para pipes (`|`) y redirecciones (`>`, `>>`)
-- Más de 40 comandos del sistema
 
-Perfecto para aprender Linux, hacer demostraciones educativas o entretenimiento interactivo.
+- 🗂️ **Sistema de archivos virtual** - Completo con directorios, archivos y permisos
+- 👥 **Gestión de usuarios y grupos** - Sistema UNIX completo
+- ⌨️ **40+ comandos del sistema** - `ls`, `cd`, `mkdir`, `grep`, `chmod`, etc.
+- 📝 **Historial de comandos** - Con navegación ↑/↓
+- 🔒 **Control de permisos** - Sistema rwx completo
+- 🔗 **Pipes y redirecciones** - `|`, `>`, `>>` totalmente funcionales
+- 🎯 **Variables de entorno** - `PATH`, `HOME`, `USER`, etc.
+- 💾 **Persistencia de estado** - Guarda el estado de la máquina virtual
+
+Perfecto para:
+- 📚 **Educación** - Enseñar Linux interactivamente
+- 🧪 **Demostraciones** - Mostrar comandos en vivo
+- 🎮 **Entretenimiento** - Terminal interactiva en el navegador
+- 🔧 **Componente embebible** - Integrar en otros proyectos
 
 ## 🚀 Instalación
 
@@ -23,20 +30,19 @@ Perfecto para aprender Linux, hacer demostraciones educativas o entretenimiento 
 ### Pasos
 
 ```bash
-# Clonar el repositorio
-git clone <repository-url>
-cd TerminalSimulator
-
 # Instalar dependencias
 pnpm install
 
 # Iniciar servidor de desarrollo
 pnpm dev
 
-# Compilar para producción
-pnpm build
+# Acceder a http://localhost:5173
+```
 
-# Vista previa de producción
+Para producción:
+
+```bash
+pnpm build
 pnpm preview
 ```
 
@@ -45,59 +51,101 @@ pnpm preview
 ```
 TerminalSimulator/
 ├── src/
-│   ├── main.ts                 # Punto de entrada, manejo de eventos
-│   ├── core/                   # Núcleo del sistema
-│   │   ├── Kernel.ts           # Motor de ejecución de comandos
-│   │   ├── Environment.ts      # Variables de entorno
-│   │   ├── FileSystem.ts       # Sistema de archivos virtual
-│   │   ├── UserManager.ts      # Gestión de usuarios y grupos
-│   │   └── filesystem/
-│   │       ├── AccessControl.ts    # Control de permisos (rwx)
-│   │       ├── NodeFactory.ts      # Factory para crear nodos
-│   │       └── PathResolver.ts     # Resolver de rutas
-│   ├── commands/               # Implementación de comandos
-│   │   ├── index.ts            # Registro central
-│   │   ├── system/             # Comandos del sistema
-│   │   ├── filesystem/         # Comandos de archivos
-│   │   ├── text/               # Comandos de texto
-│   │   ├── users/              # Comandos de usuarios
-│   │   └── custom/             # Comandos personalizados
-│   ├── types/                  # Tipos e interfaces TypeScript
-│   ├── ui/                     # Componentes UI
-│   └── utils/                  # Utilidades
-├── vms/                        # Configuraciones iniciales
-├── index.html                  # HTML principal
-├── style.css                   # Estilos
-└── vite.config.ts             # Configuración Vite
+│   ├── main.ts                     # Entrada principal
+│   ├── kernel/                     # Núcleo del sistema
+│   ├── slices/                     # Features modulares
+│   ├── ui/                         # Componentes UI
+│   └── result/                     # Manejo de errores
+├── tests/                          # Tests
+├── vms/                            # Configuraciones de VM
+├── docs/                           # Documentación
+├── index.html                      # HTML principal
+├── style.css                       # Estilos
+└── package.json                    # Configuración
 ```
 
 ## 🎮 Comandos Disponibles
 
 ### Sistema
-`clear`, `echo`, `date`, `uptime`, `who`, `whoami`, `sudo`, `history`, `help`
+```bash
+clear              # Limpiar pantalla
+echo [texto]       # Imprimir texto
+date               # Fecha y hora actual
+uptime             # Tiempo de ejecución
+who                # Usuarios conectados
+whoami             # Usuario actual
+help               # Listar comandos
+history            # Historial de comandos
+```
 
-### Archivos
-`ls`, `cd`, `pwd`, `mkdir`, `touch`, `cat`, `rm`, `cp`, `mv`
+### Navegación y Archivos
+```bash
+ls [-la]           # Listar directorio
+cd [ruta]          # Cambiar directorio
+pwd                # Ruta actual
+mkdir [dir]        # Crear directorio
+touch [archivo]    # Crear archivo
+cat [archivo]      # Ver contenido
+rm [-r] [archivo]  # Eliminar
+cp [src] [dest]    # Copiar
+mv [src] [dest]    # Mover
+```
 
 ### Usuarios
-`adduser`, `deluser`, `useradd`, `addgroup`, `delgroup`, `groups`, `su`
+```bash
+adduser [usuario]  # Crear usuario
+deluser [usuario]  # Eliminar usuario
+su [usuario]       # Cambiar usuario
+groups [usuario]   # Ver grupos
+sudo [comando]     # Ejecutar como root
+passwd [usuario]   # Cambiar contraseña
+```
 
-### Texto
-`grep`, `cat`
+### Texto y Búsqueda
+```bash
+grep [patrón]      # Buscar en archivo
+cat [archivo]      # Ver contenido
+wc [archivo]       # Contar líneas
+```
 
 ### Permisos
-`chmod`, `chown`
+```bash
+chmod [modo]       # Cambiar permisos
+chown [user]       # Cambiar propietario
+```
+
+Ver completo: [COMMANDS.md](./docs/COMMANDS.md)
+
+## 📖 Documentación
+
+- [ARCHITECTURE.md](./docs/ARCHITECTURE.md) - Arquitectura del sistema y decisiones de diseño
+- [API.md](./docs/API.md) - Referencia completa de la API pública
+- [COMMANDS.md](./docs/COMMANDS.md) - Documentación detallada de comandos
+- [EMBEDDING.md](./docs/EMBEDDING.md) - Cómo usarlo como componente en otros proyectos
+- [CONTRIBUTING.md](./docs/CONTRIBUTING.md) - Guía para contribuir al proyecto
 
 ## 🔧 Desarrollo
 
-Para agregar nuevos comandos, consulta [CONTRIBUTING.md](./docs/CONTRIBUTING.md)
+```bash
+pnpm dev           # Servidor de desarrollo
+pnpm build         # Compilar para producción
+pnpm lint          # Ejecutar ESLint
+pnpm test          # Ejecutar tests
+```
+
+## 📦 Configuraciones de VM
+
+Disponibles en `vms/`:
+- `default.json` - Ubuntu con usuario ubuntu y root
+- `webserver.json` - Configuración minimalista para servidor web
+
+
 
 ## 📚 Documentación
 
 - [ARCHITECTURE.md](./docs/ARCHITECTURE.md) - Arquitectura del sistema
-- [COMMANDS.md](./docs/COMMANDS.md) - Documentación de comandos
-- [CONTRIBUTING.md](./docs/CONTRIBUTING.md) - Guía de contribución
-- [API.md](./docs/API.md) - Interfaz programática
+- [COMMANDS.md](./docs/COMMANDS.md) - Lista de comandos
+- [API.md](./docs/API.md) - API pública
 
 
 ## Notas
