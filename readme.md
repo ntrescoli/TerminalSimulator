@@ -21,7 +21,31 @@ Perfecto para:
 - 🎮 **Entretenimiento** - Terminal interactiva en el navegador
 - 🔧 **Componente embebible** - Integrar en otros proyectos
 
-## 🚀 Instalación
+## � Usar como Paquete NPM
+
+¿Quieres usar Terminal Simulator en tu proyecto? ¡Es muy fácil!
+
+### 2 Opciones:
+
+**1. Vanilla JS/TypeScript:**
+```typescript
+import { TSTerminal } from 'terminal-simulator';
+import 'terminal-simulator/style.css';
+
+new TSTerminal(document.getElementById('terminal'));
+```
+
+**2. React:**
+```tsx
+import { ReactTerminal } from 'terminal-simulator';
+import 'terminal-simulator/style.css';
+
+<ReactTerminal />
+```
+
+👉 **[Documentación completa de uso como paquete](./USAGE_AS_PACKAGE.md)**
+
+## 🚀 Instalación para Desarrollo
 
 ### Requisitos
 - Node.js 18+ o superior

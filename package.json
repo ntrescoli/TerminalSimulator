@@ -1,6 +1,7 @@
 {
   "name": "terminal-simulator",
   "version": "1.0.0",
+  "description": "Interactive Linux terminal simulator for the browser - use as Vanilla JS or React component",
   "type": "module",
   "main": "./dist/terminal-simulator.cjs",
   "module": "./dist/terminal-simulator.js",
@@ -16,8 +17,21 @@
   "files": [
     "dist"
   ],
+  "keywords": [
+    "terminal",
+    "simulator",
+    "linux",
+    "shell",
+    "bash",
+    "interactive",
+    "react",
+    "typescript",
+    "component",
+    "virtual-machine"
+  ],
   "scripts": {
     "dev": "vite",
+    "build": "vite build --config vite.config.ts",
     "compile": "tsc && vite build --config vite.config.ts",
     "preview": "vite preview",
     "lint": "eslint . --ext .ts,.tsx",
@@ -47,5 +61,18 @@
     "typescript": "^5.2.2",
     "vite": "^5.0.0",
     "vitest": "^1.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/terminal-simulator.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/terminal-simulator/issues"
+  },
+  "homepage": "https://github.com/yourusername/terminal-simulator#readme",
+  "author": "Your Name",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

@@ -14,6 +14,11 @@
     "isolatedModules": true,
     "noEmit": true,
 
+    /* Type Declaration Generation (for library build) */
+    "declaration": true,
+    "declarationMap": true,
+    "emitDeclarationOnly": false,
+
     /* Linting / Strict Mode */
     "strict": true,
     "noUnusedLocals": true,

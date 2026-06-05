@@ -1,8 +1,46 @@
+# Dependencies
 node_modules/
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# Build outputs
+dist/
 build/
+coverage/
+
+# Development
 .env
-.DS_Store
+.env.local
+.env.*.local
+.tmp/
 *.log
+logs/
+
+# IDE
 .idea/
 .vscode/
-coverage/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# OS
+Thumbs.db
+.DS_Store
+
+# Testing
+.nyc_output
+jest-coverage
+
+# pnpm
+.pnpmstore/
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Vitest
+.vitest/

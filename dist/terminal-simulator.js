@@ -2769,6 +2769,7 @@ const Xr = () => {
   }, []), /* @__PURE__ */ zr.jsx("div", { ref: o, className: "ubuntu-terminal-theme" });
 };
 export {
+  jr as Kernel,
   Xr as ReactTerminal,
   Br as TSTerminal
 };
