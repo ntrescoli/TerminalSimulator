@@ -1,53 +1,336 @@
 # Usar Terminal Simulator como Componente
 
-Terminal Simulator puede ser embebido en otros proyectos de dos formas:
+Terminal Simulator puede ser embebido en otros proyectos de **dos formas principales**:
 
-## 1. Como Dependencia NPM (Próximamente en npm registry)
+1. **TSTerminal**: Para proyectos Vanilla JS/TypeScript
+2. **ReactTerminal**: Para proyectos React
 
-### Instalación
+---
+
+## 📦 Instalación
+
+### Desde npm (Próximamente)
 
 ```bash
 npm install terminal-simulator
 # o
 pnpm add terminal-simulator
+# o
+yarn add terminal-simulator
 ```
 
-### Uso en TypeScript/JavaScript
+### Desde archivo local (desarrollo)
+
+```bash
+npm install ../path/to/TerminalSimulator
+```
+
+---
+
+## 🚀 Opción 1: Vanilla JS / TypeScript
+
+### Uso Básico
+
+```typescript
+import { TSTerminal } from 'terminal-simulator';
+import 'terminal-simulator/style.css'; // Importa los estilos
+
+// 1. Crear un contenedor en tu HTML
+const container = document.getElementById('terminal-container');
+
+// 2. Instanciar TSTerminal
+const terminal = new TSTerminal(container, '/path/to/vm-config.json');
+
+// ✅ ¡Listo! La terminal está lista para usar
+```
+
+### Ejemplo HTML Completo
+
+```html
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Terminal</title>
+    <style>
+        body { margin: 0; padding: 20px; font-family: monospace; }
+        #terminal-container { width: 100%; max-width: 1000px; margin: 0 auto; }
+    </style>
+</head>
+<body>
+    <div id="terminal-container"></div>
+
+    <script type="module">
+        import { TSTerminal } from './dist/terminal-simulator.js';
+        import './dist/style.css';
+        
+        const container = document.getElementById('terminal-container');
+        new TSTerminal(container);
+    </script>
+</body>
+</html>
+```
+
+### Con Build Tool (Vite, Webpack, etc.)
+
+```typescript
+import { TSTerminal } from 'terminal-simulator';
+import 'terminal-simulator/style.css';
+
+// En tu código
+const terminal = new TSTerminal(document.getElementById('app'));
+```
+
+---
+
+## ⚛️ Opción 2: React
+
+### Uso Básico
+
+```tsx
+import { ReactTerminal } from 'terminal-simulator';
+import 'terminal-simulator/style.css';
+
+export function App() {
+  return (
+    <div>
+      <h1>Mi Aplicación con Terminal</h1>
+      <ReactTerminal />
+    </div>
+  );
+}
+```
+
+### Con Next.js
+
+```tsx
+'use client'; // Si usas App Router
+
+import { ReactTerminal } from 'terminal-simulator';
+import 'terminal-simulator/style.css';
+
+export default function Page() {
+  return (
+    <div>
+      <h1>Terminal Simulator</h1>
+      <ReactTerminal />
+    </div>
+  );
+}
+```
+
+### Con Custom Container
+
+```tsx
+import { useRef } from 'react';
+import { ReactTerminal } from 'terminal-simulator';
+import 'terminal-simulator/style.css';
+
+export function TerminalContainer() {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  return (
+    <div className="terminal-wrapper">
+      <div ref={containerRef} style={{ 
+        width: '100%', 
+        height: '500px',
+        border: '1px solid #ccc',
+        borderRadius: '4px'
+      }}>
+        <ReactTerminal />
+      </div>
+    </div>
+  );
+}
+```
+
+---
+
+## 🔧 Acceso Directo al Kernel (Avanzado)
+
+Para casos más complejos, puedes acceder directamente al `Kernel`:
 
 ```typescript
 import { Kernel } from 'terminal-simulator';
 
-// Crear una instancia del kernel
-const kernel = new Kernel('/vms/default.json');
+const kernel = new Kernel('/path/to/vm-config.json');
 
-// Inicializar el sistema
-await kernel.boot();
-
-// Ejecutar comandos
-const output = await kernel.execute('ls -la');
-console.log(output);
-
-// Obtener historial
+// Métodos disponibles
 const history = kernel.getHistory();
-console.log(history);
+const uptime = kernel.getUptime();
+
+// Ejecutar comandos directamente (si está disponible)
+// const result = await kernel.execute('ls -la');
 ```
 
-### Uso en Vue 3
+---
 
-```vue
-<template>
-  <div class="terminal-wrapper">
-    <div id="output" ref="outputRef"></div>
-    <div class="input-line">
-      <span id="prompt">{{ prompt }}</span>
-      <input 
-        type="text" 
-        v-model="command"
-        @keydown.enter="executeCommand"
-      />
-    </div>
-  </div>
-</template>
+## 🎨 Personalización de Estilos
+
+Terminal Simulator usa clases CSS predefinidas. Puedes sobrescribir los estilos:
+
+```css
+/* Terminal Container */
+#terminal-container {
+  background-color: #1e1e1e;
+  color: #00ff00;
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  padding: 16px;
+  border-radius: 8px;
+}
+
+/* Output Area */
+#output {
+  height: 400px;
+  overflow-y: auto;
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+
+/* Input Line */
+.input-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#terminal-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #00ff00;
+  font-family: inherit;
+  font-size: inherit;
+  outline: none;
+}
+
+.prompt {
+  color: #ff6b6b;
+  font-weight: bold;
+}
+```
+
+---
+
+## 📝 Configuración de VM (Máquina Virtual)
+
+Puedes pasar un archivo JSON de configuración para personalizar el estado inicial:
+
+```typescript
+new TSTerminal(container, '/vms/custom-config.json');
+```
+
+Formato del archivo JSON:
+
+```json
+{
+  "hostname": "ubuntu-server",
+  "users": [
+    { "username": "root", "uid": 0, "home": "/root" },
+    { "username": "admin", "uid": 1000, "home": "/home/admin" }
+  ],
+  "filesystem": {
+    "directories": ["/root", "/home", "/etc", "/tmp"],
+    "files": [
+      { "path": "/etc/hostname", "content": "ubuntu-server" }
+    ]
+  }
+}
+```
+
+---
+
+## 🔌 TypeScript Support
+
+Terminal Simulator incluye types completos:
+
+```typescript
+import { TSTerminal, Kernel, ReactTerminal } from 'terminal-simulator';
+
+// Los tipos están disponibles automáticamente
+type TerminalInstance = TSTerminal;
+type KernelInstance = Kernel;
+```
+
+---
+
+## 📚 Ejemplos Adicionales
+
+### Crear múltiples instancias
+
+```typescript
+import { TSTerminal } from 'terminal-simulator';
+
+// Terminal 1
+const terminal1 = new TSTerminal(document.getElementById('terminal1'));
+
+// Terminal 2 (con otra configuración)
+const terminal2 = new TSTerminal(document.getElementById('terminal2'), '/vms/server.json');
+```
+
+### En un Framework MVC/MVVM
+
+```typescript
+// En tu controlador/ViewModel
+class AppController {
+  private terminal: TSTerminal;
+
+  initialize(containerElement: HTMLElement) {
+    this.terminal = new TSTerminal(containerElement);
+  }
+
+  getTerminal(): TSTerminal {
+    return this.terminal;
+  }
+}
+```
+
+---
+
+## ⚠️ Notas Importantes
+
+1. **CSS Global**: `TSTerminal` necesita que se importe el CSS globalmente: `import 'terminal-simulator/style.css'`
+2. **React DOM**: En React, el componente maneja todo internamente
+3. **Contenedor**: El contenedor HTML debe tener dimensiones definidas
+4. **Configuración**: Si no proporcionas URL de configuración, usa `/vms/default.json`
+5. **Compatibilidad**: Requiere navegadores modernos (ES2020+)
+
+---
+
+## 🆘 Troubleshooting
+
+### "Cannot find module 'terminal-simulator'"
+
+Asegúrate de haber instalado el paquete:
+
+```bash
+npm install terminal-simulator
+```
+
+### Los estilos no se aplican
+
+Verifica que importaste el CSS:
+
+```typescript
+import 'terminal-simulator/style.css';
+```
+
+### El contenedor se ve vacío
+
+Asegúrate que:
+1. El contenedor existe en el DOM
+2. Tiene dimensiones definidas (width/height)
+3. Pasaste la referencia correcta a `TSTerminal`
+
+---
+
+## 📖 Documentación Adicional
+
+- [API Documentation](./API.md)
+- [Guía de Comandos](./COMMANDS.md)
+- [Troubleshooting](./TROUBLESHOOTING.md)
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';

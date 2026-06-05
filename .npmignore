@@ -3,15 +3,25 @@ src/
 tests/
 .github/
 node_modules/
+.tmp/
+.vscode/
 
 # Excluir archivos de configuración
 vite.config.ts
 tsconfig.json
 tsconfig.node.json
 .eslintrc.cjs
+.eslintignore
 .gitignore
 vitest.config.ts
 
-# Excluir archivos sueltos de la raíz
+# Excluir archivos de desarrollo
 *.html
-*.md
+GITHUB_SETUP.md
+RELEASE_CHECKLIST.md
+scripts/
+help.txt
+
+# Mantener documentación importante
+!README.md
+!LICENSE

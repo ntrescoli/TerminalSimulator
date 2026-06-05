@@ -1,5 +1,4 @@
 // TSTerminal como Componente React
-
 import { useEffect, useRef } from 'react';
 import { TSTerminal } from './TSTerminal';
 import './style.css'; // React importará tus estilos globales de la terminal
