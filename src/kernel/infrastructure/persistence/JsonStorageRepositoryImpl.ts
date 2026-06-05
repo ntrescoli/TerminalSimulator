@@ -5,7 +5,7 @@ export class JsonStorageRepositoryImpl implements IStorageRepository {
     private readonly savers: Map<string, ISliceStateSaver> = new Map();
     private history: string[] = []; // El historial sí puede ser nativo del Kernel si se maneja aquí
 
-    constructor(savers: ISliceStateSaver[], private readonly configUrl = '/vms/default.json') {
+    constructor(savers: ISliceStateSaver[], private readonly configUrl = '/public/vms/default.json') {
         savers.forEach(saver => this.savers.set(saver.key, saver));
     }
 

@@ -4,21 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ubuntu Server Simulator</title>
-    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div id="terminal-container">
-        <!-- El historial de comandos se inyectará aquí -->
-        <div id="output"></div>
-        
-        <!-- La línea activa donde escribe el usuario -->
-        <div class="input-line">
-            <span id="prompt" class="prompt">root@ubuntu:~$</span>
-            <input type="text" id="terminal-input" autofocus spellcheck="false" autocomplete="off">
-        </div>
-    </div>
-
-    <!-- El script principal (Vite lo manejará desde src/main.ts) -->
+    <div id="app"></div> 
     <script type="module" src="./src/main.ts"></script>
 </body>
 </html>

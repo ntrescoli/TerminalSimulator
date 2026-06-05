@@ -1,9 +1,5 @@
-import { Kernel } from '../kernel/Kernel';
-import { AuthenticationManager } from '../ui/AuthenticationManager';
-import { CommandHistoryExpander } from '../ui/CommandHistoryExpander';
-import { CommandHistoryNavigator } from '../ui/CommandHistoryNavigator';
-import { TerminalUI } from '../ui/Terminal';
-import { TerminalInputHandler } from '../ui/TerminalInputHandler';
+import { TSTerminal } from '../TSTerminal';
+import '../style.css';
 
 type VMManifestItem = {
     id: string;
@@ -16,9 +12,6 @@ const selectElement = document.getElementById('vm-select') as HTMLSelectElement;
 const launchButton = document.getElementById('launch-vm') as HTMLButtonElement;
 const statusElement = document.getElementById('launch-status') as HTMLDivElement;
 const terminalContainer = document.getElementById('terminal-container') as HTMLDivElement;
-const outputElement = document.getElementById('output') as HTMLDivElement;
-const inputElement = document.getElementById('terminal-input') as HTMLInputElement;
-const promptElement = document.getElementById('prompt') as HTMLSpanElement;
 
 async function loadManifest(): Promise<VMManifestItem[]> {
     const response = await fetch('/vms/manifest.json');
@@ -49,26 +42,13 @@ async function launchVirtualMachine(configUrl: string) {
     setStatus('Arrancando la máquina virtual...');
 
     try {
-        const kernel = new Kernel(configUrl);
-        await kernel.boot();
-
+        // 1. Mostramos el contenedor de la terminal
         terminalContainer.classList.remove('hidden');
-        setStatus(`Máquina lanzada con ${configUrl}`);
+        
+        // 2. Instanciamos tu componente pasándole el contenedor vacío y la configuración
+        new TSTerminal(terminalContainer, configUrl);
 
-        const terminal = new TerminalUI(outputElement, inputElement, promptElement);
-        terminal.clear();
-
-        const authManager = new AuthenticationManager();
-        const historyExpander = new CommandHistoryExpander();
-        const historyNavigator = new CommandHistoryNavigator(kernel.getHistory());
-        const inputHandler = new TerminalInputHandler(kernel, terminal, authManager, historyExpander, historyNavigator);
-        inputHandler.attach(inputElement);
-
-        terminal.print('Hypervisor VM iniciada. Bienvenido.');
-        terminal.print(`Estado inicial cargado desde ${configUrl}`);
-        terminal.print('');
-        terminal.updatePrompt(kernel.getPromptText());
-        inputElement.focus();
+        setStatus(`Máquina lanzada exitosamente desde ${configUrl}`);
     } catch (error) {
         console.error(error);
         setStatus('Error al lanzar la VM. Revisa la consola.', true);

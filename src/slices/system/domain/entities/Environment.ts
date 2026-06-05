@@ -51,8 +51,8 @@ export class Environment {
         return { ...this.vars };
     }
 
-    public setAlias(name: string, command: string): void {
-        this.aliases.set(name, command);
+    public setAlias(name: string | undefined, command: string | undefined): void {
+        this.aliases.set(name || '', command || '');
     }
 
     public getAlias(name: string): string | undefined {
