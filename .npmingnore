@@ -1,0 +1,17 @@
+# Excluir carpetas de desarrollo
+src/
+tests/
+.github/
+node_modules/
+
+# Excluir archivos de configuración
+vite.config.ts
+tsconfig.json
+tsconfig.node.json
+.eslintrc.cjs
+.gitignore
+vitest.config.ts
+
+# Excluir archivos sueltos de la raíz
+*.html
+*.md

@@ -1,0 +1,60 @@
+{
+  "users": [
+    { "username": "admin", "uid": 0, "gid": 0, "home": "/root", "shell": "/bin/bash" },
+    { "username": "webmaster", "uid": 1001, "gid": 1001, "home": "/var/www", "shell": "/bin/sh" },
+    { "username": "visitor", "uid": 2000, "gid": 2000, "home": "/home/visitor", "shell": "/bin/bash" }
+  ],
+  "fileSystem": {
+    "name": "/",
+    "type": "dir",
+    "owner": "admin",
+    "permissions": { "read": true, "write": true, "execute": true },
+    "children": [
+      {
+        "name": "var",
+        "type": "dir",
+        "owner": "admin",
+        "permissions": { "read": true, "write": true, "execute": true },
+        "children": [
+          {
+            "name": "www",
+            "type": "dir",
+            "owner": "webmaster",
+            "permissions": { "read": true, "write": true, "execute": true },
+            "children": [
+              {
+                "name": "index.html",
+                "type": "file",
+                "owner": "webmaster",
+                "content": "<html><body><h1>Servidor en Mantenimiento</h1></body></html>",
+                "permissions": { "read": true, "write": true, "execute": false }
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "etc",
+        "type": "dir",
+        "owner": "admin",
+        "permissions": { "read": true, "write": false, "execute": true },
+        "children": [
+          {
+            "name": "motd",
+            "type": "file",
+            "owner": "admin",
+            "content": "BIENVENIDO AL SERVIDOR DE PRODUCCION\nSolo personal autorizado.",
+            "permissions": { "read": true, "write": false, "execute": false }
+          }
+        ]
+      },
+      {
+        "name": "logs",
+        "type": "dir",
+        "owner": "admin",
+        "permissions": { "read": true, "write": true, "execute": true },
+        "children": []
+      }
+    ]
+  }
+}
