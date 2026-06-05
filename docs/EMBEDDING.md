@@ -86,11 +86,23 @@ const terminal = new TSTerminal(document.getElementById('app'));
 
 ## ⚛️ Opción 2: React
 
+### ⚠️ Requisitos Previos
+
+`React` y `react-dom` **NO son opcionales**. Debes instalarlos en tu proyecto:
+
+```bash
+npm install react react-dom terminal-simulator
+# o
+pnpm add react react-dom terminal-simulator
+# o
+yarn add react react-dom terminal-simulator
+```
+
 ### Uso Básico
 
 ```tsx
 import { ReactTerminal } from 'terminal-simulator';
-import 'terminal-simulator/style.css';
+import 'terminal-simulator/style.css';  // ← No olvides esto
 
 export function App() {
   return (
@@ -102,17 +114,44 @@ export function App() {
 }
 ```
 
-### Con Next.js
+### Uso con Contenedor Personalizado
 
 ```tsx
-'use client'; // Si usas App Router
+import { ReactTerminal } from 'terminal-simulator';
+import 'terminal-simulator/style.css';
+
+export function TerminalPage() {
+  return (
+    <div style={{ 
+      width: '100%', 
+      height: '100vh',
+      display: 'flex',
+      flexDirection: 'column'
+    }}>
+      <header>
+        <h1>Terminal</h1>
+      </header>
+      <main style={{ flex: 1, overflow: 'hidden' }}>
+        <ReactTerminal />
+      </main>
+    </div>
+  );
+}
+```
+
+### Con Next.js (App Router)
+
+⚠️ **IMPORTANTE:** Usa `'use client'` para componentes interactivos
+
+```tsx
+'use client'; // ← Necesario para Next.js App Router
 
 import { ReactTerminal } from 'terminal-simulator';
 import 'terminal-simulator/style.css';
 
-export default function Page() {
+export default function TerminalPage() {
   return (
-    <div>
+    <div style={{ width: '100%', height: '100vh' }}>
       <h1>Terminal Simulator</h1>
       <ReactTerminal />
     </div>

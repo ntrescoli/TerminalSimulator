@@ -73,7 +73,11 @@ Para proyectos React, es más simple aún.
 
 ```bash
 npm install terminal-simulator react react-dom
+# o con pnpm
+pnpm add terminal-simulator react react-dom
 ```
+
+⚠️ **IMPORTANTE:** `react` y `react-dom` deben estar instalados en tu proyecto.
 
 **Uso en tu componente:**
 
@@ -94,7 +98,7 @@ export function MyApp() {
 **Ejemplo con Next.js 13+:**
 
 ```tsx
-'use client'; // Si usas App Router
+'use client'; // ← IMPORTANTE: Necesario en Next.js App Router
 
 import { ReactTerminal } from 'terminal-simulator';
 import 'terminal-simulator/style.css';
@@ -240,22 +244,51 @@ También puedes usar Terminal Simulator directamente desde un CDN (cuando esté 
 ## ✅ Checklist para Usar como Paquete
 
 - [ ] Ejecutar `npm install terminal-simulator`
+- [ ] Para React: Instalar `react` y `react-dom` también
 - [ ] Importar `TSTerminal` o `ReactTerminal`
 - [ ] Importar el CSS: `import 'terminal-simulator/style.css'`
 - [ ] Proporcionar un contenedor HTML con dimensiones
 - [ ] Verificar que los estilos se aplican correctamente
-- [ ] Opcional: Personalizar estilos según tu diseño
 
 ---
 
 ## 🆘 Solución de Problemas
 
-### Error: "Cannot find module 'terminal-simulator'"
+### Error: "Cannot read properties of undefined (reading 'ReactCurrentDispatcher')"
 
-Asegúrate de haber instalado el paquete:
+**Causa:** React no está instalado en tu proyecto.
 
+**Solución:**
 ```bash
-npm install terminal-simulator
+# Debes instalar React y react-dom
+npm install react react-dom
+
+# Si usas pnpm
+pnpm add react react-dom
+
+# Si usas yarn
+yarn add react react-dom
+```
+
+Verifica en tu `package.json`:
+```json
+{
+  "dependencies": {
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "terminal-simulator": "^1.0.0"
+  }
+}
+```
+
+### Error: "The file is in the MIME type application/json"
+
+**Causa:** Falta importar el CSS.
+
+**Solución:**
+```typescript
+import 'terminal-simulator/style.css'; // ← Agrega esto
+import { TSTerminal } from 'terminal-simulator';
 ```
 
 ### La terminal no se ve
@@ -271,6 +304,23 @@ Importa el CSS **antes** de cualquier otro CSS:
 ```typescript
 import 'terminal-simulator/style.css'; // ← Primero
 import './my-styles.css'; // ← Después
+```
+
+### Con Next.js: "useRef is not defined"
+
+**Causa:** Usas un Client Component en Next.js.
+
+**Solución:** Agrega `'use client'` al inicio del archivo:
+
+```tsx
+'use client'; // ← IMPORTANTE
+
+import { ReactTerminal } from 'terminal-simulator';
+import 'terminal-simulator/style.css';
+
+export default function Page() {
+  return <ReactTerminal />;
+}
 ```
 
 ---
