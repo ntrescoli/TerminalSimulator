@@ -1,15 +1,14 @@
 {
   "name": "terminal-simulator",
-  "description": "Personal Linux terminal simulator for the browser and React",
   "version": "1.0.0",
   "type": "module",
-  "main": "./dist/terminal-simulator.umd.cjs",
+  "main": "./dist/terminal-simulator.cjs",
   "module": "./dist/terminal-simulator.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "import": "./dist/terminal-simulator.js",
-      "require": "./dist/terminal-simulator.umd.cjs",
+      "require": "./dist/terminal-simulator.cjs",
       "types": "./dist/index.d.ts"
     },
     "./style.css": "./dist/style.css"
@@ -19,7 +18,7 @@
   ],
   "scripts": {
     "dev": "vite",
-    "compile": "tsc && vite build",
+    "compile": "tsc && vite build --config vite.config.ts",
     "preview": "vite preview",
     "lint": "eslint . --ext .ts,.tsx",
     "test": "vitest"

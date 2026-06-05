@@ -4,20 +4,12 @@ import { resolve } from 'path';
 export default defineConfig({
   build: {
     lib: {
-      // 1. El archivo principal que exporta tu clase y el componente React
       entry: resolve(__dirname, 'src/index.ts'), 
-      
-      // 2. El nombre global de la variable (para cuando se use mediante <script>)
       name: 'TerminalSimulator',
-      
-      // 3. ¡ESTO ES LO IMPORTANTE! El nombre fijo que tendrán los archivos en dist
       fileName: 'terminal-simulator',
-      
-      // 4. Forzamos formatos limpios (ES Modules y CommonJS)
       formats: ['es', 'cjs']
     },
     rollupOptions: {
-      // Nos aseguramos de no empaquetar React dentro de tu librería
       external: ['react', 'react-dom'],
       output: {
         globals: {
