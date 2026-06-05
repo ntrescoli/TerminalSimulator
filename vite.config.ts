@@ -18,5 +18,13 @@ export default defineConfig({
         },
       },
     },
+    // Asegurar que los módulos comunes se mantengan
+    commonjsOptions: {
+      include: [/node_modules/],
+    }
   },
+  // Asegurar que el JSX se transpile correctamente
+  esbuild: {
+    drop: undefined,
+  }
 });
