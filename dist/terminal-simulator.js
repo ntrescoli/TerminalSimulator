@@ -1,7 +1,7 @@
-var yt = Object.defineProperty;
-var vt = (o, e, t) => e in o ? yt(o, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : o[e] = t;
-var y = (o, e, t) => vt(o, typeof e != "symbol" ? e + "" : e, t);
-import We, { useRef as St, useEffect as wt } from "react";
+var vt = Object.defineProperty;
+var St = (o, e, t) => e in o ? vt(o, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : o[e] = t;
+var y = (o, e, t) => St(o, typeof e != "symbol" ? e + "" : e, t);
+import He, { useRef as je, useEffect as wt } from "react";
 class g {
   constructor(e, t, r) {
     y(this, "isSuccess");
@@ -626,10 +626,10 @@ class Tt {
     if (_.length === 0) return "";
     const R = _[0].toLowerCase(), L = _.slice(1), M = t.get(R);
     if (!M) return `-bash: ${R}: command not found`;
-    const F = M.valuedFlags || [], z = R === "sudo" ? [...F, "sudo-pass", "--sudo-pass"] : F, se = this.extractAllowedFlagsFromCommand(M, z);
+    const F = M.valuedFlags || [], K = R === "sudo" ? [...F, "sudo-pass", "--sudo-pass"] : F, se = this.extractAllowedFlagsFromCommand(M, K);
     if (c != null && c.aborted)
       return "COMMAND_ABORTED";
-    const { options: J, args: V, flagValues: ne } = this.parseArgsAndFlags(L, z, se), X = {
+    const { options: J, args: V, flagValues: ne } = this.parseArgsAndFlags(L, K, se), X = {
       args: this.expandGlobPatterns(V, r),
       options: J,
       flagValues: ne,
@@ -799,10 +799,10 @@ const Pt = {
           day: "2-digit",
           hour: "2-digit",
           minute: "2-digit"
-        }), M = je(p, e("-F"));
+        }), M = Ge(p, e("-F"));
         return `${S}  1 ${P} ${G} ${R.padStart(8)} ${L} ${M}`;
       }).join(`
-`) : d = h.map((p) => je(p, e("-F"))).join(e("-1") ? `
+`) : d = h.map((p) => Ge(p, e("-F"))).join(e("-1") ? `
 ` : "  "), i ? s.push(`${u}:`, d) : s.push(d);
     }
     const c = e("-1") ? `
@@ -827,7 +827,7 @@ function Ct(o) {
     r /= 1024, t++;
   return `${r.toFixed(1)}${e[t]}`;
 }
-function je(o, e) {
+function Ge(o, e) {
   return o.type === "dir" ? `${o.name}/` : e && o.permissions.execute ? `${o.name}*` : o.name;
 }
 const Ot = {
@@ -1034,7 +1034,7 @@ const Ot = {
 `).length, c = n.trim() === "" ? 0 : n.trim().split(/\s+/).length, u = n.length, l = e("l"), h = e("w"), d = e("c") || e("m"), p = !l && !h && !d, w = [];
     return (l || p) && w.push(i.toString()), (h || p) && w.push(c.toString()), (d || p) && w.push(u.toString()), !r && s && w.push(s), w.join("	");
   }
-}, Kt = {
+}, zt = {
   name: "head",
   valuedFlags: ["n"],
   execute: async ({ args: o, flagValues: e, fs: t, pipeInput: r }) => {
@@ -1058,7 +1058,7 @@ const Ot = {
 `).slice(0, s).join(`
 `);
   }
-}, zt = {
+}, Kt = {
   name: "tail",
   valuedFlags: ["n"],
   execute: async ({ args: o, flagValues: e, fs: t, pipeInput: r }) => {
@@ -1166,8 +1166,8 @@ const Ot = {
   Bt,
   Ht,
   Yt,
-  Kt,
   zt,
+  Kt,
   qt,
   Jt,
   Vt,
@@ -1609,7 +1609,7 @@ Notice: Account is locked until a password is set via 'passwd'.`;
 }, Dr = [
   Ar,
   Nr
-], He = [
+], Ye = [
   ...gr,
   ...Lt,
   ...Qt,
@@ -1617,7 +1617,7 @@ Notice: Account is locked until a password is set via 'passwd'.`;
   ...Dr
 ], Ur = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
   __proto__: null,
-  commandList: He
+  commandList: Ye
 }, Symbol.toStringTag, { value: "Module" }));
 class Pr {
   constructor() {
@@ -1625,7 +1625,7 @@ class Pr {
     this.loadCommands();
   }
   loadCommands() {
-    He.forEach((e) => {
+    Ye.forEach((e) => {
       this.commands.set(e.name, e), e.alias && e.alias.forEach((t) => this.commands.set(t, e));
     });
   }
@@ -2146,11 +2146,11 @@ var pe = { exports: {} }, q = {};
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
-var Ge;
+var Le;
 function qr() {
-  if (Ge) return q;
-  Ge = 1;
-  var o = We, e = Symbol.for("react.element"), t = Symbol.for("react.fragment"), r = Object.prototype.hasOwnProperty, s = o.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.ReactCurrentOwner, n = { key: !0, ref: !0, __self: !0, __source: !0 };
+  if (Le) return q;
+  Le = 1;
+  var o = He, e = Symbol.for("react.element"), t = Symbol.for("react.fragment"), r = Object.prototype.hasOwnProperty, s = o.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.ReactCurrentOwner, n = { key: !0, ref: !0, __self: !0, __source: !0 };
   function i(c, u, l) {
     var h, d = {}, p = null, w = null;
     l !== void 0 && (p = "" + l), u.key !== void 0 && (p = "" + u.key), u.ref !== void 0 && (w = u.ref);
@@ -2160,7 +2160,7 @@ function qr() {
   }
   return q.Fragment = t, q.jsx = i, q.jsxs = i, q;
 }
-var K = {};
+var z = {};
 /**
  * @license React
  * react-jsx-runtime.development.js
@@ -2170,10 +2170,10 @@ var K = {};
  * This source code is licensed under the MIT license found in the
  * LICENSE file in the root directory of this source tree.
  */
-var Le;
-function Kr() {
-  return Le || (Le = 1, process.env.NODE_ENV !== "production" && function() {
-    var o = We, e = Symbol.for("react.element"), t = Symbol.for("react.portal"), r = Symbol.for("react.fragment"), s = Symbol.for("react.strict_mode"), n = Symbol.for("react.profiler"), i = Symbol.for("react.provider"), c = Symbol.for("react.context"), u = Symbol.for("react.forward_ref"), l = Symbol.for("react.suspense"), h = Symbol.for("react.suspense_list"), d = Symbol.for("react.memo"), p = Symbol.for("react.lazy"), w = Symbol.for("react.offscreen"), S = Symbol.iterator, P = "@@iterator";
+var We;
+function zr() {
+  return We || (We = 1, process.env.NODE_ENV !== "production" && function() {
+    var o = He, e = Symbol.for("react.element"), t = Symbol.for("react.portal"), r = Symbol.for("react.fragment"), s = Symbol.for("react.strict_mode"), n = Symbol.for("react.profiler"), i = Symbol.for("react.provider"), c = Symbol.for("react.context"), u = Symbol.for("react.forward_ref"), l = Symbol.for("react.suspense"), h = Symbol.for("react.suspense_list"), d = Symbol.for("react.memo"), p = Symbol.for("react.lazy"), w = Symbol.for("react.offscreen"), S = Symbol.iterator, P = "@@iterator";
     function G(a) {
       if (a === null || typeof a != "object")
         return null;
@@ -2198,10 +2198,10 @@ function Kr() {
         $.unshift("Warning: " + f), Function.prototype.apply.call(console[a], console, $);
       }
     }
-    var M = !1, F = !1, z = !1, se = !1, J = !1, V;
+    var M = !1, F = !1, K = !1, se = !1, J = !1, V;
     V = Symbol.for("react.module.reference");
     function ne(a) {
-      return !!(typeof a == "string" || typeof a == "function" || a === r || a === n || J || a === s || a === l || a === h || se || a === w || M || F || z || typeof a == "object" && a !== null && (a.$$typeof === p || a.$$typeof === d || a.$$typeof === i || a.$$typeof === c || a.$$typeof === u || // This needs to include all possible module reference object
+      return !!(typeof a == "string" || typeof a == "function" || a === r || a === n || J || a === s || a === l || a === h || se || a === w || M || F || K || typeof a == "object" && a !== null && (a.$$typeof === p || a.$$typeof === d || a.$$typeof === i || a.$$typeof === c || a.$$typeof === u || // This needs to include all possible module reference object
       // types supported by any Flight configuration anywhere since
       // we don't know which Flight build this will end up being used
       // with.
@@ -2266,7 +2266,7 @@ function Kr() {
     function xe() {
     }
     xe.__reactDisabledLog = !0;
-    function Ye() {
+    function Be() {
       {
         if (Y === 0) {
           ge = console.log, ye = console.info, ve = console.warn, Se = console.error, we = console.group, Ee = console.groupCollapsed, be = console.groupEnd;
@@ -2289,7 +2289,7 @@ function Kr() {
         Y++;
       }
     }
-    function Be() {
+    function qe() {
       {
         if (Y--, Y === 0) {
           var a = {
@@ -2340,8 +2340,8 @@ function Kr() {
     }
     var ae = !1, Z;
     {
-      var qe = typeof WeakMap == "function" ? WeakMap : Map;
-      Z = new qe();
+      var ze = typeof WeakMap == "function" ? WeakMap : Map;
+      Z = new ze();
     }
     function $e(a, f) {
       if (!a || ae)
@@ -2356,7 +2356,7 @@ function Kr() {
       var x = Error.prepareStackTrace;
       Error.prepareStackTrace = void 0;
       var $;
-      $ = oe.current, oe.current = null, Ye();
+      $ = oe.current, oe.current = null, Be();
       try {
         if (f) {
           var b = function() {
@@ -2409,7 +2409,7 @@ function Kr() {
             }
         }
       } finally {
-        ae = !1, oe.current = $, Be(), Error.prepareStackTrace = x;
+        ae = !1, oe.current = $, qe(), Error.prepareStackTrace = x;
       }
       var H = a ? a.displayName || a.name : "", j = H ? Q(H) : "";
       return typeof a == "function" && Z.set(a, j), j;
@@ -2417,7 +2417,7 @@ function Kr() {
     function Ke(a, f, m) {
       return $e(a, !1);
     }
-    function ze(a) {
+    function Je(a) {
       var f = a.prototype;
       return !!(f && f.isReactComponent);
     }
@@ -2425,7 +2425,7 @@ function Kr() {
       if (a == null)
         return "";
       if (typeof a == "function")
-        return $e(a, ze(a));
+        return $e(a, Je(a));
       if (typeof a == "string")
         return Q(a);
       switch (a) {
@@ -2458,7 +2458,7 @@ function Kr() {
       } else
         Te.setExtraStackFrame(null);
     }
-    function Je(a, f, m, v, x) {
+    function Ve(a, f, m, v, x) {
       {
         var $ = Function.call.bind(B);
         for (var b in a)
@@ -2477,17 +2477,17 @@ function Kr() {
           }
       }
     }
-    var Ve = Array.isArray;
+    var Xe = Array.isArray;
     function ce(a) {
-      return Ve(a);
+      return Xe(a);
     }
-    function Xe(a) {
+    function Qe(a) {
       {
         var f = typeof Symbol == "function" && Symbol.toStringTag, m = f && a[Symbol.toStringTag] || a.constructor.name || "Object";
         return m;
       }
     }
-    function Qe(a) {
+    function Ze(a) {
       try {
         return Ae(a), !1;
       } catch {
@@ -2498,16 +2498,16 @@ function Kr() {
       return "" + a;
     }
     function Ne(a) {
-      if (Qe(a))
-        return R("The provided key is an unsupported type %s. This value must be coerced to a string before before using it here.", Xe(a)), Ae(a);
+      if (Ze(a))
+        return R("The provided key is an unsupported type %s. This value must be coerced to a string before before using it here.", Qe(a)), Ae(a);
     }
-    var De = _.ReactCurrentOwner, Ze = {
+    var De = _.ReactCurrentOwner, et = {
       key: !0,
       ref: !0,
       __self: !0,
       __source: !0
     }, Ue, Pe;
-    function et(a) {
+    function tt(a) {
       if (B.call(a, "ref")) {
         var f = Object.getOwnPropertyDescriptor(a, "ref").get;
         if (f && f.isReactWarning)
@@ -2515,7 +2515,7 @@ function Kr() {
       }
       return a.ref !== void 0;
     }
-    function tt(a) {
+    function rt(a) {
       if (B.call(a, "key")) {
         var f = Object.getOwnPropertyDescriptor(a, "key").get;
         if (f && f.isReactWarning)
@@ -2523,10 +2523,10 @@ function Kr() {
       }
       return a.key !== void 0;
     }
-    function rt(a, f) {
+    function st(a, f) {
       typeof a.ref == "string" && De.current;
     }
-    function st(a, f) {
+    function nt(a, f) {
       {
         var m = function() {
           Ue || (Ue = !0, R("%s: `key` is not a prop. Trying to access it will result in `undefined` being returned. If you need to access the same value within the child component, you should pass it as a different prop. (https://reactjs.org/link/special-props)", f));
@@ -2537,7 +2537,7 @@ function Kr() {
         });
       }
     }
-    function nt(a, f) {
+    function ot(a, f) {
       {
         var m = function() {
           Pe || (Pe = !0, R("%s: `ref` is not a prop. Trying to access it will result in `undefined` being returned. If you need to access the same value within the child component, you should pass it as a different prop. (https://reactjs.org/link/special-props)", f));
@@ -2548,7 +2548,7 @@ function Kr() {
         });
       }
     }
-    var ot = function(a, f, m, v, x, $, b) {
+    var it = function(a, f, m, v, x, $, b) {
       var E = {
         // This tag allows us to uniquely identify this as a React Element
         $$typeof: e,
@@ -2577,12 +2577,12 @@ function Kr() {
         value: x
       }), Object.freeze && (Object.freeze(E.props), Object.freeze(E)), E;
     };
-    function it(a, f, m, v, x) {
+    function at(a, f, m, v, x) {
       {
         var $, b = {}, E = null, U = null;
-        m !== void 0 && (Ne(m), E = "" + m), tt(f) && (Ne(f.key), E = "" + f.key), et(f) && (U = f.ref, rt(f, x));
+        m !== void 0 && (Ne(m), E = "" + m), rt(f) && (Ne(f.key), E = "" + f.key), tt(f) && (U = f.ref, st(f, x));
         for ($ in f)
-          B.call(f, $) && !Ze.hasOwnProperty($) && (b[$] = f[$]);
+          B.call(f, $) && !et.hasOwnProperty($) && (b[$] = f[$]);
         if (a && a.defaultProps) {
           var T = a.defaultProps;
           for ($ in T)
@@ -2590,9 +2590,9 @@ function Kr() {
         }
         if (E || U) {
           var A = typeof a == "function" ? a.displayName || a.name || "Unknown" : a;
-          E && st(b, A), U && nt(b, A);
+          E && nt(b, A), U && ot(b, A);
         }
-        return ot(a, E, U, x, v, De.current, b);
+        return it(a, E, U, x, v, De.current, b);
       }
     }
     var ue = _.ReactCurrentOwner, Ce = _.ReactDebugCurrentFrame;
@@ -2620,11 +2620,11 @@ Check the render method of \`` + a + "`.";
         return "";
       }
     }
-    function at(a) {
+    function ct(a) {
       return "";
     }
     var _e = {};
-    function ct(a) {
+    function ut(a) {
       {
         var f = Oe();
         if (!f) {
@@ -2641,7 +2641,7 @@ Check the top-level render call using <` + m + ">.");
         if (!a._store || a._store.validated || a.key != null)
           return;
         a._store.validated = !0;
-        var m = ct(f);
+        var m = ut(f);
         if (_e[m])
           return;
         _e[m] = !0;
@@ -2668,7 +2668,7 @@ Check the top-level render call using <` + m + ">.");
         }
       }
     }
-    function ut(a) {
+    function lt(a) {
       {
         var f = a.type;
         if (f == null || typeof f == "string")
@@ -2684,7 +2684,7 @@ Check the top-level render call using <` + m + ">.");
           return;
         if (m) {
           var v = k(f);
-          Je(m, a.props, "prop", v, a);
+          Ve(m, a.props, "prop", v, a);
         } else if (f.PropTypes !== void 0 && !le) {
           le = !0;
           var x = k(f);
@@ -2693,7 +2693,7 @@ Check the top-level render call using <` + m + ">.");
         typeof f.getDefaultProps == "function" && !f.getDefaultProps.isReactClassApproved && R("getDefaultProps is only used on classic React.createClass definitions. Use a static property named `defaultProps` instead.");
       }
     }
-    function lt(a) {
+    function ht(a) {
       {
         for (var f = Object.keys(a.props), m = 0; m < f.length; m++) {
           var v = f[m];
@@ -2712,12 +2712,12 @@ Check the top-level render call using <` + m + ">.");
         if (!b) {
           var E = "";
           (a === void 0 || typeof a == "object" && a !== null && Object.keys(a).length === 0) && (E += " You likely forgot to export your component from the file it's defined in, or you might have mixed up default and named imports.");
-          var U = at();
+          var U = ct();
           U ? E += U : E += Oe();
           var T;
           a === null ? T = "null" : ce(a) ? T = "array" : a !== void 0 && a.$$typeof === e ? (T = "<" + (k(a.type) || "Unknown") + " />", E = " Did you accidentally export a JSX literal instead of a component?") : T = typeof a, R("React.jsx: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: %s.%s", T, E);
         }
-        var A = it(a, f, m, x, $);
+        var A = at(a, f, m, x, $);
         if (A == null)
           return A;
         if (b) {
@@ -2734,39 +2734,61 @@ Check the top-level render call using <` + m + ">.");
               ke(I, a);
         }
         if (B.call(f, "key")) {
-          var j = k(a), O = Object.keys(f).filter(function(gt) {
-            return gt !== "key";
+          var j = k(a), O = Object.keys(f).filter(function(yt) {
+            return yt !== "key";
           }), fe = O.length > 0 ? "{key: someKey, " + O.join(": ..., ") + ": ...}" : "{key: someKey}";
           if (!Me[j + fe]) {
-            var mt = O.length > 0 ? "{" + O.join(": ..., ") + ": ...}" : "{}";
+            var gt = O.length > 0 ? "{" + O.join(": ..., ") + ": ...}" : "{}";
             R(`A props object containing a "key" prop is being spread into JSX:
   let props = %s;
   <%s {...props} />
 React keys must be passed directly to JSX without using spread:
   let props = %s;
-  <%s key={someKey} {...props} />`, fe, j, mt, j), Me[j + fe] = !0;
+  <%s key={someKey} {...props} />`, fe, j, gt, j), Me[j + fe] = !0;
           }
         }
-        return a === r ? lt(A) : ut(A), A;
+        return a === r ? ht(A) : lt(A), A;
       }
     }
-    function ht(a, f, m) {
+    function ft(a, f, m) {
       return Fe(a, f, m, !0);
     }
-    function ft(a, f, m) {
+    function dt(a, f, m) {
       return Fe(a, f, m, !1);
     }
-    var dt = ft, pt = ht;
-    K.Fragment = r, K.jsx = dt, K.jsxs = pt;
-  }()), K;
+    var pt = dt, mt = ft;
+    z.Fragment = r, z.jsx = pt, z.jsxs = mt;
+  }()), z;
 }
-process.env.NODE_ENV === "production" ? pe.exports = qr() : pe.exports = Kr();
-var zr = pe.exports;
+process.env.NODE_ENV === "production" ? pe.exports = qr() : pe.exports = zr();
+var Kr = pe.exports;
 const Xr = () => {
-  const o = St(null);
+  const o = je(null), e = je(null);
   return wt(() => {
-    o.current && new Br(o.current);
-  }, []), /* @__PURE__ */ zr.jsx("div", { ref: o, className: "ubuntu-terminal-theme" });
+    if (o.current) {
+      e.current && (e.current = null);
+      try {
+        e.current = new Br(o.current);
+      } catch (t) {
+        console.error("Error initializing ReactTerminal:", t);
+      }
+      return () => {
+        e.current && (e.current = null);
+      };
+    }
+  }, []), /* @__PURE__ */ Kr.jsx(
+    "div",
+    {
+      ref: o,
+      className: "ubuntu-terminal-theme",
+      style: {
+        width: "100%",
+        height: "100%",
+        minHeight: "400px"
+        // Altura mínima para que sea usable
+      }
+    }
+  );
 };
 export {
   jr as Kernel,
