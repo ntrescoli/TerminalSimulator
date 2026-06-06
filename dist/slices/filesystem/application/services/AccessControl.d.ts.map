@@ -1,0 +1,1 @@
+{"version":3,"file":"AccessControl.d.ts","sourceRoot":"","sources":["../../../../../src/slices/filesystem/application/services/AccessControl.ts"],"names":[],"mappings":"AAAA,OAAO,KAAK,EAAE,KAAK,EAAE,MAAM,4BAA4B,CAAC;AAExD,qBAAa,aAAa;IACtB;;OAEG;WACW,SAAS,CACnB,IAAI,EAAE,KAAK,EACX,IAAI,EAAE,MAAM,EACZ,MAAM,EAAE,MAAM,GAAG,OAAO,GAAG,SAAS,EACpC,QAAQ,EAAE,MAAM,GACjB,OAAO;CAqBb"}

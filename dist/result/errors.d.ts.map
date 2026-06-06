@@ -1,0 +1,1 @@
+{"version":3,"file":"errors.d.ts","sourceRoot":"","sources":["../../src/result/errors.ts"],"names":[],"mappings":"AAAA,eAAO,MAAM,MAAM;;0BAGO,MAAM;kCACE,MAAM;6BACX,MAAM;gCACH,MAAM;+BACP,MAAM;0BACX,MAAM;6BACH,MAAM;;6BAEN,MAAM;;;0BAKT,MAAM;+BACD,MAAM;6BACR,MAAM;0BACT,MAAM;;;;;2BAML,MAAM;gCACD,MAAM;0BACZ,MAAM;+BACD,MAAM;;;iCAKJ,MAAM;4BACX,MAAM;+BACH,MAAM;;;CAGpC,CAAC"}
