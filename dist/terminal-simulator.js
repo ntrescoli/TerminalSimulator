@@ -1,20 +1,21 @@
-var vt = Object.defineProperty;
-var St = (o, e, t) => e in o ? vt(o, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : o[e] = t;
-var y = (o, e, t) => St(o, typeof e != "symbol" ? e + "" : e, t);
-import He, { useRef as je, useEffect as wt } from "react";
-class g {
+var L = Object.defineProperty;
+var j = (o, e, t) => e in o ? L(o, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : o[e] = t;
+var m = (o, e, t) => j(o, typeof e != "symbol" ? e + "" : e, t);
+import { jsx as _ } from "react/jsx-runtime";
+import { useRef as R, useEffect as W } from "react";
+class f {
   constructor(e, t, r) {
-    y(this, "isSuccess");
-    y(this, "isFailure");
-    y(this, "_error");
-    y(this, "_value");
+    m(this, "isSuccess");
+    m(this, "isFailure");
+    m(this, "_error");
+    m(this, "_value");
     this.isSuccess = e, this.isFailure = !e, this._error = t, this._value = r;
   }
   static ok(e) {
-    return new g(!0, void 0, e);
+    return new f(!0, void 0, e);
   }
   static fail(e) {
-    return new g(!1, e, void 0);
+    return new f(!1, e, void 0);
   }
   /**
    * Extrae el valor en caso de éxito.
@@ -34,7 +35,7 @@ class g {
     return this._error || "Unknown error";
   }
 }
-const N = {
+const y = {
   // --- FILESYSTEM ERRORS ---
   FS: {
     NOT_FOUND: (o) => `bash: ${o}: No such file or directory`,
@@ -48,15 +49,15 @@ const N = {
     UNKNOWN_TYPE: (o) => `bash: ${o}: unknown file type`
   }
 };
-class Et {
+class H {
   /**
    * Valida si un usuario tiene permiso para realizar una acción
    */
   static canAccess(e, t, r, s) {
-    return t === "root" ? !0 : ["/etc", "/bin", "/var", "/sbin"].some((c) => s.startsWith(c)) && r === "write" ? !1 : e.owner === t ? e.permissions.user[r] : e.permissions.others[r];
+    return t === "root" ? !0 : ["/etc", "/bin", "/var", "/sbin"].some((a) => s.startsWith(a)) && r === "write" ? !1 : e.owner === t ? e.permissions.user[r] : e.permissions.others[r];
   }
 }
-class re {
+class A {
   /**
    * Crea un nodo desde cero (para mkdir, touch, etc.)
    */
@@ -79,7 +80,7 @@ class re {
     };
   }
 }
-class D {
+class S {
   /**
    * Toma una ruta y devuelve el nodo correspondiente o null.
    */
@@ -89,14 +90,14 @@ class D {
     const s = e.startsWith("~") ? e.replace("~", "/home") : e;
     let n = s.startsWith("/") ? r : t;
     const i = s.split("/").filter(Boolean);
-    for (const c of i)
-      if (c !== ".")
-        if (c === "..")
+    for (const a of i)
+      if (a !== ".")
+        if (a === "..")
           n = n.parent || n;
         else {
-          const u = n.children.find((l) => l.name === c);
-          if (!u) return null;
-          n = u;
+          const c = n.children.find((u) => u.name === a);
+          if (!c) return null;
+          n = c;
         }
     return n;
   }
@@ -110,13 +111,13 @@ class D {
     return r || "/";
   }
 }
-class bt {
+class B {
   constructor(e) {
-    y(this, "root");
-    y(this, "currentDirectory");
-    y(this, "previousDirectory");
-    y(this, "env");
-    this.env = e, this.root = re.create("/", "dir", "root"), this.currentDirectory = this.root, this.previousDirectory = this.root;
+    m(this, "root");
+    m(this, "currentDirectory");
+    m(this, "previousDirectory");
+    m(this, "env");
+    this.env = e, this.root = A.create("/", "dir", "root"), this.currentDirectory = this.root, this.previousDirectory = this.root;
   }
   getCurrentDirectory() {
     return this.currentDirectory;
@@ -131,8 +132,8 @@ class bt {
     this.root = e;
   }
   checkAccess(e, t) {
-    const r = this.env.get("USER") || "guest", s = D.getAbsolutePath(e);
-    return Et.canAccess(e, r, t, s);
+    const r = this.env.get("USER") || "guest", s = S.getAbsolutePath(e);
+    return H.canAccess(e, r, t, s);
   }
   // --- MÉTODOS DE DATOS ---
   // public getNodes(path: string = ".", showHidden: boolean = false): INode[] {
@@ -148,11 +149,11 @@ class bt {
   getNodes(e = ".", t = !1) {
     const r = this.resolvePath(e);
     if (!r)
-      return g.fail(`cannot access '${e}': No such file or directory`);
+      return f.fail(`cannot access '${e}': No such file or directory`);
     if (r.type === "file")
-      return g.ok([r]);
+      return f.ok([r]);
     let s = [...r.children];
-    return t || (s = s.filter((n) => !n.name.startsWith("."))), g.ok(s.sort((n, i) => n.name.localeCompare(i.name)));
+    return t || (s = s.filter((n) => !n.name.startsWith("."))), f.ok(s.sort((n, i) => n.name.localeCompare(i.name)));
   }
   readdir(e) {
     const t = this.resolvePath(e);
@@ -163,7 +164,7 @@ class bt {
     return t && t.type === "dir" && t.children ? t.children : [];
   }
   resolvePath(e) {
-    return D.resolve(e, this.currentDirectory, this.root);
+    return S.resolve(e, this.currentDirectory, this.root);
   }
   // --- MÉTODOS DE ACCIÓN ---
   /**
@@ -190,55 +191,55 @@ class bt {
   touch(e, t = "") {
     const r = e.lastIndexOf("/"), s = r === -1 ? "." : e.substring(0, r) || "/", n = r === -1 ? e : e.substring(r + 1), i = this.resolvePath(s);
     if (!i || i.type !== "dir")
-      return g.fail(N.FS.NOT_FOUND(e));
+      return f.fail(y.FS.NOT_FOUND(e));
     if (!this.checkAccess(i, "write"))
-      return g.fail(N.FS.PERMISSION_DENIED(e));
-    const c = i.children.find((u) => u.name === n);
-    if (c)
-      return c.type === "dir" ? g.fail(N.FS.IS_DIRECTORY(e)) : this.checkAccess(c, "write") ? (t !== "" && (c.content = t), g.ok(c)) : g.fail(N.FS.PERMISSION_DENIED(e));
+      return f.fail(y.FS.PERMISSION_DENIED(e));
+    const a = i.children.find((c) => c.name === n);
+    if (a)
+      return a.type === "dir" ? f.fail(y.FS.IS_DIRECTORY(e)) : this.checkAccess(a, "write") ? (t !== "" && (a.content = t), f.ok(a)) : f.fail(y.FS.PERMISSION_DENIED(e));
     {
-      const u = this.env.get("USER") || "root", l = re.create(n, "file", u, i, t);
-      return i.children.push(l), g.ok(l);
+      const c = this.env.get("USER") || "root", u = A.create(n, "file", c, i, t);
+      return i.children.push(u), f.ok(u);
     }
   }
   mkdir(e) {
     const t = e.lastIndexOf("/"), r = t === -1 ? "." : e.substring(0, t) || "/", s = t === -1 ? e : e.substring(t + 1), n = this.resolvePath(r);
     if (!n || n.type !== "dir")
-      return g.fail(N.FS.NOT_FOUND(e));
+      return f.fail(y.FS.NOT_FOUND(e));
     if (!this.checkAccess(n, "write"))
-      return g.fail(N.FS.PERMISSION_DENIED(e));
-    if (n.children.some((c) => c.name === s))
-      return g.fail(N.FS.ALREADY_EXISTS(e));
-    const i = re.create(s, "dir", this.env.get("USER"), n);
-    return n.children.push(i), g.ok(i);
+      return f.fail(y.FS.PERMISSION_DENIED(e));
+    if (n.children.some((a) => a.name === s))
+      return f.fail(y.FS.ALREADY_EXISTS(e));
+    const i = A.create(s, "dir", this.env.get("USER"), n);
+    return n.children.push(i), f.ok(i);
   }
   remove(e, t = !1) {
     const r = this.resolvePath(e);
-    return r ? r === this.root ? g.fail("cannot remove root directory '/'") : r === this.currentDirectory ? g.fail("cannot remove current directory '.' or '..'") : r.type === "dir" && !t ? g.fail(N.FS.IS_DIRECTORY(e)) : r.parent && !this.checkAccess(r.parent, "write") ? g.fail(N.FS.PERMISSION_DENIED(e)) : (r.parent && (r.parent.children = r.parent.children.filter((s) => s !== r), r.parent = null), g.ok()) : g.fail(N.FS.NOT_FOUND(e));
+    return r ? r === this.root ? f.fail("cannot remove root directory '/'") : r === this.currentDirectory ? f.fail("cannot remove current directory '.' or '..'") : r.type === "dir" && !t ? f.fail(y.FS.IS_DIRECTORY(e)) : r.parent && !this.checkAccess(r.parent, "write") ? f.fail(y.FS.PERMISSION_DENIED(e)) : (r.parent && (r.parent.children = r.parent.children.filter((s) => s !== r), r.parent = null), f.ok()) : f.fail(y.FS.NOT_FOUND(e));
   }
   // @/slices/filesystem/application/services/FileSystem.ts
   removeDirectory(e) {
     const t = this.resolvePath(e);
     if (!t)
-      return g.fail(N.FS.NOT_FOUND(e));
+      return f.fail(y.FS.NOT_FOUND(e));
     if (t.type !== "dir")
-      return g.fail(`Failed to remove '${e}': Not a directory`);
+      return f.fail(`Failed to remove '${e}': Not a directory`);
     if (t === this.root)
-      return g.fail("cannot remove root directory '/'");
+      return f.fail("cannot remove root directory '/'");
     if (t === this.currentDirectory)
-      return g.fail("cannot remove current directory '.'");
+      return f.fail("cannot remove current directory '.'");
     if (t.children.length > 0)
-      return g.fail(`Failed to remove '${e}': Directory not empty`);
+      return f.fail(`Failed to remove '${e}': Directory not empty`);
     const s = t.parent || this.resolvePath(e + "/..");
-    return s && !this.checkAccess(s, "write") ? g.fail(N.FS.PERMISSION_DENIED(e)) : (s && (s.children = s.children.filter((n) => n.name !== t.name)), g.ok());
+    return s && !this.checkAccess(s, "write") ? f.fail(y.FS.PERMISSION_DENIED(e)) : (s && (s.children = s.children.filter((n) => n.name !== t.name)), f.ok());
   }
   changeDirectory(e) {
     let t = null;
-    return e === "-" ? t = this.previousDirectory : t = this.resolvePath(e), t ? t.type !== "dir" ? g.fail(N.FS.NOT_A_DIRECTORY(e)) : (this.previousDirectory = this.currentDirectory, this.currentDirectory = t, g.ok()) : g.fail(N.FS.NOT_FOUND(e));
+    return e === "-" ? t = this.previousDirectory : t = this.resolvePath(e), t ? t.type !== "dir" ? f.fail(y.FS.NOT_A_DIRECTORY(e)) : (this.previousDirectory = this.currentDirectory, this.currentDirectory = t, f.ok()) : f.fail(y.FS.NOT_FOUND(e));
   }
   cat(e) {
     const t = this.resolvePath(e);
-    return t ? t.type === "dir" ? g.fail(N.FS.IS_DIRECTORY(e)) : this.checkAccess(t, "read") ? g.ok(t.content || "") : g.fail(N.FS.PERMISSION_DENIED(e)) : g.fail(N.FS.NOT_FOUND(e));
+    return t ? t.type === "dir" ? f.fail(y.FS.IS_DIRECTORY(e)) : this.checkAccess(t, "read") ? f.ok(t.content || "") : f.fail(y.FS.PERMISSION_DENIED(e)) : f.fail(y.FS.NOT_FOUND(e));
   }
   /**
    * Realiza una lectura directa de un archivo del sistema ignorando las restricciones 
@@ -246,7 +247,7 @@ class bt {
    */
   catSystem(e) {
     const t = this.resolvePath(e);
-    return t ? t.type !== "file" ? g.fail("Not a file") : g.ok(t.content) : g.fail("File not found");
+    return t ? t.type !== "file" ? f.fail("Not a file") : f.ok(t.content) : f.fail("File not found");
   }
   // No se usa
   getPreviousDirectory() {
@@ -266,21 +267,21 @@ class bt {
   setOwnership(e, t, r, s, n) {
     const i = this.resolvePath(e);
     if (!i)
-      return g.fail(`cannot access '${e}': No such file or directory`);
+      return f.fail(`cannot access '${e}': No such file or directory`);
     if (t !== "root") {
       if (i.owner !== t)
-        return g.fail(`changing group of '${e}': Operation not permitted`);
+        return f.fail(`changing group of '${e}': Operation not permitted`);
       if (n !== void 0 && !r.includes(t))
-        return g.fail(`changing group of '${e}': Group membership required`);
+        return f.fail(`changing group of '${e}': Group membership required`);
     }
-    return s !== void 0 && (i.owner = s), n !== void 0 && (i.group = n), g.ok();
+    return s !== void 0 && (i.owner = s), n !== void 0 && (i.group = n), f.ok();
   }
   getModificationTime(e) {
     var t;
     return ((t = this.resolvePath(e)) == null ? void 0 : t.mtime) || 0;
   }
   getType(e) {
-    return e.type === "dir" ? g.ok("dir") : e.type === "file" ? g.ok("file") : g.fail(N.FS.UNKNOWN_TYPE(e.name));
+    return e.type === "dir" ? f.ok("dir") : e.type === "file" ? f.ok("file") : f.fail(y.FS.UNKNOWN_TYPE(e.name));
   }
   /**
    * Método auxiliar para clonar un nodo en profundidad (Deep Copy)
@@ -295,59 +296,59 @@ class bt {
     return e.children && (r.children = e.children.map((s) => this.cloneNode(s, r))), r;
   }
   copy(e, t, r = !1) {
-    const s = D.resolve(e, this.currentDirectory, this.root);
-    if (!s) return g.fail(`cp: cannot stat '${e}': No such file or directory`);
+    const s = S.resolve(e, this.currentDirectory, this.root);
+    if (!s) return f.fail(`cp: cannot stat '${e}': No such file or directory`);
     if (s.type === "dir" && !r)
-      return g.fail(`cp: -r not specified; omitting directory '${e}'`);
-    const n = D.resolve(t, this.currentDirectory, this.root);
-    let i = null, c = s.name;
+      return f.fail(`cp: -r not specified; omitting directory '${e}'`);
+    const n = S.resolve(t, this.currentDirectory, this.root);
+    let i = null, a = s.name;
     if (n && n.type === "dir")
       i = n;
     else {
-      const l = t.lastIndexOf("/");
-      if (l === -1)
-        i = this.currentDirectory, c = t;
+      const u = t.lastIndexOf("/");
+      if (u === -1)
+        i = this.currentDirectory, a = t;
       else {
-        const h = t.substring(0, l) || "/";
-        i = D.resolve(h, this.currentDirectory, this.root), c = t.substring(l + 1);
+        const l = t.substring(0, u) || "/";
+        i = S.resolve(l, this.currentDirectory, this.root), a = t.substring(u + 1);
       }
     }
     if (!i || i.type !== "dir")
-      return g.fail(`cp: cannot create regular file '${t}': Not a directory`);
-    const u = this.cloneNode(s, i);
-    return u.name = c, i.children = i.children.filter((l) => l.name !== c), i.children.push(u), g.ok();
+      return f.fail(`cp: cannot create regular file '${t}': Not a directory`);
+    const c = this.cloneNode(s, i);
+    return c.name = a, i.children = i.children.filter((u) => u.name !== a), i.children.push(c), f.ok();
   }
   move(e, t) {
-    const r = D.resolve(e, this.currentDirectory, this.root);
-    if (!r) return g.fail(`mv: cannot stat '${e}': No such file or directory`);
-    if (r === this.root) return g.fail("mv: cannot move root directory '/'");
-    const s = D.resolve(t, this.currentDirectory, this.root);
+    const r = S.resolve(e, this.currentDirectory, this.root);
+    if (!r) return f.fail(`mv: cannot stat '${e}': No such file or directory`);
+    if (r === this.root) return f.fail("mv: cannot move root directory '/'");
+    const s = S.resolve(t, this.currentDirectory, this.root);
     let n = null, i = r.name;
     if (s && s.type === "dir")
       n = s;
     else {
-      const c = t.lastIndexOf("/");
-      if (c === -1)
+      const a = t.lastIndexOf("/");
+      if (a === -1)
         n = this.currentDirectory, i = t;
       else {
-        const u = t.substring(0, c) || "/";
-        n = D.resolve(u, this.currentDirectory, this.root), i = t.substring(c + 1);
+        const c = t.substring(0, a) || "/";
+        n = S.resolve(c, this.currentDirectory, this.root), i = t.substring(a + 1);
       }
     }
-    return !n || n.type !== "dir" ? g.fail(`mv: cannot move to '${t}': Not a directory`) : (r.parent && (r.parent.children = r.parent.children.filter((c) => c !== r)), r.parent = n, r.name = i, n.children = n.children.filter((c) => c.name !== i), n.children.push(r), g.ok());
+    return !n || n.type !== "dir" ? f.fail(`mv: cannot move to '${t}': Not a directory`) : (r.parent && (r.parent.children = r.parent.children.filter((a) => a !== r)), r.parent = n, r.name = i, n.children = n.children.filter((a) => a.name !== i), n.children.push(r), f.ok());
   }
   // --- CARGA INICIAL DE SEGURIDAD (CENTRALIZAR EN EL FUTURO) ---
   loadDefaults() {
-    this.root = re.create("/", "dir", "root"), this.currentDirectory = this.root, this.mkdir("home"), this.mkdir("bin"), this.mkdir("etc"), this.mkdir("var"), this.writeFile("/etc/passwd", `root:x:0:0:root:/root:/bin/bash
+    this.root = A.create("/", "dir", "root"), this.currentDirectory = this.root, this.mkdir("home"), this.mkdir("bin"), this.mkdir("etc"), this.mkdir("var"), this.writeFile("/etc/passwd", `root:x:0:0:root:/root:/bin/bash
 guest:x:1000:1000:guest:/home/guest:/bin/bash`), this.writeFile("/etc/group", `root:x:0:
 sudo:x:27:guest,nico
 `), this.writeFile("home/readme.txt", "Bienvenido al sistema de archivos avanzado.");
   }
 }
-class xt {
+class Y {
   constructor() {
-    y(this, "vars");
-    y(this, "aliases", /* @__PURE__ */ new Map());
+    m(this, "vars");
+    m(this, "aliases", /* @__PURE__ */ new Map());
     this.vars = {};
   }
   /**
@@ -414,14 +415,14 @@ class xt {
     };
   }
 }
-class $t {
+class q {
   constructor(e, t) {
-    y(this, "cachedUsers", []);
-    y(this, "cachedGroups", []);
-    y(this, "lastUsersSync", -1);
-    y(this, "lastShadowSync", -1);
+    m(this, "cachedUsers", []);
+    m(this, "cachedGroups", []);
+    m(this, "lastUsersSync", -1);
+    m(this, "lastShadowSync", -1);
     // 🌟 Nueva marca para trackear /etc/shadow
-    y(this, "lastGroupsSync", -1);
+    m(this, "lastGroupsSync", -1);
     this.fs = e, this.repository = t;
   }
   //  --- SINCRONIZACIÓN DE CACHÉ ---
@@ -525,7 +526,7 @@ class $t {
     this.repository.saveUsers(e), this.repository.saveGroups(t), this.lastUsersSync = this.fs.getModificationTime("/etc/passwd"), this.lastShadowSync = this.fs.getModificationTime("/etc/shadow"), this.lastGroupsSync = this.fs.getModificationTime("/etc/group");
   }
 }
-class Rt {
+class z {
   constructor(e) {
     this.fs = e;
   }
@@ -548,12 +549,12 @@ class Rt {
     return this.parseGroups(t);
   }
   saveUsers(e) {
-    const t = e.map((c) => `${c.username}:x:${c.uid}:${c.gid}:${c.fullName}:${c.home}:${c.shell}`).join(`
+    const t = e.map((a) => `${a.username}:x:${a.uid}:${a.gid}:${a.fullName}:${a.home}:${a.shell}`).join(`
 `);
     this.fs.writeFile("/etc/passwd", t);
-    const r = Math.floor(Date.now() / (1e3 * 60 * 60 * 24)), s = this.fs.cat("/etc/shadow"), n = s.isSuccess ? this.parseShadow(s.getValue()) : /* @__PURE__ */ new Map(), i = e.map((c) => {
-      const u = c.password || n.get(c.username) || "$6$rounds=5000$jsTerminalSalt$c37ce20fffffffff";
-      return `${c.username}:${u}:${r}:0:99999:7:::`;
+    const r = Math.floor(Date.now() / (1e3 * 60 * 60 * 24)), s = this.fs.cat("/etc/shadow"), n = s.isSuccess ? this.parseShadow(s.getValue()) : /* @__PURE__ */ new Map(), i = e.map((a) => {
+      const c = a.password || n.get(a.username) || "$6$rounds=5000$jsTerminalSalt$c37ce20fffffffff";
+      return `${a.username}:${c}:${r}:0:99999:7:::`;
     }).join(`
 `) + `
 `;
@@ -568,14 +569,14 @@ class Rt {
   parsePasswd(e) {
     return e.split(`
 `).map((t) => t.trim()).filter((t) => t !== "" && !t.startsWith("#")).map((t) => {
-      const [r, , s, n, i, c, u] = t.split(":");
+      const [r, , s, n, i, a, c] = t.split(":");
       return {
         username: r,
         uid: parseInt(s, 10) || 0,
         gid: parseInt(n, 10) || 0,
         fullName: i || r,
-        home: c || `/home/${r}`,
-        shell: u || "/bin/bash"
+        home: a || `/home/${r}`,
+        shell: c || "/bin/bash"
       };
     });
   }
@@ -595,61 +596,61 @@ class Rt {
     });
   }
 }
-class Tt {
+class K {
   constructor(e) {
     this.env = e;
   }
   async execute(e, t, r, s, n = null, i) {
-    const c = e.trim();
-    if (!c) return "";
+    const a = e.trim();
+    if (!a) return "";
     if (i != null && i.aborted)
       return "COMMAND_ABORTED";
-    if (c.includes("|")) {
-      const u = c.split("|").map((h) => h.trim());
-      let l = "";
-      for (const h of u) {
+    if (a.includes("|")) {
+      const c = a.split("|").map((l) => l.trim());
+      let u = "";
+      for (const l of c) {
         if (i != null && i.aborted)
           return "COMMAND_ABORTED";
-        l = await this.processCommandLine(h, t, r, s, l, n, i);
+        u = await this.processCommandLine(l, t, r, s, u, n, i);
       }
-      return l;
+      return u;
     }
-    return await this.processCommandLine(c, t, r, s, "", n, i);
+    return await this.processCommandLine(a, t, r, s, "", n, i);
   }
-  async processCommandLine(e, t, r, s, n = "", i = null, c) {
-    let u = e.trim(), l = null, h = !1;
-    const d = u.match(/>>\s*([^\s]+)$/), p = u.match(/>\s*([^\s]+)$/);
-    d ? (h = !0, l = d[1], u = u.replace(/>>\s*[^\s]+$/, "").trim()) : p && (h = !1, l = p[1], u = u.replace(/>\s*[^\s]+$/, "").trim());
-    const w = u.indexOf(" "), S = w === -1 ? u : u.substring(0, w), P = w === -1 ? "" : u.substring(w), G = this.env.getAlias(S.trim());
-    G && (u = `${G}${P}`.trim());
-    const _ = this.tokenize(u);
-    if (_.length === 0) return "";
-    const R = _[0].toLowerCase(), L = _.slice(1), M = t.get(R);
-    if (!M) return `-bash: ${R}: command not found`;
-    const F = M.valuedFlags || [], z = R === "sudo" ? [...F, "sudo-pass", "--sudo-pass"] : F, se = this.extractAllowedFlagsFromCommand(M, z);
-    if (c != null && c.aborted)
+  async processCommandLine(e, t, r, s, n = "", i = null, a) {
+    let c = e.trim(), u = null, l = !1;
+    const h = c.match(/>>\s*([^\s]+)$/), d = c.match(/>\s*([^\s]+)$/);
+    h ? (l = !0, u = h[1], c = c.replace(/>>\s*[^\s]+$/, "").trim()) : d && (l = !1, u = d[1], c = c.replace(/>\s*[^\s]+$/, "").trim());
+    const g = c.indexOf(" "), p = g === -1 ? c : c.substring(0, g), w = g === -1 ? "" : c.substring(g), U = this.env.getAlias(p.trim());
+    U && (c = `${U}${w}`.trim());
+    const v = this.tokenize(c);
+    if (v.length === 0) return "";
+    const E = v[0].toLowerCase(), b = v.slice(1), $ = t.get(E);
+    if (!$) return `-bash: ${E}: command not found`;
+    const N = $.valuedFlags || [], T = E === "sudo" ? [...N, "sudo-pass", "--sudo-pass"] : N, O = this.extractAllowedFlagsFromCommand($, T);
+    if (a != null && a.aborted)
       return "COMMAND_ABORTED";
-    const { options: J, args: V, flagValues: ne } = this.parseArgsAndFlags(L, z, se), X = {
-      args: this.expandGlobPatterns(V, r),
-      options: J,
-      flagValues: ne,
-      rawArgs: L,
+    const { options: C, args: k, flagValues: G } = this.parseArgsAndFlags(b, T, O), F = {
+      args: this.expandGlobPatterns(k, r),
+      options: C,
+      flagValues: G,
+      rawArgs: b,
       fs: r,
       env: this.env,
       userManager: s,
       pipeInput: n,
-      signal: c,
+      signal: a,
       kernel: i,
-      hasFlag: (C) => J.includes(C.startsWith("-") ? C : `-${C}`),
+      hasFlag: (x) => C.includes(x.startsWith("-") ? x : `-${x}`),
       rawInput: e
-    }, k = await M.execute(X);
-    if (c != null && c.aborted)
+    }, P = await $.execute(F);
+    if (a != null && a.aborted)
       return "COMMAND_ABORTED";
-    if (l) {
-      const C = r.writeFile(l, k, h);
-      return C.isSuccess ? "" : C.getError();
+    if (u) {
+      const x = r.writeFile(u, P, l);
+      return x.isSuccess ? "" : x.getError();
     }
-    return k;
+    return P;
   }
   tokenize(e) {
     const t = /"([^"]*)"|'([^']*)'|([^\s]+)/g, r = [];
@@ -660,35 +661,35 @@ class Tt {
   }
   parseArgsAndFlags(e, t = [], r) {
     const s = [], n = [], i = {};
-    for (let c = 0; c < e.length; c++) {
-      const u = e[c];
-      if (u.startsWith("-") && u.length > 1) {
-        const l = u.startsWith("--"), h = l ? [u.slice(2)] : u.slice(1).split("");
-        let d = !1;
-        for (let p = 0; p < h.length; p++) {
-          const w = h[p], S = l ? `--${w}` : `-${w}`;
-          if (r && !r.has(S))
-            if (l) {
-              n.push(u), d = !0;
+    for (let a = 0; a < e.length; a++) {
+      const c = e[a];
+      if (c.startsWith("-") && c.length > 1) {
+        const u = c.startsWith("--"), l = u ? [c.slice(2)] : c.slice(1).split("");
+        let h = !1;
+        for (let d = 0; d < l.length; d++) {
+          const g = l[d], p = u ? `--${g}` : `-${g}`;
+          if (r && !r.has(p))
+            if (u) {
+              n.push(c), h = !0;
               break;
             } else {
-              const P = "-" + h.slice(p).join("");
-              n.push(P), d = !0;
+              const w = "-" + l.slice(d).join("");
+              n.push(w), h = !0;
               break;
             }
-          if (s.push(S), t.includes(w) || t.includes(S)) {
-            if (!l && u.slice(p + 2).length > 0) {
-              i[S] = u.slice(p + 2), d = !0;
+          if (s.push(p), t.includes(g) || t.includes(p)) {
+            if (!u && c.slice(d + 2).length > 0) {
+              i[p] = c.slice(d + 2), h = !0;
               break;
-            } else if (c + 1 < e.length) {
-              i[S] = e[c + 1], c++, d = !0;
+            } else if (a + 1 < e.length) {
+              i[p] = e[a + 1], a++, h = !0;
               break;
             }
           }
         }
-        if (d) continue;
+        if (h) continue;
       } else
-        n.push(u);
+        n.push(c);
     }
     return { options: s, args: n, flagValues: i };
   }
@@ -699,13 +700,13 @@ class Tt {
         r.push(s);
         continue;
       }
-      const n = s.lastIndexOf("/"), i = n === -1 ? "" : s.substring(0, n + 1), c = n === -1 ? "." : s.substring(0, n) || "/", u = n === -1 ? s : s.substring(n + 1), l = t.resolvePath(c);
-      if (!l || l.type !== "dir") {
+      const n = s.lastIndexOf("/"), i = n === -1 ? "" : s.substring(0, n + 1), a = n === -1 ? "." : s.substring(0, n) || "/", c = n === -1 ? s : s.substring(n + 1), u = t.resolvePath(a);
+      if (!u || u.type !== "dir") {
         r.push(s);
         continue;
       }
-      const h = this.globToRegExp(u), d = l.children.filter((p) => p.name.startsWith(".") && !u.startsWith(".") ? !1 : h.test(p.name)).map((p) => `${i}${p.name}`);
-      d.length > 0 ? r.push(...d) : r.push(s);
+      const l = this.globToRegExp(c), h = u.children.filter((d) => d.name.startsWith(".") && !c.startsWith(".") ? !1 : l.test(d.name)).map((d) => `${i}${d.name}`);
+      h.length > 0 ? r.push(...h) : r.push(s);
     }
     return r;
   }
@@ -719,21 +720,21 @@ class Tt {
       let i;
       for (; (i = s.exec(r)) !== null; )
         n.add(i[1]);
-      for (const c of t)
-        c.startsWith("-") || c.startsWith("--") ? n.add(c) : c.length === 1 ? n.add(`-${c}`) : n.add(`--${c}`);
+      for (const a of t)
+        a.startsWith("-") || a.startsWith("--") ? n.add(a) : a.length === 1 ? n.add(`-${a}`) : n.add(`--${a}`);
       return n.size > 0 ? n : void 0;
     } catch {
       return;
     }
   }
 }
-const At = {
+const J = {
   name: "cd",
   execute: ({ args: o, fs: e, env: t }) => {
     const r = o[0] || "~", s = e.changeDirectory(r);
-    return s.isFailure ? `cd: ${s.getError()}` : r === "-" ? D.getAbsolutePath(e.getCurrentDirectory()) : (t.set("PWD", D.getAbsolutePath(e.getCurrentDirectory())), "");
+    return s.isFailure ? `cd: ${s.getError()}` : r === "-" ? S.getAbsolutePath(e.getCurrentDirectory()) : (t.set("PWD", S.getAbsolutePath(e.getCurrentDirectory())), "");
   }
-}, Nt = {
+}, Q = {
   name: "chmod",
   // description: 'Cambia los permisos de acceso a ficheros o directorios',
   execute: async ({ args: o, fs: e, env: t }) => {
@@ -744,14 +745,14 @@ const At = {
     if (i !== "root" && n.owner !== i)
       return `chmod: changing permissions of '${s}': Operation not permitted`;
     try {
-      let c;
-      return /^[0-7]{3}$/.test(r) ? c = Dt(r) : c = Ut(n.permissions, r), n.permissions = c, "";
+      let a;
+      return /^[0-7]{3}$/.test(r) ? a = X(r) : a = Z(n.permissions, r), n.permissions = a, "";
     } catch {
       return `chmod: invalid mode: '${r}'`;
     }
   }
 };
-function Dt(o) {
+function X(o) {
   const e = o.split("").map(Number), t = (r) => ({
     read: !!(r & 4),
     write: !!(r & 2),
@@ -763,63 +764,63 @@ function Dt(o) {
     others: t(e[2])
   };
 }
-function Ut(o, e) {
+function Z(o, e) {
   const t = JSON.parse(JSON.stringify(o)), r = e.match(/^([ugoa]*)([+\-=])([rwx]*)$/);
   if (!r) throw new Error();
-  const [, s, n, i] = r, c = s === "" || s.includes("a") ? ["user", "group", "others"] : [];
-  s.includes("u") && c.push("user"), s.includes("g") && c.push("group"), s.includes("o") && c.push("others");
-  const u = [];
-  return i.includes("r") && u.push("read"), i.includes("w") && u.push("write"), i.includes("x") && u.push("execute"), c.forEach((l) => {
-    u.forEach((h) => {
-      n === "+" && (t[l][h] = !0), n === "-" && (t[l][h] = !1), n === "=" && (t[l].read = i.includes("r"), t[l].write = i.includes("w"), t[l].execute = i.includes("x"));
+  const [, s, n, i] = r, a = s === "" || s.includes("a") ? ["user", "group", "others"] : [];
+  s.includes("u") && a.push("user"), s.includes("g") && a.push("group"), s.includes("o") && a.push("others");
+  const c = [];
+  return i.includes("r") && c.push("read"), i.includes("w") && c.push("write"), i.includes("x") && c.push("execute"), a.forEach((u) => {
+    c.forEach((l) => {
+      n === "+" && (t[u][l] = !0), n === "-" && (t[u][l] = !1), n === "=" && (t[u].read = i.includes("r"), t[u].write = i.includes("w"), t[u].execute = i.includes("x"));
     });
   }), t;
 }
-const Pt = {
+const V = {
   name: "ls",
   execute: ({ args: o, hasFlag: e, fs: t }) => {
-    const r = o.length ? o : ["."], s = [], n = r.reduce((u, l) => {
-      const h = t.resolvePath(l);
-      return u + ((h == null ? void 0 : h.type) === "dir" ? 1 : 0);
+    const r = o.length ? o : ["."], s = [], n = r.reduce((c, u) => {
+      const l = t.resolvePath(u);
+      return c + ((l == null ? void 0 : l.type) === "dir" ? 1 : 0);
     }, 0), i = n > 1 || n > 0 && r.length > 1;
-    for (const u of r) {
-      const l = t.getNodes(u, e("-a"));
-      if (l.isFailure)
-        return `ls: ${l.getError()}`;
-      const h = l.getValue();
-      e("-S") ? h.sort((p, w) => {
-        var S, P;
-        return (((S = w.content) == null ? void 0 : S.length) || 0) - (((P = p.content) == null ? void 0 : P.length) || 0);
-      }) : e("-r") && h.reverse();
-      let d;
-      e("-l") ? d = h.map((p) => {
-        var F;
-        const S = (p.type === "dir" ? "d" : "-") + de(p.permissions.user) + de(p.permissions.group) + de(p.permissions.others), P = p.owner.padEnd(10), G = (p.group || p.owner).padEnd(10), _ = p.type === "dir" ? 4096 : ((F = p.content) == null ? void 0 : F.length) || 0, R = e("-h") ? Ct(_) : _.toString(), L = new Date(p.createdAt).toLocaleDateString("es-ES", {
+    for (const c of r) {
+      const u = t.getNodes(c, e("-a"));
+      if (u.isFailure)
+        return `ls: ${u.getError()}`;
+      const l = u.getValue();
+      e("-S") ? l.sort((d, g) => {
+        var p, w;
+        return (((p = g.content) == null ? void 0 : p.length) || 0) - (((w = d.content) == null ? void 0 : w.length) || 0);
+      }) : e("-r") && l.reverse();
+      let h;
+      e("-l") ? h = l.map((d) => {
+        var N;
+        const p = (d.type === "dir" ? "d" : "-") + D(d.permissions.user) + D(d.permissions.group) + D(d.permissions.others), w = d.owner.padEnd(10), U = (d.group || d.owner).padEnd(10), v = d.type === "dir" ? 4096 : ((N = d.content) == null ? void 0 : N.length) || 0, E = e("-h") ? ee(v) : v.toString(), b = new Date(d.createdAt).toLocaleDateString("es-ES", {
           month: "short",
           day: "2-digit",
           hour: "2-digit",
           minute: "2-digit"
-        }), M = Ge(p, e("-F"));
-        return `${S}  1 ${P} ${G} ${R.padStart(8)} ${L} ${M}`;
+        }), $ = I(d, e("-F"));
+        return `${p}  1 ${w} ${U} ${E.padStart(8)} ${b} ${$}`;
       }).join(`
-`) : d = h.map((p) => Ge(p, e("-F"))).join(e("-1") ? `
-` : "  "), i ? s.push(`${u}:`, d) : s.push(d);
+`) : h = l.map((d) => I(d, e("-F"))).join(e("-1") ? `
+` : "  "), i ? s.push(`${c}:`, h) : s.push(h);
     }
-    const c = e("-1") ? `
+    const a = e("-1") ? `
 ` : i ? `
 
 ` : "  ";
-    return s.join(c);
+    return s.join(a);
   }
 };
-function de(o) {
+function D(o) {
   return [
     o.read ? "r" : "-",
     o.write ? "w" : "-",
     o.execute ? "x" : "-"
   ].join("");
 }
-function Ct(o) {
+function ee(o) {
   if (o < 1024) return `${o}B`;
   const e = ["K", "M", "G"];
   let t = -1, r = o;
@@ -827,27 +828,27 @@ function Ct(o) {
     r /= 1024, t++;
   return `${r.toFixed(1)}${e[t]}`;
 }
-function Ge(o, e) {
+function I(o, e) {
   return o.type === "dir" ? `${o.name}/` : e && o.permissions.execute ? `${o.name}*` : o.name;
 }
-const Ot = {
+const te = {
   name: "mkdir",
   execute: ({ args: o, fs: e }) => {
     if (o.length < 1) return "mkdir: missing operand";
     const t = e.mkdir(o[0]);
     return t.isFailure ? `mkdir: ${t.getError()}` : "";
   }
-}, _t = {
+}, re = {
   name: "pwd",
-  execute: ({ fs: o }) => D.getAbsolutePath(o.getCurrentDirectory())
-}, It = {
+  execute: ({ fs: o }) => S.getAbsolutePath(o.getCurrentDirectory())
+}, se = {
   name: "touch",
   execute: ({ args: o, fs: e }) => {
     if (o.length < 1) return "touch: missing file operand";
     const t = o[0], r = o[1] || "", s = e.touch(t, r);
     return s.isFailure ? `touch: ${s.getError()}` : "";
   }
-}, kt = {
+}, ne = {
   name: "file",
   execute: ({ args: o, fs: e }) => {
     if (o.length < 1) return "file: missing file operand";
@@ -856,24 +857,24 @@ const Ot = {
     const s = e.getType(r);
     return s.isFailure ? `file: ${s.getError()}` : s.getValue() === "dir" ? `${t}: directory` : `${t}: regular file`;
   }
-}, Mt = {
+}, oe = {
   name: "rm",
   execute: ({ args: o, hasFlag: e, fs: t }) => {
     if (o.length < 1)
       return "rm: missing operand";
     const r = e("-r") || e("-R"), s = e("-f"), n = [];
     for (const i of o) {
-      const c = t.remove(i, r);
-      if (c.isFailure) {
-        if (s && /not found|No such file or directory/i.test(c.getError()))
+      const a = t.remove(i, r);
+      if (a.isFailure) {
+        if (s && /not found|No such file or directory/i.test(a.getError()))
           continue;
-        n.push(`rm: cannot remove '${i}': ${c.getError()}`);
+        n.push(`rm: cannot remove '${i}': ${a.getError()}`);
       }
     }
     return n.length > 0 ? n.join(`
 `) : "";
   }
-}, Ft = {
+}, ie = {
   name: "rmdir",
   execute: ({ args: o, fs: e }) => {
     if (o.length < 1)
@@ -886,7 +887,7 @@ const Ot = {
     return t.length > 0 ? t.join(`
 `) : "";
   }
-}, jt = {
+}, ae = {
   name: "cp",
   execute: ({ args: o, hasFlag: e, fs: t }) => {
     if (o.length < 2)
@@ -894,7 +895,7 @@ const Ot = {
     const r = o[0], s = o[1], n = e("-r") || e("-R") || e("--recursive"), i = t.copy(r, s, n);
     return i.isFailure ? i.getError() : "";
   }
-}, Gt = {
+}, ce = {
   name: "mv",
   execute: ({ args: o, fs: e }) => {
     if (o.length < 2)
@@ -902,19 +903,19 @@ const Ot = {
     const t = o[0], r = o[1], s = e.move(t, r);
     return s.isFailure ? s.getError() : "";
   }
-}, Lt = [
-  At,
-  Nt,
-  Pt,
-  Ot,
-  _t,
-  It,
-  kt,
-  Mt,
-  Ft,
-  jt,
-  Gt
-], Wt = {
+}, ue = [
+  J,
+  Q,
+  V,
+  te,
+  re,
+  se,
+  ne,
+  oe,
+  ie,
+  ae,
+  ce
+], le = {
   name: "cat",
   execute: ({ args: o, fs: e, hasFlag: t }) => {
     if (o.length < 1) return "cat: missing file operand";
@@ -933,59 +934,59 @@ const Ot = {
 `).map((n, i) => `${(i + 1).toString().padStart(6)}  ${n}`).join(`
 `) : s;
   }
-}, Ht = {
+}, he = {
   name: "cmp",
   valuedFlags: [],
   execute: async ({ args: o, fs: e }) => {
     if (o.length < 2)
       return "cmp: usage: cmp file1 file2";
-    const t = o[0].trim(), r = o[1].trim(), s = e.getRoot(), n = e.getCurrentDirectory(), i = D.resolve(t, n, s);
+    const t = o[0].trim(), r = o[1].trim(), s = e.getRoot(), n = e.getCurrentDirectory(), i = S.resolve(t, n, s);
     if (!i || i.type !== "file")
       return `cmp: ${t}: No such file or directory`;
-    const c = D.resolve(r, n, s);
-    if (!c || c.type !== "file")
+    const a = S.resolve(r, n, s);
+    if (!a || a.type !== "file")
       return `cmp: ${r}: No such file or directory`;
-    const u = i.content || "", l = c.content || "";
-    if (u === l)
+    const c = i.content || "", u = a.content || "";
+    if (c === u)
       return "";
-    const h = Math.min(u.length, l.length);
-    let d = 1, p = 1;
-    for (let w = 0; w < h; w++) {
-      const S = u[w], P = l[w];
-      if (S !== P)
-        return `${t} ${r} differ: byte ${p}, line ${d}`;
-      S === `
-` && d++, p++;
+    const l = Math.min(c.length, u.length);
+    let h = 1, d = 1;
+    for (let g = 0; g < l; g++) {
+      const p = c[g], w = u[g];
+      if (p !== w)
+        return `${t} ${r} differ: byte ${d}, line ${h}`;
+      p === `
+` && h++, d++;
     }
-    return u.length > l.length ? `cmp: EOF on ${r} after byte ${p - 1}, line ${d}` : `cmp: EOF on ${t} after byte ${p - 1}, line ${d}`;
+    return c.length > u.length ? `cmp: EOF on ${r} after byte ${d - 1}, line ${h}` : `cmp: EOF on ${t} after byte ${d - 1}, line ${h}`;
   }
-}, Yt = {
+}, de = {
   name: "diff",
   valuedFlags: [],
   execute: async ({ args: o, fs: e }) => {
     if (o.length < 2)
       return "diff: usage: diff file1 file2";
-    const t = o[0].trim(), r = o[1].trim(), s = e.getRoot(), n = e.getCurrentDirectory(), i = D.resolve(t, n, s);
+    const t = o[0].trim(), r = o[1].trim(), s = e.getRoot(), n = e.getCurrentDirectory(), i = S.resolve(t, n, s);
     if (!i || i.type !== "file")
       return `diff: ${t}: No such file or directory`;
-    const c = D.resolve(r, n, s);
-    if (!c || c.type !== "file")
+    const a = S.resolve(r, n, s);
+    if (!a || a.type !== "file")
       return `diff: ${r}: No such file or directory`;
-    const u = (i.content || "").split(`
-`), l = (c.content || "").split(`
+    const c = (i.content || "").split(`
+`), u = (a.content || "").split(`
 `);
-    if (i.content === c.content)
+    if (i.content === a.content)
       return "";
-    const h = [], d = Math.max(u.length, l.length);
-    let p = 0;
-    for (; p < d; ) {
-      const w = u[p], S = l[p];
-      w !== void 0 && S !== void 0 && w !== S ? (h.push(`${p + 1}c${p + 1}`), h.push(`< ${w}`), h.push("---"), h.push(`> ${S}`)) : w !== void 0 && S === void 0 ? (h.push(`${p + 1}d${l.length}`), h.push(`< ${w}`)) : w === void 0 && S !== void 0 && (h.push(`${u.length}a${p + 1}`), h.push(`> ${S}`)), p++;
+    const l = [], h = Math.max(c.length, u.length);
+    let d = 0;
+    for (; d < h; ) {
+      const g = c[d], p = u[d];
+      g !== void 0 && p !== void 0 && g !== p ? (l.push(`${d + 1}c${d + 1}`), l.push(`< ${g}`), l.push("---"), l.push(`> ${p}`)) : g !== void 0 && p === void 0 ? (l.push(`${d + 1}d${u.length}`), l.push(`< ${g}`)) : g === void 0 && p !== void 0 && (l.push(`${c.length}a${d + 1}`), l.push(`> ${p}`)), d++;
     }
-    return h.join(`
+    return l.join(`
 `);
   }
-}, Bt = {
+}, fe = {
   name: "grep",
   execute: ({ args: o, hasFlag: e, fs: t, pipeInput: r }) => {
     const s = o[0], n = o[1];
@@ -994,28 +995,28 @@ const Ot = {
     if (r)
       i = r;
     else if (n) {
-      const p = t.cat(n);
-      if (p.isFailure)
-        return `grep: ${p.getError()}`;
-      i = p.getValue();
+      const d = t.cat(n);
+      if (d.isFailure)
+        return `grep: ${d.getError()}`;
+      i = d.getValue();
     } else
       return "grep: missing input";
-    const c = e("-i"), u = e("-v"), l = e("-c");
-    let h;
+    const a = e("-i"), c = e("-v"), u = e("-c");
+    let l;
     try {
-      h = new RegExp(s, c ? "i" : "");
+      l = new RegExp(s, a ? "i" : "");
     } catch {
       return `grep: invalid regular expression: ${s}`;
     }
-    const d = i.split(`
-`).filter((p) => {
-      const w = h.test(p);
-      return u ? !w : w;
+    const h = i.split(`
+`).filter((d) => {
+      const g = l.test(d);
+      return c ? !g : g;
     });
-    return l ? d.length.toString() : d.join(`
+    return u ? h.length.toString() : h.join(`
 `);
   }
-}, qt = {
+}, me = {
   name: "wc",
   // No añadimos valuedFlags porque -l, -w y -c son booleanas, no esperan un parámetro.
   execute: async ({ args: o, hasFlag: e, fs: t, pipeInput: r }) => {
@@ -1025,23 +1026,23 @@ const Ot = {
       n = r;
     else {
       if (!s) return "wc: missing file operand";
-      const S = t.resolvePath(s);
-      if (!S || S.type !== "file")
+      const p = t.resolvePath(s);
+      if (!p || p.type !== "file")
         return `wc: ${s}: No such file or directory`;
-      n = S.content || "";
+      n = p.content || "";
     }
     const i = n === "" ? 0 : n.split(`
-`).length, c = n.trim() === "" ? 0 : n.trim().split(/\s+/).length, u = n.length, l = e("l"), h = e("w"), d = e("c") || e("m"), p = !l && !h && !d, w = [];
-    return (l || p) && w.push(i.toString()), (h || p) && w.push(c.toString()), (d || p) && w.push(u.toString()), !r && s && w.push(s), w.join("	");
+`).length, a = n.trim() === "" ? 0 : n.trim().split(/\s+/).length, c = n.length, u = e("l"), l = e("w"), h = e("c") || e("m"), d = !u && !l && !h, g = [];
+    return (u || d) && g.push(i.toString()), (l || d) && g.push(a.toString()), (h || d) && g.push(c.toString()), !r && s && g.push(s), g.join("	");
   }
-}, Kt = {
+}, pe = {
   name: "head",
   valuedFlags: ["n"],
   execute: async ({ args: o, flagValues: e, fs: t, pipeInput: r }) => {
     let s = 10;
     if (e && e["-n"]) {
-      const u = parseInt(e["-n"]);
-      !isNaN(u) && u > 0 && (s = u);
+      const c = parseInt(e["-n"]);
+      !isNaN(c) && c > 0 && (s = c);
     }
     const n = o[0] ? o[0].trim() : "";
     let i = "";
@@ -1049,23 +1050,23 @@ const Ot = {
       i = r;
     else {
       if (!n) return "head: missing file operand";
-      const u = t.resolvePath(n);
-      if (!u || u.type !== "file")
+      const c = t.resolvePath(n);
+      if (!c || c.type !== "file")
         return `head: cannot open '${n}' for reading: No such file or directory`;
-      i = u.content || "";
+      i = c.content || "";
     }
     return i.split(`
 `).slice(0, s).join(`
 `);
   }
-}, zt = {
+}, ge = {
   name: "tail",
   valuedFlags: ["n"],
   execute: async ({ args: o, flagValues: e, fs: t, pipeInput: r }) => {
     let s = 10;
     if (e && e["-n"]) {
-      const u = parseInt(e["-n"]);
-      !isNaN(u) && u > 0 && (s = u);
+      const c = parseInt(e["-n"]);
+      !isNaN(c) && c > 0 && (s = c);
     }
     const n = o[0] ? o[0].trim() : "";
     let i = "";
@@ -1073,17 +1074,17 @@ const Ot = {
       i = r;
     else {
       if (!n) return "tail: missing file operand";
-      const u = t.resolvePath(n);
-      if (!u || u.type !== "file")
+      const c = t.resolvePath(n);
+      if (!c || c.type !== "file")
         return `tail: cannot open '${n}' for reading: No such file or directory`;
-      i = u.content || "";
+      i = c.content || "";
     }
-    const c = i.split(`
+    const a = i.split(`
 `);
-    return c.length > 1 && c[c.length - 1] === "" && c.pop(), c.slice(-s).join(`
+    return a.length > 1 && a[a.length - 1] === "" && a.pop(), a.slice(-s).join(`
 `);
   }
-}, Jt = {
+}, ye = {
   name: "cut",
   valuedFlags: ["d", "f"],
   // Registramos 'd' (delimiter) y 'f' (fields)
@@ -1092,33 +1093,33 @@ const Ot = {
     e && e["-d"] && (s = e["-d"]);
     let n = 1;
     if (e && e["-f"]) {
-      const h = parseInt(e["-f"]);
-      if (!isNaN(h) && h > 0)
-        n = h;
+      const l = parseInt(e["-f"]);
+      if (!isNaN(l) && l > 0)
+        n = l;
       else
         return "cut: fields are numbered from 1";
     }
     const i = o[0] ? o[0].trim() : "";
-    let c = "";
+    let a = "";
     if (r)
-      c = r;
+      a = r;
     else {
       if (!i) return "cut: missing file operand";
-      const h = t.resolvePath(i);
-      if (!h || h.type !== "file")
+      const l = t.resolvePath(i);
+      if (!l || l.type !== "file")
         return `cut: ${i}: No such file or directory`;
-      c = h.content || "";
+      a = l.content || "";
     }
-    return c.split(`
-`).map((h) => {
-      if (h === "") return "";
-      if (!h.includes(s)) return h;
-      const d = h.split(s);
-      return d[n - 1] !== void 0 ? d[n - 1] : "";
+    return a.split(`
+`).map((l) => {
+      if (l === "") return "";
+      if (!l.includes(s)) return l;
+      const h = l.split(s);
+      return h[n - 1] !== void 0 ? h[n - 1] : "";
     }).join(`
 `);
   }
-}, Vt = {
+}, Se = {
   name: "sort",
   execute: async ({ args: o, hasFlag: e, fs: t, pipeInput: r }) => {
     const s = o[0] ? o[0].trim() : "";
@@ -1127,17 +1128,17 @@ const Ot = {
       n = r;
     else {
       if (!s) return "sort: missing file operand";
-      const c = t.resolvePath(s);
-      if (!c || c.type !== "file")
+      const a = t.resolvePath(s);
+      if (!a || a.type !== "file")
         return `sort: ${s}: No such file or directory`;
-      n = c.content || "";
+      n = a.content || "";
     }
     const i = n.split(`
 `);
-    return i.length > 1 && i[i.length - 1] === "" && i.pop(), i.sort((c, u) => c.localeCompare(u)), e("r") && i.reverse(), i.join(`
+    return i.length > 1 && i[i.length - 1] === "" && i.pop(), i.sort((a, c) => a.localeCompare(c)), e("r") && i.reverse(), i.join(`
 `);
   }
-}, Xt = {
+}, we = {
   name: "uniq",
   execute: async ({ args: o, hasFlag: e, fs: t, pipeInput: r }) => {
     const s = o[0] ? o[0].trim() : "";
@@ -1146,33 +1147,33 @@ const Ot = {
       n = r;
     else {
       if (!s) return "uniq: missing file operand";
-      const d = t.resolvePath(s);
-      if (!d || d.type !== "file")
+      const h = t.resolvePath(s);
+      if (!h || h.type !== "file")
         return `uniq: ${s}: No such file or directory`;
-      n = d.content || "";
+      n = h.content || "";
     }
     const i = n.split(`
 `);
     if (i.length > 1 && i[i.length - 1] === "" && i.pop(), i.length === 0) return "";
-    const c = e("c"), u = [];
-    let l = i[0], h = 1;
-    for (let d = 1; d < i.length; d++)
-      i[d] === l ? h++ : (c ? u.push(`  ${h} ${l}`) : u.push(l), l = i[d], h = 1);
-    return c ? u.push(`  ${h} ${l}`) : u.push(l), u.join(`
+    const a = e("c"), c = [];
+    let u = i[0], l = 1;
+    for (let h = 1; h < i.length; h++)
+      i[h] === u ? l++ : (a ? c.push(`  ${l} ${u}`) : c.push(u), u = i[h], l = 1);
+    return a ? c.push(`  ${l} ${u}`) : c.push(u), c.join(`
 `);
   }
-}, Qt = [
-  Wt,
-  Bt,
-  Ht,
-  Yt,
-  Kt,
-  zt,
-  qt,
-  Jt,
-  Vt,
-  Xt
-], Zt = {
+}, ve = [
+  le,
+  fe,
+  he,
+  de,
+  pe,
+  ge,
+  me,
+  ye,
+  Se,
+  we
+], $e = {
   name: "echo",
   execute: ({ args: o, env: e }) => o.map((t) => {
     if (t.startsWith("$")) {
@@ -1181,23 +1182,23 @@ const Ot = {
     }
     return t;
   }).join(" ")
-}, er = {
+}, xe = {
   name: "whoami",
   execute: ({ env: o }) => o.get("USER") || "unknown"
-}, tr = {
+}, Ee = {
   name: "clear",
   execute: () => "COMMAND_CLEAR"
-}, rr = {
+}, Ne = {
   name: "help",
-  execute: async ({ args: o }) => `Comandos disponibles: ${Ye.map((e) => e.name).join(", ")}`
-}, sr = {
+  execute: async ({ args: o }) => `Comandos disponibles: ${M.map((e) => e.name).join(", ")}`
+}, Ue = {
   name: "env",
   execute: ({ env: o }) => {
     const e = o.getAll();
     return Object.entries(e).map(([t, r]) => `${t}=${r}`).join(`
 `);
   }
-}, nr = {
+}, be = {
   name: "history",
   execute: ({ kernel: o, hasFlag: e }) => {
     const t = o.getHistory();
@@ -1211,44 +1212,44 @@ const Ot = {
     return t.map((r, s) => `${(s + 1).toString().padStart(5)}  ${r}`).join(`
 `);
   }
-}, or = {
+}, Ae = {
   name: "sudo",
   execute: async ({ args: o, kernel: e, env: t, userManager: r, flagValues: s, ...n }) => {
     if (o.length === 0) return "usage: sudo <command> [arguments]";
-    const i = t.get("USER") || "guest", u = r.getGroups().find((S) => S.groupName === "sudo" || S.groupName === "wheel"), l = u == null ? void 0 : u.members.includes(i);
-    if (i !== "root" && !l)
+    const i = t.get("USER") || "guest", c = r.getGroups().find((p) => p.groupName === "sudo" || p.groupName === "wheel"), u = c == null ? void 0 : c.members.includes(i);
+    if (i !== "root" && !u)
       return `Sorry, user ${i} is not allowed to execute sudo. This incident will be reported.`;
-    let h = s["--sudo-pass"] || s["sudo-pass"] || null;
-    if (!h && n.rawInput) {
-      const S = n.rawInput.match(/--sudo-pass=(\S+)/);
-      S && (h = S[1]);
+    let l = s["--sudo-pass"] || s["sudo-pass"] || null;
+    if (!l && n.rawInput) {
+      const p = n.rawInput.match(/--sudo-pass=(\S+)/);
+      p && (l = p[1]);
     }
-    if (i !== "root" && !h)
+    if (i !== "root" && !l)
       return `AUTH_REQUIRED:sudo:${i}`;
-    if (i !== "root" && h) {
-      const S = r.getUserByName(i), P = r.hashPassword(h);
-      if (!S || P !== S.password)
+    if (i !== "root" && l) {
+      const p = r.getUserByName(i), w = r.hashPassword(l);
+      if (!p || w !== p.password)
         return "sudo: 1 incorrect password attempt";
     }
-    const p = o.filter((S) => !S.startsWith("--sudo-pass=")).join(" "), w = i;
+    const d = o.filter((p) => !p.startsWith("--sudo-pass=")).join(" "), g = i;
     try {
-      return t.set("USER", "root"), t.set("SUDO_USER", w), await e.execute(p, !0);
-    } catch (S) {
-      return `sudo: error executing command: ${S.message}`;
+      return t.set("USER", "root"), t.set("SUDO_USER", g), await e.execute(d, !0);
+    } catch (p) {
+      return `sudo: error executing command: ${p.message}`;
     } finally {
-      t.set("USER", w), t.set("SUDO_USER", "");
+      t.set("USER", g), t.set("SUDO_USER", "");
     }
   }
-}, ir = {
+}, De = {
   name: "date",
   // description: 'Muestra la fecha y hora del sistema',
   execute: async ({ args: o, hasFlag: e }) => {
     const t = /* @__PURE__ */ new Date();
     if (e("-u") || e("--utc"))
       return t.toUTCString();
-    const r = o.find((c) => c.startsWith("+"));
+    const r = o.find((a) => a.startsWith("+"));
     if (r)
-      return ar(t, r.slice(1));
+      return Te(t, r.slice(1));
     const s = {
       weekday: "short",
       month: "short",
@@ -1262,7 +1263,7 @@ const Ot = {
     return `${n} ${i}`;
   }
 };
-function ar(o, e) {
+function Te(o, e) {
   const t = {
     "%Y": o.getFullYear(),
     "%m": (o.getMonth() + 1).toString().padStart(2, "0"),
@@ -1276,31 +1277,31 @@ function ar(o, e) {
     r = r.replace(new RegExp(s, "g"), t[s]);
   return r;
 }
-const cr = {
+const Ce = {
   name: "uptime",
   // description: 'Muestra cuánto tiempo lleva el sistema encendido',
   execute: async ({ kernel: o, userManager: e }) => {
-    const r = (/* @__PURE__ */ new Date()).toLocaleTimeString("es-ES", { hour12: !1 }), s = o.getUptime(), n = Math.floor(s / 1e3), i = Math.floor(n / 60), c = Math.floor(i / 60), u = Math.floor(c / 24);
-    let l = "";
-    u > 0 && (l += `${u} day${u > 1 ? "s" : ""}, `), c > 0 && (l += `${c % 24} hour${c % 24 > 1 ? "s" : ""}, `), l += `${i % 60} min${i % 60 > 1 ? "s" : ""}`;
-    const h = e.getUsers().length;
-    return ` ${r} up ${l},  ${h} users,  load average: 0.05, 0.03, 0.01`;
+    const r = (/* @__PURE__ */ new Date()).toLocaleTimeString("es-ES", { hour12: !1 }), s = o.getUptime(), n = Math.floor(s / 1e3), i = Math.floor(n / 60), a = Math.floor(i / 60), c = Math.floor(a / 24);
+    let u = "";
+    c > 0 && (u += `${c} day${c > 1 ? "s" : ""}, `), a > 0 && (u += `${a % 24} hour${a % 24 > 1 ? "s" : ""}, `), u += `${i % 60} min${i % 60 > 1 ? "s" : ""}`;
+    const l = e.getUsers().length;
+    return ` ${r} up ${u},  ${l} users,  load average: 0.05, 0.03, 0.01`;
   }
-}, ur = {
+}, Pe = {
   name: "who",
   // description: 'Muestra quién está conectado',
   execute: async ({ env: o, kernel: e }) => {
-    const t = o.get("USER") || "guest", r = o.get("HOSTNAME") || "js-terminal", s = new Date(Date.now() - e.getUptime()), n = s.toLocaleString("es-ES", { month: "short" }), i = s.getDate(), c = s.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", hour12: !1 });
-    return `${t.padEnd(10)} pts/0        ${n} ${i} ${c} (${r})`;
+    const t = o.get("USER") || "guest", r = o.get("HOSTNAME") || "js-terminal", s = new Date(Date.now() - e.getUptime()), n = s.toLocaleString("es-ES", { month: "short" }), i = s.getDate(), a = s.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", hour12: !1 });
+    return `${t.padEnd(10)} pts/0        ${n} ${i} ${a} (${r})`;
   }
-}, lr = {
+}, Re = {
   name: "w",
   // description: 'Muestra quién está conectado',
   execute: async ({ env: o, kernel: e }) => {
-    const t = o.get("USER") || "guest", r = o.get("HOSTNAME") || "js-terminal", s = new Date(Date.now() - e.getUptime()), n = s.toLocaleString("es-ES", { month: "short" }), i = s.getDate(), c = s.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", hour12: !1 });
-    return `${t.padEnd(10)} pts/0        ${n} ${i} ${c} (${r})`;
+    const t = o.get("USER") || "guest", r = o.get("HOSTNAME") || "js-terminal", s = new Date(Date.now() - e.getUptime()), n = s.toLocaleString("es-ES", { month: "short" }), i = s.getDate(), a = s.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", hour12: !1 });
+    return `${t.padEnd(10)} pts/0        ${n} ${i} ${a} (${r})`;
   }
-}, hr = {
+}, Ie = {
   name: "chown",
   // description: 'Cambia el propietario y el grupo de un archivo o directorio',
   execute: async ({ args: o, fs: e, env: t, userManager: r }) => {
@@ -1308,26 +1309,26 @@ const cr = {
       return "chown: changing ownership: Operation not permitted";
     if (o.length < 2)
       return "usage: chown [OWNER][:[GROUP]] FILE...";
-    const s = o[0], n = o[1], [i, c] = s.split(":");
-    return i && !r.getUserByName(i) ? `chown: invalid user: '${i}'` : c && !r.getGroups().find((l) => l.groupName === c) ? `chown: invalid group: '${c}'` : e.setOwnership(n, "root", [], i, c).isSuccess ? "" : `chown: cannot access '${n}': No such file or directory`;
+    const s = o[0], n = o[1], [i, a] = s.split(":");
+    return i && !r.getUserByName(i) ? `chown: invalid user: '${i}'` : a && !r.getGroups().find((u) => u.groupName === a) ? `chown: invalid group: '${a}'` : e.setOwnership(n, "root", [], i, a).isSuccess ? "" : `chown: cannot access '${n}': No such file or directory`;
   }
-}, fr = {
+}, Me = {
   name: "cal",
   execute: ({ args: o }) => {
     const e = /* @__PURE__ */ new Date();
     let t = e.getMonth(), r = e.getFullYear();
     if (o.length === 1) {
-      const d = parseInt(o[0], 10);
+      const h = parseInt(o[0], 10);
+      if (isNaN(h) || h < 1 || h > 9999)
+        return "cal: illegal year value: use 1-9999";
+      r = h;
+    } else if (o.length >= 2) {
+      const h = parseInt(o[0], 10), d = parseInt(o[1], 10);
+      if (isNaN(h) || h < 1 || h > 12)
+        return `cal: ${o[0]} is not a valid month (1-12)`;
       if (isNaN(d) || d < 1 || d > 9999)
         return "cal: illegal year value: use 1-9999";
-      r = d;
-    } else if (o.length >= 2) {
-      const d = parseInt(o[0], 10), p = parseInt(o[1], 10);
-      if (isNaN(d) || d < 1 || d > 12)
-        return `cal: ${o[0]} is not a valid month (1-12)`;
-      if (isNaN(p) || p < 1 || p > 9999)
-        return "cal: illegal year value: use 1-9999";
-      t = d - 1, r = p;
+      t = h - 1, r = d;
     }
     const s = [
       "January",
@@ -1342,54 +1343,54 @@ const cr = {
       "October",
       "November",
       "December"
-    ], n = new Date(r, t, 1).getDay(), i = new Date(r, t + 1, 0).getDate(), c = [], u = `${s[t]} ${r}`, l = Math.max(0, Math.floor((20 - u.length) / 2));
-    c.push(" ".repeat(l) + u), c.push("Su Mo Tu We Th Fr Sa");
-    let h = "   ".repeat(n);
-    for (let d = 1; d <= i; d++) {
-      const p = d.toString().padStart(2, " ");
-      h += p + " ", ((n + d) % 7 === 0 || d === i) && (c.push(h.trimEnd()), h = "");
+    ], n = new Date(r, t, 1).getDay(), i = new Date(r, t + 1, 0).getDate(), a = [], c = `${s[t]} ${r}`, u = Math.max(0, Math.floor((20 - c.length) / 2));
+    a.push(" ".repeat(u) + c), a.push("Su Mo Tu We Th Fr Sa");
+    let l = "   ".repeat(n);
+    for (let h = 1; h <= i; h++) {
+      const d = h.toString().padStart(2, " ");
+      l += d + " ", ((n + h) % 7 === 0 || h === i) && (a.push(l.trimEnd()), l = "");
     }
-    return c.join(`
+    return a.join(`
 `);
   }
-}, dr = {
+}, Oe = {
   name: "chgrp",
   execute: async ({ args: o, fs: e, env: t, userManager: r }) => {
     if (o.length < 2)
       return "usage: chgrp GROUP FILE...";
-    const s = o[0], n = o[1], i = t.get("USER") || "guest", c = r.getGroups().find((l) => l.groupName === s);
-    if (!c)
+    const s = o[0], n = o[1], i = t.get("USER") || "guest", a = r.getGroups().find((u) => u.groupName === s);
+    if (!a)
       return `chgrp: invalid group: '${s}'`;
-    const u = e.setOwnership(
+    const c = e.setOwnership(
       n,
       i,
-      c.members,
+      a.members,
       void 0,
       // No alteramos el dueño (owner)
       s
       // Cambiamos el grupo
     );
-    return u.isFailure ? `chgrp: ${u.getError()}` : "";
+    return c.isFailure ? `chgrp: ${c.getError()}` : "";
   }
-}, pr = {
+}, ke = {
   name: "alias",
   valuedFlags: [],
   execute: async ({ args: o, rawArgs: e, env: t, rawInput: r }) => {
     if (o.length === 0) {
-      const u = t.getAliases();
-      return u.length === 0 ? "" : u.map(([l, h]) => `alias ${l}='${h}'`).join(`
+      const c = t.getAliases();
+      return c.length === 0 ? "" : c.map(([u, l]) => `alias ${u}='${l}'`).join(`
 `);
     }
     const s = r == null ? void 0 : r.indexOf("=");
     if (s === -1) {
-      const u = o[0].trim(), l = t.getAlias(u);
-      return l ? `alias ${u}='${l}'` : `shell: alias: ${u}: not found`;
+      const c = o[0].trim(), u = t.getAlias(c);
+      return u ? `alias ${c}='${u}'` : `shell: alias: ${c}: not found`;
     }
     const n = r == null ? void 0 : r.substring(0, s).trim(), i = n == null ? void 0 : n.replace(/^alias\s+/, "").trim();
-    let c = r == null ? void 0 : r.substring(s ? s + 1 : 0).trim();
-    return (c != null && c.startsWith("'") && (c != null && c.endsWith("'")) || c != null && c.startsWith('"') && (c != null && c.endsWith('"'))) && (c = c == null ? void 0 : c.substring(1, c.length - 1)), i === "" ? "alias: invalid alias name" : (t.setAlias(i, c), "");
+    let a = r == null ? void 0 : r.substring(s ? s + 1 : 0).trim();
+    return (a != null && a.startsWith("'") && (a != null && a.endsWith("'")) || a != null && a.startsWith('"') && (a != null && a.endsWith('"'))) && (a = a == null ? void 0 : a.substring(1, a.length - 1)), i === "" ? "alias: invalid alias name" : (t.setAlias(i, a), "");
   }
-}, mr = {
+}, Ge = {
   name: "unalias",
   valuedFlags: [],
   execute: async ({ args: o, env: e }) => {
@@ -1400,31 +1401,31 @@ const cr = {
         return `unalias: ${t}: not found`;
     return "";
   }
-}, gr = [
-  or,
-  tr,
-  Zt,
-  sr,
-  rr,
-  er,
-  nr,
-  ir,
-  cr,
-  ur,
-  lr,
-  hr,
-  fr,
-  dr,
-  pr,
-  mr
-], yr = {
+}, Fe = [
+  Ae,
+  Ee,
+  $e,
+  Ue,
+  Ne,
+  xe,
+  be,
+  De,
+  Ce,
+  Pe,
+  Re,
+  Ie,
+  Me,
+  Oe,
+  ke,
+  Ge
+], Le = {
   name: "groups",
   // description: 'Muestra los grupos a los que pertenece un usuario',
   execute: async ({ args: o, userManager: e, env: t }) => {
     const r = o[0] || t.get("USER"), n = e.getGroups().filter((i) => i.groupName === r || i.members.includes(r)).map((i) => i.groupName);
     return n.length === 0 ? `${r} : no groups found` : `${r} : ${n.join(" ")}`;
   }
-}, vr = {
+}, je = {
   name: "adduser",
   // description: 'Añade un usuario al sistema o añade un usuario a un grupo',
   execute: async ({ args: o, userManager: e, env: t }) => {
@@ -1435,7 +1436,7 @@ const cr = {
     }
     return o.length === 1 ? "Use 'useradd' to create new users or 'adduser user group' to link them." : "Usage: adduser USER GROUP";
   }
-}, Sr = {
+}, _e = {
   name: "addgroup",
   // description: 'Añade un nuevo grupo al sistema',
   valuedFlags: ["g"],
@@ -1451,8 +1452,8 @@ Uso: addgroup [OPCIONES] NOMBRE`;
     if (e["-g"]) {
       if (n = parseInt(e["-g"]), isNaN(n)) return "addgroup: el GID debe ser un número";
     } else {
-      const c = t.getGroups();
-      n = c.length > 0 ? Math.max(...c.map((u) => u.gid)) + 1 : 1e3;
+      const a = t.getGroups();
+      n = a.length > 0 ? Math.max(...a.map((c) => c.gid)) + 1 : 1e3;
     }
     const i = t.saveGroup({
       groupName: s,
@@ -1462,7 +1463,7 @@ Uso: addgroup [OPCIONES] NOMBRE`;
     });
     return i || `Añadiendo el grupo '${s}' (GID ${n})... Hecho.`;
   }
-}, wr = {
+}, We = {
   name: "su",
   execute: async ({ args: o, env: e, userManager: t }) => {
     const r = e.get("USER") || "guest", s = o[0] || "root", n = t.getUserByName(s);
@@ -1474,7 +1475,7 @@ Uso: addgroup [OPCIONES] NOMBRE`;
     const i = o[1];
     return i ? t.hashPassword(i) !== n.password ? "su: Authentication failure" : (e.set("USER", n.username), e.set("HOME", n.home), e.set("PWD", n.home), `Cambiando al usuario ${n.username}...`) : `AUTH_REQUIRED:su:${s}`;
   }
-}, Er = {
+}, He = {
   name: "useradd",
   valuedFlags: ["u", "s"],
   execute: async ({ args: o, flagValues: e, userManager: t, fs: r, env: s }) => {
@@ -1483,31 +1484,31 @@ Uso: addgroup [OPCIONES] NOMBRE`;
     if (o.length < 1)
       return "useradd: missing username";
     const n = o[0], i = t.getUsers();
-    if (i.some((d) => d.username === n))
+    if (i.some((h) => h.username === n))
       return `useradd: user '${n}' already exists`;
-    let c;
+    let a;
     if (e["-u"] || e["--u"]) {
-      if (c = parseInt(e["-u"] || e["--u"]), isNaN(c)) return "useradd: invalid numeric argument for -u";
-      if (i.some((d) => d.uid === c))
-        return `useradd: UID ${c} already exists`;
+      if (a = parseInt(e["-u"] || e["--u"]), isNaN(a)) return "useradd: invalid numeric argument for -u";
+      if (i.some((h) => h.uid === a))
+        return `useradd: UID ${a} already exists`;
     } else
-      c = i.length > 0 ? Math.max(...i.map((d) => d.uid)) + 1 : 1e3;
-    const u = {
+      a = i.length > 0 ? Math.max(...i.map((h) => h.uid)) + 1 : 1e3;
+    const c = {
       username: n,
-      uid: c,
-      gid: c,
+      uid: a,
+      gid: a,
       home: `/home/${n}`,
       shell: e["-s"] || e["--s"] || "/bin/bash",
       fullName: n,
       password: "!"
       // 🌟 Cuenta bloqueada por defecto hasta asignación manual
-    }, l = t.saveUser(u);
-    if (l) return l;
-    const h = e["-s"] || e["--s"] ? ` with shell ${u.shell}` : "";
-    return `useradd: user '${n}' added (UID: ${c})${h}
+    }, u = t.saveUser(c);
+    if (u) return u;
+    const l = e["-s"] || e["--s"] ? ` with shell ${c.shell}` : "";
+    return `useradd: user '${n}' added (UID: ${a})${l}
 Notice: Account is locked until a password is set via 'passwd'.`;
   }
-}, br = {
+}, Be = {
   name: "deluser",
   // description: 'Elimina un usuario del sistema',
   execute: async ({ args: o, userManager: e, env: t, fs: r }) => {
@@ -1516,10 +1517,10 @@ Notice: Account is locked until a password is set via 'passwd'.`;
     const s = o[0], n = t.get("USER"), i = t.get("SUDO_USER") || n;
     if (s === i)
       return `deluser: The user '${s}' is currently logged in and cannot be deleted.`;
-    const c = e.deleteUser(s);
-    return c || `Removing user '${s}'... Done.`;
+    const a = e.deleteUser(s);
+    return a || `Removing user '${s}'... Done.`;
   }
-}, xr = {
+}, Ye = {
   name: "delgroup",
   // description: 'Elimina un grupo del sistema',
   execute: async ({ args: o, userManager: e, env: t }) => {
@@ -1528,7 +1529,7 @@ Notice: Account is locked until a password is set via 'passwd'.`;
     const r = o[0], s = e.deleteGroup(r);
     return s || `Removing group '${r}'... Done.`;
   }
-}, $r = {
+}, qe = {
   name: "finger",
   execute: async ({ args: o, fs: e }) => {
     const t = e.resolvePath("/etc/passwd");
@@ -1537,28 +1538,28 @@ Notice: Account is locked until a password is set via 'passwd'.`;
     const s = (t.content || "").split(`
 `).filter((i) => i.trim() !== "");
     if (o.length > 0) {
-      const i = o[0].trim().toLowerCase(), c = s.find((S) => S.startsWith(`${i}:`));
-      if (!c) return `finger: ${i}: no such user`;
-      const u = c.split(":"), l = u[0], h = u[2], d = u[4] || l, p = u[5], w = u[6];
+      const i = o[0].trim().toLowerCase(), a = s.find((p) => p.startsWith(`${i}:`));
+      if (!a) return `finger: ${i}: no such user`;
+      const c = a.split(":"), u = c[0], l = c[2], h = c[4] || u, d = c[5], g = c[6];
       return [
-        `Login: ${l}				Name: ${d}`,
-        `Directory: ${p}			Shell: ${w}`,
-        `UID: ${h}				Status: Active`,
+        `Login: ${u}				Name: ${h}`,
+        `Directory: ${d}			Shell: ${g}`,
+        `UID: ${l}				Status: Active`,
         "Project: No profile project file specified."
       ].join(`
 `);
     }
     const n = ["Login		Name		TTY	Idle	Login Time"];
     return s.forEach((i) => {
-      const c = i.split(":");
-      if (c.length >= 6) {
-        const u = c[0], l = c[4] || c[0];
-        n.push(`${u.padEnd(12)}${l.padEnd(16)}pts/0	*	May 17 20:26`);
+      const a = i.split(":");
+      if (a.length >= 6) {
+        const c = a[0], u = a[4] || a[0];
+        n.push(`${c.padEnd(12)}${u.padEnd(16)}pts/0	*	May 17 20:26`);
       }
     }), n.join(`
 `);
   }
-}, Rr = {
+}, ze = {
   name: "passwd",
   execute: async ({ args: o, userManager: e, env: t, fs: r }) => {
     const s = t.get("USER") || "guest";
@@ -1571,26 +1572,26 @@ Notice: Account is locked until a password is set via 'passwd'.`;
     if (!i && o[0] && n === s && (i = o[0].trim(), n = s), !i || i === n)
       return `Usage: passwd [username] [new_password]
 (Note: password cannot be empty)`;
-    const c = r.resolvePath("/etc/passwd");
-    if (!c || c.type !== "file")
+    const a = r.resolvePath("/etc/passwd");
+    if (!a || a.type !== "file")
       return "passwd: User database (/etc/passwd) not found";
-    if (!(c.content || "").split(`
-`).some((d) => d.startsWith(`${n}:`)))
+    if (!(a.content || "").split(`
+`).some((h) => h.startsWith(`${n}:`)))
       return `passwd: user '${n}' does not exist`;
-    const h = e.updatePassword(n, i);
-    return h || `passwd: password updated successfully for user '${n}'`;
+    const l = e.updatePassword(n, i);
+    return l || `passwd: password updated successfully for user '${n}'`;
   }
-}, Tr = [
-  wr,
-  Er,
-  yr,
-  vr,
-  Sr,
-  br,
-  xr,
-  $r,
-  Rr
-], Ar = {
+}, Ke = [
+  We,
+  He,
+  Le,
+  je,
+  _e,
+  Be,
+  Ye,
+  qe,
+  ze
+], Je = {
   name: "save",
   execute: ({ kernel: o }) => {
     try {
@@ -1600,26 +1601,26 @@ Notice: Account is locked until a password is set via 'passwd'.`;
       return "Error al exportar: " + e;
     }
   }
-}, Nr = {
+}, Qe = {
   name: "easteregg",
   execute: () => "Esto es un Easter Egg."
-}, Dr = [
-  Ar,
-  Nr
-], Ye = [
-  ...gr,
-  ...Lt,
-  ...Qt,
-  ...Tr,
-  ...Dr
+}, Xe = [
+  Je,
+  Qe
+], M = [
+  ...Fe,
+  ...ue,
+  ...ve,
+  ...Ke,
+  ...Xe
 ];
-class Ur {
+class Ze {
   constructor() {
-    y(this, "commands", /* @__PURE__ */ new Map());
+    m(this, "commands", /* @__PURE__ */ new Map());
     this.loadCommands();
   }
   loadCommands() {
-    Ye.forEach((e) => {
+    M.forEach((e) => {
       this.commands.set(e.name, e), e.alias && e.alias.forEach((t) => this.commands.set(t, e));
     });
   }
@@ -1637,9 +1638,9 @@ class Ur {
     return Array.from(new Set(Array.from(this.commands.values()).map((e) => e.name)));
   }
 }
-class Pr {
+class Ve {
   constructor(e) {
-    y(this, "key", "fileSystem");
+    m(this, "key", "fileSystem");
     this.fs = e;
   }
   /**
@@ -1696,9 +1697,9 @@ class Pr {
     )), r;
   }
 }
-class Cr {
+class et {
   constructor(e) {
-    y(this, "key", "env");
+    m(this, "key", "env");
     this.env = e;
   }
   /**
@@ -1716,9 +1717,9 @@ class Cr {
       this.env.set(t, String(r));
   }
 }
-class Or {
+class tt {
   constructor(e) {
-    y(this, "key", "groups");
+    m(this, "key", "groups");
     this.userManager = e;
   }
   getState() {
@@ -1728,9 +1729,9 @@ class Or {
     this.userManager.saveGroup(e);
   }
 }
-class _r {
+class rt {
   constructor(e) {
-    y(this, "key", "users");
+    m(this, "key", "users");
     this.userManager = e;
   }
   getState() {
@@ -1740,11 +1741,11 @@ class _r {
     this.userManager.saveUser(e);
   }
 }
-class Ir {
+class st {
   // El historial sí puede ser nativo del Kernel si se maneja aquí
   constructor(e, t = "/public/vms/default.json") {
-    y(this, "savers", /* @__PURE__ */ new Map());
-    y(this, "history", []);
+    m(this, "savers", /* @__PURE__ */ new Map());
+    m(this, "history", []);
     this.configUrl = t, e.forEach((r) => this.savers.set(r.key, r));
   }
   async loadData() {
@@ -1774,21 +1775,21 @@ class Ir {
     this.history = e;
   }
 }
-class kr {
+class nt {
   constructor(e, t = "/vms/default.json") {
-    y(this, "envStateImpl");
-    y(this, "fsStateImpl");
-    y(this, "userStateImpl");
-    y(this, "groupStateImpl");
-    y(this, "jsonStorageImpl");
-    this.envStateImpl = new Cr(e.environment), this.fsStateImpl = new Pr(e.fileSystem), this.userStateImpl = new _r(e.userManager), this.groupStateImpl = new Or(e.userManager);
+    m(this, "envStateImpl");
+    m(this, "fsStateImpl");
+    m(this, "userStateImpl");
+    m(this, "groupStateImpl");
+    m(this, "jsonStorageImpl");
+    this.envStateImpl = new et(e.environment), this.fsStateImpl = new Ve(e.fileSystem), this.userStateImpl = new rt(e.userManager), this.groupStateImpl = new tt(e.userManager);
     const r = [
       this.envStateImpl,
       this.fsStateImpl,
       this.userStateImpl,
       this.groupStateImpl
     ];
-    this.jsonStorageImpl = new Ir(r, t);
+    this.jsonStorageImpl = new st(r, t);
   }
   async initSystem(e) {
     try {
@@ -1810,45 +1811,45 @@ class kr {
     };
   }
 }
-class Mr {
+class ot {
   constructor(e, t, r) {
-    y(this, "fileSystem");
-    y(this, "environment");
-    y(this, "userManager");
+    m(this, "fileSystem");
+    m(this, "environment");
+    m(this, "userManager");
     this.fileSystem = e, this.environment = t, this.userManager = r;
   }
   generatePromptText() {
-    const e = this.environment.get("USER") || "guest", t = this.environment.get("HOSTNAME") || "js-terminal", r = D.getAbsolutePath(this.fileSystem.getCurrentDirectory());
+    const e = this.environment.get("USER") || "guest", t = this.environment.get("HOSTNAME") || "js-terminal", r = S.getAbsolutePath(this.fileSystem.getCurrentDirectory());
     return `${e}@${t}:${r}$ `;
   }
   getCompletions(e) {
     const t = e.split(/\s+/), r = t[t.length - 1], s = r.lastIndexOf("/");
-    let n = r, i = "", c;
-    return s !== -1 ? (i = r.substring(0, s + 1), n = r.substring(s + 1), c = D.resolve(
+    let n = r, i = "", a;
+    return s !== -1 ? (i = r.substring(0, s + 1), n = r.substring(s + 1), a = S.resolve(
       i,
       this.fileSystem.getCurrentDirectory(),
       this.fileSystem.getRoot()
-    )) : c = this.fileSystem.getCurrentDirectory(), !c || c.type !== "dir" ? [] : c.children.filter((u) => u.name.startsWith(n)).map((u) => {
-      const l = u.type === "dir" ? "/" : " ";
-      return i + u.name + l;
+    )) : a = this.fileSystem.getCurrentDirectory(), !a || a.type !== "dir" ? [] : a.children.filter((c) => c.name.startsWith(n)).map((c) => {
+      const u = c.type === "dir" ? "/" : " ";
+      return i + c.name + u;
     });
   }
   loadDefaults() {
     this.environment.loadDefaults(), this.fileSystem.loadDefaults(), this.userManager.loadDefaults();
   }
 }
-class Fr {
+class it {
   constructor(e = "/vms/default.json") {
-    y(this, "startTime");
-    y(this, "history", []);
-    y(this, "isReady", !1);
-    y(this, "executor");
-    y(this, "registry");
-    y(this, "orchestrator");
-    y(this, "persistence");
+    m(this, "startTime");
+    m(this, "history", []);
+    m(this, "isReady", !1);
+    m(this, "executor");
+    m(this, "registry");
+    m(this, "orchestrator");
+    m(this, "persistence");
     this.startTime = Date.now();
-    const t = new xt(), r = new bt(t), s = new Rt(r), n = new $t(r, s);
-    this.orchestrator = new Mr(r, t, n), this.executor = new Tt(t), this.registry = new Ur(), this.persistence = new kr(this.orchestrator, e);
+    const t = new Y(), r = new B(t), s = new z(r), n = new q(r, s);
+    this.orchestrator = new ot(r, t, n), this.executor = new K(t), this.registry = new Ze(), this.persistence = new nt(this.orchestrator, e);
   }
   async boot() {
     this.isReady || (await this.persistence.initSystem(this.orchestrator), this.isReady = !0);
@@ -1892,11 +1893,11 @@ class Fr {
     return this.persistence.exportFullSystemState(this.history);
   }
 }
-class jr {
+class at {
   constructor(e, t, r) {
-    y(this, "outputElement");
-    y(this, "inputElement");
-    y(this, "promptElement");
+    m(this, "outputElement");
+    m(this, "inputElement");
+    m(this, "promptElement");
     this.outputElement = e, this.inputElement = t, this.promptElement = r, this.init();
   }
   init() {
@@ -1946,9 +1947,9 @@ class jr {
     this.inputElement.type = e;
   }
 }
-class Gr {
+class ct {
   constructor() {
-    y(this, "pendingAuth", null);
+    m(this, "pendingAuth", null);
   }
   hasPendingAuth() {
     return this.pendingAuth !== null;
@@ -1975,7 +1976,7 @@ class Gr {
     return `${t} ${e}`;
   }
 }
-class Lr {
+class ut {
   expand(e, t) {
     if (!e.startsWith("!") || e.length === 1) return null;
     const r = e.substring(1).trim();
@@ -1991,10 +1992,10 @@ class Lr {
     return null;
   }
 }
-class Wr {
+class lt {
   constructor(e) {
-    y(this, "currentIndex", -1);
-    y(this, "history");
+    m(this, "currentIndex", -1);
+    m(this, "history");
     this.history = e;
   }
   goUp() {
@@ -2007,9 +2008,9 @@ class Wr {
     this.currentIndex = -1;
   }
 }
-class Hr {
+class ht {
   constructor(e, t, r, s, n) {
-    y(this, "currentAbortController", null);
+    m(this, "currentAbortController", null);
     this.kernel = e, this.terminal = t, this.authManager = r, this.historyExpander = s, this.historyNavigator = n;
   }
   attach(e) {
@@ -2050,8 +2051,8 @@ class Hr {
         t.value = i + s[0];
       } else if (s.length > 1) {
         const n = s.map((i) => {
-          const c = i.split("/");
-          return i.endsWith("/") ? c[c.length - 2] + "/" : c[c.length - 1];
+          const a = i.split("/");
+          return i.endsWith("/") ? a[a.length - 2] + "/" : a[a.length - 1];
         });
         this.terminal.print(`
 ` + n.join("  ")), this.terminal.updatePrompt(this.kernel.getPromptText());
@@ -2070,26 +2071,26 @@ class Hr {
       }
       if (n) {
         this.terminal.copyInputToOutput("********");
-        const u = this.authManager.buildAuthenticatedCommand(s);
+        const c = this.authManager.buildAuthenticatedCommand(s);
         this.authManager.clearPendingAuth(), this.terminal.setInputType("text");
-        const l = await this.kernel.execute(u, !0, t.signal);
-        if (l.startsWith("AUTH_REQUIRED:")) {
-          const [, h, d] = l.split(":");
-          this.authManager.initiatePendingAuth(h, s), this.terminal.updatePrompt(this.authManager.getPromptText(d)), this.terminal.setInputType("password"), e.value = "";
+        const u = await this.kernel.execute(c, !0, t.signal);
+        if (u.startsWith("AUTH_REQUIRED:")) {
+          const [, l, h] = u.split(":");
+          this.authManager.initiatePendingAuth(l, s), this.terminal.updatePrompt(this.authManager.getPromptText(h)), this.terminal.setInputType("password"), e.value = "";
           return;
         }
-        this.processResponse(l), e.value = "", this.historyNavigator.reset();
+        this.processResponse(u), e.value = "", this.historyNavigator.reset();
         return;
       }
       const i = this.historyExpander.expand(s, this.kernel.getHistory());
       i && (s = i, this.terminal.print(s)), this.terminal.copyInputToOutput(s);
-      const c = await this.kernel.execute(s, !1, t.signal);
-      if (c.startsWith("AUTH_REQUIRED:")) {
-        const [, u, l] = c.split(":");
-        this.authManager.initiatePendingAuth(u, s), this.terminal.updatePrompt(this.authManager.getPromptText(l)), this.terminal.setInputType("password"), e.value = "";
+      const a = await this.kernel.execute(s, !1, t.signal);
+      if (a.startsWith("AUTH_REQUIRED:")) {
+        const [, c, u] = a.split(":");
+        this.authManager.initiatePendingAuth(c, s), this.terminal.updatePrompt(this.authManager.getPromptText(u)), this.terminal.setInputType("password"), e.value = "";
         return;
       }
-      this.processResponse(c), e.value = "", this.historyNavigator.reset();
+      this.processResponse(a), e.value = "", this.historyNavigator.reset();
     } finally {
       this.currentAbortController = null;
     }
@@ -2098,11 +2099,11 @@ class Hr {
     e === "COMMAND_CLEAR" ? this.terminal.clear() : e !== "" && this.terminal.print(e), this.terminal.updatePrompt(this.kernel.getPromptText()), this.terminal.scrollToBottom();
   }
 }
-class Yr {
+class dt {
   constructor(e, t) {
-    y(this, "kernel");
-    y(this, "terminalUI");
-    this.kernel = new Fr(t), this.renderStructure(e);
+    m(this, "kernel");
+    m(this, "terminalUI");
+    this.kernel = new it(t), this.renderStructure(e);
   }
   // 1. Inyectamos dinámicamente tu estructura de index.html
   renderStructure(e) {
@@ -2119,9 +2120,9 @@ class Yr {
     this.bootstrap(t, r, s);
   }
   async bootstrap(e, t, r) {
-    await this.kernel.boot(), this.terminalUI = new jr(e, t, r), this.terminalUI.clear();
-    const s = new Gr(), n = new Lr(), i = new Wr(this.kernel.getHistory());
-    new Hr(
+    await this.kernel.boot(), this.terminalUI = new at(e, t, r), this.terminalUI.clear();
+    const s = new ct(), n = new ut(), i = new lt(this.kernel.getHistory());
+    new ht(
       this.kernel,
       this.terminalUI,
       s,
@@ -2130,639 +2131,13 @@ class Yr {
     ).attach(t), this.terminalUI.print("Welcome to Ubuntu 24.04 LTS (GNU/Linux 6.8.0-generic x86_64)"), this.terminalUI.print(`System information as of ${(/* @__PURE__ */ new Date()).toUTCString()}`), this.terminalUI.print(""), this.terminalUI.updatePrompt(this.kernel.getPromptText()), t.focus();
   }
 }
-var pe = { exports: {} }, q = {};
-/**
- * @license React
- * react-jsx-runtime.production.min.js
- *
- * Copyright (c) Facebook, Inc. and its affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-var Le;
-function Br() {
-  if (Le) return q;
-  Le = 1;
-  var o = He, e = Symbol.for("react.element"), t = Symbol.for("react.fragment"), r = Object.prototype.hasOwnProperty, s = o.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.ReactCurrentOwner, n = { key: !0, ref: !0, __self: !0, __source: !0 };
-  function i(c, u, l) {
-    var h, d = {}, p = null, w = null;
-    l !== void 0 && (p = "" + l), u.key !== void 0 && (p = "" + u.key), u.ref !== void 0 && (w = u.ref);
-    for (h in u) r.call(u, h) && !n.hasOwnProperty(h) && (d[h] = u[h]);
-    if (c && c.defaultProps) for (h in u = c.defaultProps, u) d[h] === void 0 && (d[h] = u[h]);
-    return { $$typeof: e, type: c, key: p, ref: w, props: d, _owner: s.current };
-  }
-  return q.Fragment = t, q.jsx = i, q.jsxs = i, q;
-}
-var K = {};
-/**
- * @license React
- * react-jsx-runtime.development.js
- *
- * Copyright (c) Facebook, Inc. and its affiliates.
- *
- * This source code is licensed under the MIT license found in the
- * LICENSE file in the root directory of this source tree.
- */
-var We;
-function qr() {
-  return We || (We = 1, process.env.NODE_ENV !== "production" && function() {
-    var o = He, e = Symbol.for("react.element"), t = Symbol.for("react.portal"), r = Symbol.for("react.fragment"), s = Symbol.for("react.strict_mode"), n = Symbol.for("react.profiler"), i = Symbol.for("react.provider"), c = Symbol.for("react.context"), u = Symbol.for("react.forward_ref"), l = Symbol.for("react.suspense"), h = Symbol.for("react.suspense_list"), d = Symbol.for("react.memo"), p = Symbol.for("react.lazy"), w = Symbol.for("react.offscreen"), S = Symbol.iterator, P = "@@iterator";
-    function G(a) {
-      if (a === null || typeof a != "object")
-        return null;
-      var f = S && a[S] || a[P];
-      return typeof f == "function" ? f : null;
-    }
-    var _ = o.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED;
-    function R(a) {
-      {
-        for (var f = arguments.length, m = new Array(f > 1 ? f - 1 : 0), v = 1; v < f; v++)
-          m[v - 1] = arguments[v];
-        L("error", a, m);
-      }
-    }
-    function L(a, f, m) {
-      {
-        var v = _.ReactDebugCurrentFrame, x = v.getStackAddendum();
-        x !== "" && (f += "%s", m = m.concat([x]));
-        var $ = m.map(function(b) {
-          return String(b);
-        });
-        $.unshift("Warning: " + f), Function.prototype.apply.call(console[a], console, $);
-      }
-    }
-    var M = !1, F = !1, z = !1, se = !1, J = !1, V;
-    V = Symbol.for("react.module.reference");
-    function ne(a) {
-      return !!(typeof a == "string" || typeof a == "function" || a === r || a === n || J || a === s || a === l || a === h || se || a === w || M || F || z || typeof a == "object" && a !== null && (a.$$typeof === p || a.$$typeof === d || a.$$typeof === i || a.$$typeof === c || a.$$typeof === u || // This needs to include all possible module reference object
-      // types supported by any Flight configuration anywhere since
-      // we don't know which Flight build this will end up being used
-      // with.
-      a.$$typeof === V || a.getModuleId !== void 0));
-    }
-    function me(a, f, m) {
-      var v = a.displayName;
-      if (v)
-        return v;
-      var x = f.displayName || f.name || "";
-      return x !== "" ? m + "(" + x + ")" : m;
-    }
-    function X(a) {
-      return a.displayName || "Context";
-    }
-    function k(a) {
-      if (a == null)
-        return null;
-      if (typeof a.tag == "number" && R("Received an unexpected object in getComponentNameFromType(). This is likely a bug in React. Please file an issue."), typeof a == "function")
-        return a.displayName || a.name || null;
-      if (typeof a == "string")
-        return a;
-      switch (a) {
-        case r:
-          return "Fragment";
-        case t:
-          return "Portal";
-        case n:
-          return "Profiler";
-        case s:
-          return "StrictMode";
-        case l:
-          return "Suspense";
-        case h:
-          return "SuspenseList";
-      }
-      if (typeof a == "object")
-        switch (a.$$typeof) {
-          case c:
-            var f = a;
-            return X(f) + ".Consumer";
-          case i:
-            var m = a;
-            return X(m._context) + ".Provider";
-          case u:
-            return me(a, a.render, "ForwardRef");
-          case d:
-            var v = a.displayName || null;
-            return v !== null ? v : k(a.type) || "Memo";
-          case p: {
-            var x = a, $ = x._payload, b = x._init;
-            try {
-              return k(b($));
-            } catch {
-              return null;
-            }
-          }
-        }
-      return null;
-    }
-    var C = Object.assign, Y = 0, ge, ye, ve, Se, we, Ee, be;
-    function xe() {
-    }
-    xe.__reactDisabledLog = !0;
-    function Be() {
-      {
-        if (Y === 0) {
-          ge = console.log, ye = console.info, ve = console.warn, Se = console.error, we = console.group, Ee = console.groupCollapsed, be = console.groupEnd;
-          var a = {
-            configurable: !0,
-            enumerable: !0,
-            value: xe,
-            writable: !0
-          };
-          Object.defineProperties(console, {
-            info: a,
-            log: a,
-            warn: a,
-            error: a,
-            group: a,
-            groupCollapsed: a,
-            groupEnd: a
-          });
-        }
-        Y++;
-      }
-    }
-    function qe() {
-      {
-        if (Y--, Y === 0) {
-          var a = {
-            configurable: !0,
-            enumerable: !0,
-            writable: !0
-          };
-          Object.defineProperties(console, {
-            log: C({}, a, {
-              value: ge
-            }),
-            info: C({}, a, {
-              value: ye
-            }),
-            warn: C({}, a, {
-              value: ve
-            }),
-            error: C({}, a, {
-              value: Se
-            }),
-            group: C({}, a, {
-              value: we
-            }),
-            groupCollapsed: C({}, a, {
-              value: Ee
-            }),
-            groupEnd: C({}, a, {
-              value: be
-            })
-          });
-        }
-        Y < 0 && R("disabledDepth fell below zero. This is a bug in React. Please file an issue.");
-      }
-    }
-    var oe = _.ReactCurrentDispatcher, ie;
-    function Q(a, f, m) {
-      {
-        if (ie === void 0)
-          try {
-            throw Error();
-          } catch (x) {
-            var v = x.stack.trim().match(/\n( *(at )?)/);
-            ie = v && v[1] || "";
-          }
-        return `
-` + ie + a;
-      }
-    }
-    var ae = !1, Z;
-    {
-      var Ke = typeof WeakMap == "function" ? WeakMap : Map;
-      Z = new Ke();
-    }
-    function $e(a, f) {
-      if (!a || ae)
-        return "";
-      {
-        var m = Z.get(a);
-        if (m !== void 0)
-          return m;
-      }
-      var v;
-      ae = !0;
-      var x = Error.prepareStackTrace;
-      Error.prepareStackTrace = void 0;
-      var $;
-      $ = oe.current, oe.current = null, Be();
-      try {
-        if (f) {
-          var b = function() {
-            throw Error();
-          };
-          if (Object.defineProperty(b.prototype, "props", {
-            set: function() {
-              throw Error();
-            }
-          }), typeof Reflect == "object" && Reflect.construct) {
-            try {
-              Reflect.construct(b, []);
-            } catch (O) {
-              v = O;
-            }
-            Reflect.construct(a, [], b);
-          } else {
-            try {
-              b.call();
-            } catch (O) {
-              v = O;
-            }
-            a.call(b.prototype);
-          }
-        } else {
-          try {
-            throw Error();
-          } catch (O) {
-            v = O;
-          }
-          a();
-        }
-      } catch (O) {
-        if (O && v && typeof O.stack == "string") {
-          for (var E = O.stack.split(`
-`), U = v.stack.split(`
-`), T = E.length - 1, A = U.length - 1; T >= 1 && A >= 0 && E[T] !== U[A]; )
-            A--;
-          for (; T >= 1 && A >= 0; T--, A--)
-            if (E[T] !== U[A]) {
-              if (T !== 1 || A !== 1)
-                do
-                  if (T--, A--, A < 0 || E[T] !== U[A]) {
-                    var I = `
-` + E[T].replace(" at new ", " at ");
-                    return a.displayName && I.includes("<anonymous>") && (I = I.replace("<anonymous>", a.displayName)), typeof a == "function" && Z.set(a, I), I;
-                  }
-                while (T >= 1 && A >= 0);
-              break;
-            }
-        }
-      } finally {
-        ae = !1, oe.current = $, qe(), Error.prepareStackTrace = x;
-      }
-      var H = a ? a.displayName || a.name : "", j = H ? Q(H) : "";
-      return typeof a == "function" && Z.set(a, j), j;
-    }
-    function ze(a, f, m) {
-      return $e(a, !1);
-    }
-    function Je(a) {
-      var f = a.prototype;
-      return !!(f && f.isReactComponent);
-    }
-    function ee(a, f, m) {
-      if (a == null)
-        return "";
-      if (typeof a == "function")
-        return $e(a, Je(a));
-      if (typeof a == "string")
-        return Q(a);
-      switch (a) {
-        case l:
-          return Q("Suspense");
-        case h:
-          return Q("SuspenseList");
-      }
-      if (typeof a == "object")
-        switch (a.$$typeof) {
-          case u:
-            return ze(a.render);
-          case d:
-            return ee(a.type, f, m);
-          case p: {
-            var v = a, x = v._payload, $ = v._init;
-            try {
-              return ee($(x), f, m);
-            } catch {
-            }
-          }
-        }
-      return "";
-    }
-    var B = Object.prototype.hasOwnProperty, Re = {}, Te = _.ReactDebugCurrentFrame;
-    function te(a) {
-      if (a) {
-        var f = a._owner, m = ee(a.type, a._source, f ? f.type : null);
-        Te.setExtraStackFrame(m);
-      } else
-        Te.setExtraStackFrame(null);
-    }
-    function Ve(a, f, m, v, x) {
-      {
-        var $ = Function.call.bind(B);
-        for (var b in a)
-          if ($(a, b)) {
-            var E = void 0;
-            try {
-              if (typeof a[b] != "function") {
-                var U = Error((v || "React class") + ": " + m + " type `" + b + "` is invalid; it must be a function, usually from the `prop-types` package, but received `" + typeof a[b] + "`.This often happens because of typos such as `PropTypes.function` instead of `PropTypes.func`.");
-                throw U.name = "Invariant Violation", U;
-              }
-              E = a[b](f, b, v, m, null, "SECRET_DO_NOT_PASS_THIS_OR_YOU_WILL_BE_FIRED");
-            } catch (T) {
-              E = T;
-            }
-            E && !(E instanceof Error) && (te(x), R("%s: type specification of %s `%s` is invalid; the type checker function must return `null` or an `Error` but returned a %s. You may have forgotten to pass an argument to the type checker creator (arrayOf, instanceOf, objectOf, oneOf, oneOfType, and shape all require an argument).", v || "React class", m, b, typeof E), te(null)), E instanceof Error && !(E.message in Re) && (Re[E.message] = !0, te(x), R("Failed %s type: %s", m, E.message), te(null));
-          }
-      }
-    }
-    var Xe = Array.isArray;
-    function ce(a) {
-      return Xe(a);
-    }
-    function Qe(a) {
-      {
-        var f = typeof Symbol == "function" && Symbol.toStringTag, m = f && a[Symbol.toStringTag] || a.constructor.name || "Object";
-        return m;
-      }
-    }
-    function Ze(a) {
-      try {
-        return Ae(a), !1;
-      } catch {
-        return !0;
-      }
-    }
-    function Ae(a) {
-      return "" + a;
-    }
-    function Ne(a) {
-      if (Ze(a))
-        return R("The provided key is an unsupported type %s. This value must be coerced to a string before before using it here.", Qe(a)), Ae(a);
-    }
-    var De = _.ReactCurrentOwner, et = {
-      key: !0,
-      ref: !0,
-      __self: !0,
-      __source: !0
-    }, Ue, Pe;
-    function tt(a) {
-      if (B.call(a, "ref")) {
-        var f = Object.getOwnPropertyDescriptor(a, "ref").get;
-        if (f && f.isReactWarning)
-          return !1;
-      }
-      return a.ref !== void 0;
-    }
-    function rt(a) {
-      if (B.call(a, "key")) {
-        var f = Object.getOwnPropertyDescriptor(a, "key").get;
-        if (f && f.isReactWarning)
-          return !1;
-      }
-      return a.key !== void 0;
-    }
-    function st(a, f) {
-      typeof a.ref == "string" && De.current;
-    }
-    function nt(a, f) {
-      {
-        var m = function() {
-          Ue || (Ue = !0, R("%s: `key` is not a prop. Trying to access it will result in `undefined` being returned. If you need to access the same value within the child component, you should pass it as a different prop. (https://reactjs.org/link/special-props)", f));
-        };
-        m.isReactWarning = !0, Object.defineProperty(a, "key", {
-          get: m,
-          configurable: !0
-        });
-      }
-    }
-    function ot(a, f) {
-      {
-        var m = function() {
-          Pe || (Pe = !0, R("%s: `ref` is not a prop. Trying to access it will result in `undefined` being returned. If you need to access the same value within the child component, you should pass it as a different prop. (https://reactjs.org/link/special-props)", f));
-        };
-        m.isReactWarning = !0, Object.defineProperty(a, "ref", {
-          get: m,
-          configurable: !0
-        });
-      }
-    }
-    var it = function(a, f, m, v, x, $, b) {
-      var E = {
-        // This tag allows us to uniquely identify this as a React Element
-        $$typeof: e,
-        // Built-in properties that belong on the element
-        type: a,
-        key: f,
-        ref: m,
-        props: b,
-        // Record the component responsible for creating this element.
-        _owner: $
-      };
-      return E._store = {}, Object.defineProperty(E._store, "validated", {
-        configurable: !1,
-        enumerable: !1,
-        writable: !0,
-        value: !1
-      }), Object.defineProperty(E, "_self", {
-        configurable: !1,
-        enumerable: !1,
-        writable: !1,
-        value: v
-      }), Object.defineProperty(E, "_source", {
-        configurable: !1,
-        enumerable: !1,
-        writable: !1,
-        value: x
-      }), Object.freeze && (Object.freeze(E.props), Object.freeze(E)), E;
-    };
-    function at(a, f, m, v, x) {
-      {
-        var $, b = {}, E = null, U = null;
-        m !== void 0 && (Ne(m), E = "" + m), rt(f) && (Ne(f.key), E = "" + f.key), tt(f) && (U = f.ref, st(f, x));
-        for ($ in f)
-          B.call(f, $) && !et.hasOwnProperty($) && (b[$] = f[$]);
-        if (a && a.defaultProps) {
-          var T = a.defaultProps;
-          for ($ in T)
-            b[$] === void 0 && (b[$] = T[$]);
-        }
-        if (E || U) {
-          var A = typeof a == "function" ? a.displayName || a.name || "Unknown" : a;
-          E && nt(b, A), U && ot(b, A);
-        }
-        return it(a, E, U, x, v, De.current, b);
-      }
-    }
-    var ue = _.ReactCurrentOwner, Ce = _.ReactDebugCurrentFrame;
-    function W(a) {
-      if (a) {
-        var f = a._owner, m = ee(a.type, a._source, f ? f.type : null);
-        Ce.setExtraStackFrame(m);
-      } else
-        Ce.setExtraStackFrame(null);
-    }
-    var le;
-    le = !1;
-    function he(a) {
-      return typeof a == "object" && a !== null && a.$$typeof === e;
-    }
-    function Oe() {
-      {
-        if (ue.current) {
-          var a = k(ue.current.type);
-          if (a)
-            return `
-
-Check the render method of \`` + a + "`.";
-        }
-        return "";
-      }
-    }
-    function ct(a) {
-      return "";
-    }
-    var _e = {};
-    function ut(a) {
-      {
-        var f = Oe();
-        if (!f) {
-          var m = typeof a == "string" ? a : a.displayName || a.name;
-          m && (f = `
-
-Check the top-level render call using <` + m + ">.");
-        }
-        return f;
-      }
-    }
-    function Ie(a, f) {
-      {
-        if (!a._store || a._store.validated || a.key != null)
-          return;
-        a._store.validated = !0;
-        var m = ut(f);
-        if (_e[m])
-          return;
-        _e[m] = !0;
-        var v = "";
-        a && a._owner && a._owner !== ue.current && (v = " It was passed a child from " + k(a._owner.type) + "."), W(a), R('Each child in a list should have a unique "key" prop.%s%s See https://reactjs.org/link/warning-keys for more information.', m, v), W(null);
-      }
-    }
-    function ke(a, f) {
-      {
-        if (typeof a != "object")
-          return;
-        if (ce(a))
-          for (var m = 0; m < a.length; m++) {
-            var v = a[m];
-            he(v) && Ie(v, f);
-          }
-        else if (he(a))
-          a._store && (a._store.validated = !0);
-        else if (a) {
-          var x = G(a);
-          if (typeof x == "function" && x !== a.entries)
-            for (var $ = x.call(a), b; !(b = $.next()).done; )
-              he(b.value) && Ie(b.value, f);
-        }
-      }
-    }
-    function lt(a) {
-      {
-        var f = a.type;
-        if (f == null || typeof f == "string")
-          return;
-        var m;
-        if (typeof f == "function")
-          m = f.propTypes;
-        else if (typeof f == "object" && (f.$$typeof === u || // Note: Memo only checks outer props here.
-        // Inner props are checked in the reconciler.
-        f.$$typeof === d))
-          m = f.propTypes;
-        else
-          return;
-        if (m) {
-          var v = k(f);
-          Ve(m, a.props, "prop", v, a);
-        } else if (f.PropTypes !== void 0 && !le) {
-          le = !0;
-          var x = k(f);
-          R("Component %s declared `PropTypes` instead of `propTypes`. Did you misspell the property assignment?", x || "Unknown");
-        }
-        typeof f.getDefaultProps == "function" && !f.getDefaultProps.isReactClassApproved && R("getDefaultProps is only used on classic React.createClass definitions. Use a static property named `defaultProps` instead.");
-      }
-    }
-    function ht(a) {
-      {
-        for (var f = Object.keys(a.props), m = 0; m < f.length; m++) {
-          var v = f[m];
-          if (v !== "children" && v !== "key") {
-            W(a), R("Invalid prop `%s` supplied to `React.Fragment`. React.Fragment can only have `key` and `children` props.", v), W(null);
-            break;
-          }
-        }
-        a.ref !== null && (W(a), R("Invalid attribute `ref` supplied to `React.Fragment`."), W(null));
-      }
-    }
-    var Me = {};
-    function Fe(a, f, m, v, x, $) {
-      {
-        var b = ne(a);
-        if (!b) {
-          var E = "";
-          (a === void 0 || typeof a == "object" && a !== null && Object.keys(a).length === 0) && (E += " You likely forgot to export your component from the file it's defined in, or you might have mixed up default and named imports.");
-          var U = ct();
-          U ? E += U : E += Oe();
-          var T;
-          a === null ? T = "null" : ce(a) ? T = "array" : a !== void 0 && a.$$typeof === e ? (T = "<" + (k(a.type) || "Unknown") + " />", E = " Did you accidentally export a JSX literal instead of a component?") : T = typeof a, R("React.jsx: type is invalid -- expected a string (for built-in components) or a class/function (for composite components) but got: %s.%s", T, E);
-        }
-        var A = at(a, f, m, x, $);
-        if (A == null)
-          return A;
-        if (b) {
-          var I = f.children;
-          if (I !== void 0)
-            if (v)
-              if (ce(I)) {
-                for (var H = 0; H < I.length; H++)
-                  ke(I[H], a);
-                Object.freeze && Object.freeze(I);
-              } else
-                R("React.jsx: Static children should always be an array. You are likely explicitly calling React.jsxs or React.jsxDEV. Use the Babel transform instead.");
-            else
-              ke(I, a);
-        }
-        if (B.call(f, "key")) {
-          var j = k(a), O = Object.keys(f).filter(function(yt) {
-            return yt !== "key";
-          }), fe = O.length > 0 ? "{key: someKey, " + O.join(": ..., ") + ": ...}" : "{key: someKey}";
-          if (!Me[j + fe]) {
-            var gt = O.length > 0 ? "{" + O.join(": ..., ") + ": ...}" : "{}";
-            R(`A props object containing a "key" prop is being spread into JSX:
-  let props = %s;
-  <%s {...props} />
-React keys must be passed directly to JSX without using spread:
-  let props = %s;
-  <%s key={someKey} {...props} />`, fe, j, gt, j), Me[j + fe] = !0;
-          }
-        }
-        return a === r ? ht(A) : lt(A), A;
-      }
-    }
-    function ft(a, f, m) {
-      return Fe(a, f, m, !0);
-    }
-    function dt(a, f, m) {
-      return Fe(a, f, m, !1);
-    }
-    var pt = dt, mt = ft;
-    K.Fragment = r, K.jsx = pt, K.jsxs = mt;
-  }()), K;
-}
-process.env.NODE_ENV === "production" ? pe.exports = Br() : pe.exports = qr();
-var Kr = pe.exports;
-const Vr = () => {
-  const o = je(null), e = je(null);
-  return wt(() => {
+const yt = () => {
+  const o = R(null), e = R(null);
+  return W(() => {
     if (o.current) {
       e.current && (e.current = null);
       try {
-        e.current = new Yr(o.current);
+        e.current = new dt(o.current);
       } catch (t) {
         console.error("Error initializing ReactTerminal:", t);
       }
@@ -2770,7 +2145,7 @@ const Vr = () => {
         e.current && (e.current = null);
       };
     }
-  }, []), /* @__PURE__ */ Kr.jsx(
+  }, []), /* @__PURE__ */ _(
     "div",
     {
       ref: o,
@@ -2785,7 +2160,7 @@ const Vr = () => {
   );
 };
 export {
-  Fr as Kernel,
-  Vr as ReactTerminal,
-  Yr as TSTerminal
+  it as Kernel,
+  yt as ReactTerminal,
+  dt as TSTerminal
 };
