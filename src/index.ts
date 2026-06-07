@@ -1,4 +1,5 @@
 // Punto de entrada del paquete NPM
+// @ts-ignore
 import './style.css';
 
 export { TSTerminal } from './TSTerminal'; // Para proyectos Vanilla/JS

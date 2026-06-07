@@ -626,10 +626,10 @@ class Tt {
     if (_.length === 0) return "";
     const R = _[0].toLowerCase(), L = _.slice(1), M = t.get(R);
     if (!M) return `-bash: ${R}: command not found`;
-    const F = M.valuedFlags || [], K = R === "sudo" ? [...F, "sudo-pass", "--sudo-pass"] : F, se = this.extractAllowedFlagsFromCommand(M, K);
+    const F = M.valuedFlags || [], z = R === "sudo" ? [...F, "sudo-pass", "--sudo-pass"] : F, se = this.extractAllowedFlagsFromCommand(M, z);
     if (c != null && c.aborted)
       return "COMMAND_ABORTED";
-    const { options: J, args: V, flagValues: ne } = this.parseArgsAndFlags(L, K, se), X = {
+    const { options: J, args: V, flagValues: ne } = this.parseArgsAndFlags(L, z, se), X = {
       args: this.expandGlobPatterns(V, r),
       options: J,
       flagValues: ne,
@@ -1034,7 +1034,7 @@ const Ot = {
 `).length, c = n.trim() === "" ? 0 : n.trim().split(/\s+/).length, u = n.length, l = e("l"), h = e("w"), d = e("c") || e("m"), p = !l && !h && !d, w = [];
     return (l || p) && w.push(i.toString()), (h || p) && w.push(c.toString()), (d || p) && w.push(u.toString()), !r && s && w.push(s), w.join("	");
   }
-}, zt = {
+}, Kt = {
   name: "head",
   valuedFlags: ["n"],
   execute: async ({ args: o, flagValues: e, fs: t, pipeInput: r }) => {
@@ -1058,7 +1058,7 @@ const Ot = {
 `).slice(0, s).join(`
 `);
   }
-}, Kt = {
+}, zt = {
   name: "tail",
   valuedFlags: ["n"],
   execute: async ({ args: o, flagValues: e, fs: t, pipeInput: r }) => {
@@ -1166,8 +1166,8 @@ const Ot = {
   Bt,
   Ht,
   Yt,
-  zt,
   Kt,
+  zt,
   qt,
   Jt,
   Vt,
@@ -1189,10 +1189,7 @@ const Ot = {
   execute: () => "COMMAND_CLEAR"
 }, rr = {
   name: "help",
-  execute: async ({ args: o }) => {
-    const { commandList: e } = await Promise.resolve().then(() => Ur);
-    return `Comandos disponibles: ${e.map((t) => t.name).join(", ")}`;
-  }
+  execute: async ({ args: o }) => `Comandos disponibles: ${Ye.map((e) => e.name).join(", ")}`
 }, sr = {
   name: "env",
   execute: ({ env: o }) => {
@@ -1615,11 +1612,8 @@ Notice: Account is locked until a password is set via 'passwd'.`;
   ...Qt,
   ...Tr,
   ...Dr
-], Ur = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
-  __proto__: null,
-  commandList: Ye
-}, Symbol.toStringTag, { value: "Module" }));
-class Pr {
+];
+class Ur {
   constructor() {
     y(this, "commands", /* @__PURE__ */ new Map());
     this.loadCommands();
@@ -1643,7 +1637,7 @@ class Pr {
     return Array.from(new Set(Array.from(this.commands.values()).map((e) => e.name)));
   }
 }
-class Cr {
+class Pr {
   constructor(e) {
     y(this, "key", "fileSystem");
     this.fs = e;
@@ -1702,7 +1696,7 @@ class Cr {
     )), r;
   }
 }
-class Or {
+class Cr {
   constructor(e) {
     y(this, "key", "env");
     this.env = e;
@@ -1722,7 +1716,7 @@ class Or {
       this.env.set(t, String(r));
   }
 }
-class _r {
+class Or {
   constructor(e) {
     y(this, "key", "groups");
     this.userManager = e;
@@ -1734,7 +1728,7 @@ class _r {
     this.userManager.saveGroup(e);
   }
 }
-class Ir {
+class _r {
   constructor(e) {
     y(this, "key", "users");
     this.userManager = e;
@@ -1746,7 +1740,7 @@ class Ir {
     this.userManager.saveUser(e);
   }
 }
-class kr {
+class Ir {
   // El historial sí puede ser nativo del Kernel si se maneja aquí
   constructor(e, t = "/public/vms/default.json") {
     y(this, "savers", /* @__PURE__ */ new Map());
@@ -1780,21 +1774,21 @@ class kr {
     this.history = e;
   }
 }
-class Mr {
+class kr {
   constructor(e, t = "/vms/default.json") {
     y(this, "envStateImpl");
     y(this, "fsStateImpl");
     y(this, "userStateImpl");
     y(this, "groupStateImpl");
     y(this, "jsonStorageImpl");
-    this.envStateImpl = new Or(e.environment), this.fsStateImpl = new Cr(e.fileSystem), this.userStateImpl = new Ir(e.userManager), this.groupStateImpl = new _r(e.userManager);
+    this.envStateImpl = new Cr(e.environment), this.fsStateImpl = new Pr(e.fileSystem), this.userStateImpl = new _r(e.userManager), this.groupStateImpl = new Or(e.userManager);
     const r = [
       this.envStateImpl,
       this.fsStateImpl,
       this.userStateImpl,
       this.groupStateImpl
     ];
-    this.jsonStorageImpl = new kr(r, t);
+    this.jsonStorageImpl = new Ir(r, t);
   }
   async initSystem(e) {
     try {
@@ -1816,7 +1810,7 @@ class Mr {
     };
   }
 }
-class Fr {
+class Mr {
   constructor(e, t, r) {
     y(this, "fileSystem");
     y(this, "environment");
@@ -1843,7 +1837,7 @@ class Fr {
     this.environment.loadDefaults(), this.fileSystem.loadDefaults(), this.userManager.loadDefaults();
   }
 }
-class jr {
+class Fr {
   constructor(e = "/vms/default.json") {
     y(this, "startTime");
     y(this, "history", []);
@@ -1854,7 +1848,7 @@ class jr {
     y(this, "persistence");
     this.startTime = Date.now();
     const t = new xt(), r = new bt(t), s = new Rt(r), n = new $t(r, s);
-    this.orchestrator = new Fr(r, t, n), this.executor = new Tt(t), this.registry = new Pr(), this.persistence = new Mr(this.orchestrator, e);
+    this.orchestrator = new Mr(r, t, n), this.executor = new Tt(t), this.registry = new Ur(), this.persistence = new kr(this.orchestrator, e);
   }
   async boot() {
     this.isReady || (await this.persistence.initSystem(this.orchestrator), this.isReady = !0);
@@ -1898,7 +1892,7 @@ class jr {
     return this.persistence.exportFullSystemState(this.history);
   }
 }
-class Gr {
+class jr {
   constructor(e, t, r) {
     y(this, "outputElement");
     y(this, "inputElement");
@@ -1952,7 +1946,7 @@ class Gr {
     this.inputElement.type = e;
   }
 }
-class Lr {
+class Gr {
   constructor() {
     y(this, "pendingAuth", null);
   }
@@ -1981,7 +1975,7 @@ class Lr {
     return `${t} ${e}`;
   }
 }
-class Wr {
+class Lr {
   expand(e, t) {
     if (!e.startsWith("!") || e.length === 1) return null;
     const r = e.substring(1).trim();
@@ -1997,7 +1991,7 @@ class Wr {
     return null;
   }
 }
-class Hr {
+class Wr {
   constructor(e) {
     y(this, "currentIndex", -1);
     y(this, "history");
@@ -2013,7 +2007,7 @@ class Hr {
     this.currentIndex = -1;
   }
 }
-class Yr {
+class Hr {
   constructor(e, t, r, s, n) {
     y(this, "currentAbortController", null);
     this.kernel = e, this.terminal = t, this.authManager = r, this.historyExpander = s, this.historyNavigator = n;
@@ -2104,11 +2098,11 @@ class Yr {
     e === "COMMAND_CLEAR" ? this.terminal.clear() : e !== "" && this.terminal.print(e), this.terminal.updatePrompt(this.kernel.getPromptText()), this.terminal.scrollToBottom();
   }
 }
-class Br {
+class Yr {
   constructor(e, t) {
     y(this, "kernel");
     y(this, "terminalUI");
-    this.kernel = new jr(t), this.renderStructure(e);
+    this.kernel = new Fr(t), this.renderStructure(e);
   }
   // 1. Inyectamos dinámicamente tu estructura de index.html
   renderStructure(e) {
@@ -2125,9 +2119,9 @@ class Br {
     this.bootstrap(t, r, s);
   }
   async bootstrap(e, t, r) {
-    await this.kernel.boot(), this.terminalUI = new Gr(e, t, r), this.terminalUI.clear();
-    const s = new Lr(), n = new Wr(), i = new Hr(this.kernel.getHistory());
-    new Yr(
+    await this.kernel.boot(), this.terminalUI = new jr(e, t, r), this.terminalUI.clear();
+    const s = new Gr(), n = new Lr(), i = new Wr(this.kernel.getHistory());
+    new Hr(
       this.kernel,
       this.terminalUI,
       s,
@@ -2147,7 +2141,7 @@ var pe = { exports: {} }, q = {};
  * LICENSE file in the root directory of this source tree.
  */
 var Le;
-function qr() {
+function Br() {
   if (Le) return q;
   Le = 1;
   var o = He, e = Symbol.for("react.element"), t = Symbol.for("react.fragment"), r = Object.prototype.hasOwnProperty, s = o.__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_FIRED.ReactCurrentOwner, n = { key: !0, ref: !0, __self: !0, __source: !0 };
@@ -2160,7 +2154,7 @@ function qr() {
   }
   return q.Fragment = t, q.jsx = i, q.jsxs = i, q;
 }
-var z = {};
+var K = {};
 /**
  * @license React
  * react-jsx-runtime.development.js
@@ -2171,7 +2165,7 @@ var z = {};
  * LICENSE file in the root directory of this source tree.
  */
 var We;
-function zr() {
+function qr() {
   return We || (We = 1, process.env.NODE_ENV !== "production" && function() {
     var o = He, e = Symbol.for("react.element"), t = Symbol.for("react.portal"), r = Symbol.for("react.fragment"), s = Symbol.for("react.strict_mode"), n = Symbol.for("react.profiler"), i = Symbol.for("react.provider"), c = Symbol.for("react.context"), u = Symbol.for("react.forward_ref"), l = Symbol.for("react.suspense"), h = Symbol.for("react.suspense_list"), d = Symbol.for("react.memo"), p = Symbol.for("react.lazy"), w = Symbol.for("react.offscreen"), S = Symbol.iterator, P = "@@iterator";
     function G(a) {
@@ -2198,10 +2192,10 @@ function zr() {
         $.unshift("Warning: " + f), Function.prototype.apply.call(console[a], console, $);
       }
     }
-    var M = !1, F = !1, K = !1, se = !1, J = !1, V;
+    var M = !1, F = !1, z = !1, se = !1, J = !1, V;
     V = Symbol.for("react.module.reference");
     function ne(a) {
-      return !!(typeof a == "string" || typeof a == "function" || a === r || a === n || J || a === s || a === l || a === h || se || a === w || M || F || K || typeof a == "object" && a !== null && (a.$$typeof === p || a.$$typeof === d || a.$$typeof === i || a.$$typeof === c || a.$$typeof === u || // This needs to include all possible module reference object
+      return !!(typeof a == "string" || typeof a == "function" || a === r || a === n || J || a === s || a === l || a === h || se || a === w || M || F || z || typeof a == "object" && a !== null && (a.$$typeof === p || a.$$typeof === d || a.$$typeof === i || a.$$typeof === c || a.$$typeof === u || // This needs to include all possible module reference object
       // types supported by any Flight configuration anywhere since
       // we don't know which Flight build this will end up being used
       // with.
@@ -2340,8 +2334,8 @@ function zr() {
     }
     var ae = !1, Z;
     {
-      var ze = typeof WeakMap == "function" ? WeakMap : Map;
-      Z = new ze();
+      var Ke = typeof WeakMap == "function" ? WeakMap : Map;
+      Z = new Ke();
     }
     function $e(a, f) {
       if (!a || ae)
@@ -2414,7 +2408,7 @@ function zr() {
       var H = a ? a.displayName || a.name : "", j = H ? Q(H) : "";
       return typeof a == "function" && Z.set(a, j), j;
     }
-    function Ke(a, f, m) {
+    function ze(a, f, m) {
       return $e(a, !1);
     }
     function Je(a) {
@@ -2437,7 +2431,7 @@ function zr() {
       if (typeof a == "object")
         switch (a.$$typeof) {
           case u:
-            return Ke(a.render);
+            return ze(a.render);
           case d:
             return ee(a.type, f, m);
           case p: {
@@ -2757,18 +2751,18 @@ React keys must be passed directly to JSX without using spread:
       return Fe(a, f, m, !1);
     }
     var pt = dt, mt = ft;
-    z.Fragment = r, z.jsx = pt, z.jsxs = mt;
-  }()), z;
+    K.Fragment = r, K.jsx = pt, K.jsxs = mt;
+  }()), K;
 }
-process.env.NODE_ENV === "production" ? pe.exports = qr() : pe.exports = zr();
+process.env.NODE_ENV === "production" ? pe.exports = Br() : pe.exports = qr();
 var Kr = pe.exports;
-const Xr = () => {
+const Vr = () => {
   const o = je(null), e = je(null);
   return wt(() => {
     if (o.current) {
       e.current && (e.current = null);
       try {
-        e.current = new Br(o.current);
+        e.current = new Yr(o.current);
       } catch (t) {
         console.error("Error initializing ReactTerminal:", t);
       }
@@ -2791,7 +2785,7 @@ const Xr = () => {
   );
 };
 export {
-  jr as Kernel,
-  Xr as ReactTerminal,
-  Br as TSTerminal
+  Fr as Kernel,
+  Vr as ReactTerminal,
+  Yr as TSTerminal
 };

@@ -1,16 +1,29 @@
 import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import dts from 'vite-plugin-dts'; // 1. Importa el plugin
 import { resolve } from 'path';
-import dts from 'vite-plugin-dts';
 
 export default defineConfig({
   plugins: [
-    dts({ include: ['src'] })
+    react(),
+dts({ 
+  insertTypesEntry: true,
+  include: ['src'],            // Asegura procesar SOLO la carpeta src
+  exclude: ['src/main.ts', 'scripts/**/*', 'tests/**/*'], // Evita que se cuelen archivos de ejecución o test
+  rollupTypes: true,           // Unifica todo en index.d.ts
+  bundledPackages: [],         // Forzamos un bundling limpio de dependencias locales
+  compilerOptions: {
+    noEmit: false,             // Sobrescribimos el noEmit del tsconfig temporalmente para el plugin
+    declaration: true,
+    emitDeclarationOnly: true
+  }
+})
   ],
   build: {
     lib: {
-      entry: resolve(__dirname, 'src/index.ts'), 
+      entry: resolve(__dirname, 'src/index.ts'),
       name: 'TerminalSimulator',
-      fileName: 'terminal-simulator',
+      fileName: (format) => `terminal-simulator.${format === 'es' ? 'js' : 'cjs'}`,
       formats: ['es', 'cjs']
     },
     rollupOptions: {
@@ -18,17 +31,9 @@ export default defineConfig({
       output: {
         globals: {
           react: 'React',
-          'react-dom': 'ReactDOM',
-        },
-      },
-    },
-    // Asegurar que los módulos comunes se mantengan
-    commonjsOptions: {
-      include: [/node_modules/],
+          'react-dom': 'ReactDOM'
+        }
+      }
     }
-  },
-  // Asegurar que el JSX se transpile correctamente
-  esbuild: {
-    drop: undefined,
   }
 });

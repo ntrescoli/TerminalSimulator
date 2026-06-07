@@ -12,12 +12,19 @@
     "resolveJsonModule": true,
     "jsx": "react-jsx",
     "isolatedModules": true,
-    "noEmit": true,
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    
+    /* CAMBIO AQUÍ: Permitir la salida de archivos */
+    "noEmit": true, 
 
-    /* Type Declaration Generation (for library build) */
+    /* Type Declaration Generation */
     "declaration": true,
     "declarationMap": true,
-    "emitDeclarationOnly": false,
+    /* CAMBIO AQUÍ: Decirle a tsc que SOLO genere los .d.ts, ya que Vite hace el resto */
+    "emitDeclarationOnly": false, 
+    /* CAMBIO AQUÍ: Indicar dónde debe escupir los tipos para que coincida con tu package.json */
+    "outDir": "./dist", 
 
     /* Linting / Strict Mode */
     "strict": true,
@@ -25,7 +32,7 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     
-    /* Paths (Opcional, pero ayuda si el proyecto crece) */
+    /* Paths */
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
