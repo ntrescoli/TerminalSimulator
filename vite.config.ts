@@ -19,21 +19,27 @@ dts({
   }
 })
   ],
-  build: {
-    lib: {
-      entry: resolve(__dirname, 'src/index.ts'),
-      name: 'TerminalSimulator',
-      fileName: (format) => `terminal-simulator.${format === 'es' ? 'js' : 'cjs'}`,
-      formats: ['es', 'cjs']
-    },
-    rollupOptions: {
-      external: ['react', 'react-dom', 'react/jsx-runtime'],
-      output: {
-        globals: {
-          react: 'React',
-          'react-dom': 'ReactDOM'
-        }
+build: {
+  lib: {
+    entry: resolve(__dirname, 'src/index.ts'), 
+    name: 'TerminalSimulator',
+    fileName: (format) => `terminal-simulator.${format === 'es' ? 'js' : 'cjs'}`,
+    formats: ['es', 'cjs']
+  },
+  rollupOptions: {
+    external: [
+      'react', 
+      'react-dom', 
+      'react/jsx-runtime', 
+      'react-dom/client'
+    ],
+    output: {
+      globals: {
+        react: 'React',
+        'react-dom': 'ReactDOM',
+        'react/jsx-runtime': 'JSX'
       }
     }
   }
+}
 });
