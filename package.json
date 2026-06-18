@@ -1,6 +1,6 @@
 {
   "name": "terminal-simulator",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Interactive Linux terminal simulator for the browser - use as Vanilla JS or React component",
   "type": "module",
   "main": "./dist/terminal-simulator.cjs",

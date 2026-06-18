@@ -119,6 +119,9 @@ export class TSTerminal {
      * Sincroniza el estado visual del Input y el Prompt según la energía actual del Kernel
      */
     public applyPowerStateVisuals() {
+        // ⚠️ CRÍTICO: Si el DOM aún no se ha creado en el proceso asíncrono, abortamos de forma segura.
+        if (!this.terminalEl) return;
+        
         const inputElement = this.terminalEl.querySelector('.terminal-input') as HTMLInputElement;
         const promptElement = this.terminalEl.querySelector('.prompt') as HTMLElement;
         const inputLine = this.terminalEl.querySelector('.input-line') as HTMLElement; // <-- Capturamos la línea completa

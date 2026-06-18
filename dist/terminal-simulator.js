@@ -2218,6 +2218,7 @@ class dt {
    * Sincroniza el estado visual del Input y el Prompt según la energía actual del Kernel
    */
   applyPowerStateVisuals() {
+    if (!this.terminalEl) return;
     const e = this.terminalEl.querySelector(".terminal-input"), t = this.terminalEl.querySelector(".prompt"), r = this.terminalEl.querySelector(".input-line");
     !e || !t || !r || (this.kernel.getPowerState() === "POWER_OFF" ? (this.terminalUI.clear(), r.style.display = "none", this.terminalUI.print('The terminal is turned off. Press "Power On" in the hypervisor to start.'), e.disabled = !0, e.value = "", t.innerText = "") : (r.style.display = "flex", e.disabled = !1, this.terminalUI.clear(), this.showWelcomeMessage()));
   }
