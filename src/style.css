@@ -1,23 +1,20 @@
 /* Variables protegidas bajo el espacio de nombres de tu tema */
 .ubuntu-terminal-theme {
-    --ub-bg-color: #300a24; /* Color berenjena clásico de Ubuntu */
-    --ub-text-color: #ffffff;
-    --ub-prompt-color: #8ae234; /* Verde brillante para el usuario */
+    /* Si el hipervisor define --distro-text, lo usamos. Si no, blanco. */
+    --ub-text-color: var(--distro-text, #ffffff);
+    --ub-prompt-color: var(--distro-accent, #8ae234);
     --ub-font-family: 'Ubuntu Mono', 'Courier New', monospace;
     
-    /* Aseguramos que si se usa en layouts fluidos o hipervisores, herede bien el tamaño */
     box-sizing: border-box;
     width: 100%;
-    /* --- INTEGRACIÓN DE SEGURIDAD --- */
-    /* Si el padre no define altura, garantizamos un tamaño mínimo digno para una terminal */
-    min-height: 400px; 
-    /* Si el padre sí define una altura (ej: height: 500px o 80vh), nos acoplamos perfectamente */
-    height: 100%; 
+    min-height: 400px;
+    height: 100%;
     
-    background-color: #000000; /* El fondo negro del monitor integrado */
+    /* El fondo del monitor se adapta al tema del hipervisor */
+    background-color: var(--distro-header, #000000); 
     padding: 0;
     margin: 0;
-    overflow: hidden; /* Evita que la terminal se desborde del contenedor asignado */
+    overflow: hidden;
 }
 
 /* Aplicamos box-sizing universal interno para evitar desfases por paddings */
@@ -29,22 +26,19 @@
 
 /* El contenedor principal pasa de ID a Clase */
 .ubuntu-terminal-theme .terminal-container {
-    background-color: var(--ub-bg-color);
+    /* El cuerpo de la terminal adopta el color exacto de la distro activa */
+    background-color: var(--distro-bg, #300a24);
     width: 100%;
-    height: 100%; /* Ocupa el 100% del espacio protegido por el tema */
+    height: 100%;
     padding: 15px;
-
-    /* --- INTEGRACIÓN DE SEGURIDAD --- */
-    overflow-y: auto; /* El scrollbar de Linux se queda encapsulado aquí dentro */
-
+    overflow-y: auto;
     border-radius: 6px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    overflow-y: auto;
-    font-family: var(--ub-font-family);
+    font-family: var(--ub-font-family) !important; /* !important combate el reseteo de Tailwind */
     font-size: 16px;
     line-height: 1.4;
     color: var(--ub-text-color);
-    text-align: left; /* Previene alineaciones raras si el proyecto usa text-align center */
+    text-align: left;
 }
 
 /* El área de salida pasa de ID a Clase */
@@ -67,16 +61,17 @@
 
 /* El input pasa de ID a Clase */
 .ubuntu-terminal-theme .terminal-input {
-    background: transparent;
-    border: none;
-    color: var(--ub-text-color);
-    font-family: var(--ub-font-family);
-    font-size: 16px;
-    outline: none;
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    color: inherit !important;
+    font-family: var(--ub-font-family) !important;
+    font-size: 16px !important;
+    padding: 0 !important;
+    margin: 0 0 0 8px !important;
     flex-grow: 1;
     width: 100%;
-    padding: 0;
-    margin: 0;
+    box-shadow: none !important;
 }
 
 /* Scrollbar personalizado acotado ÚNICAMENTE a tu terminal */
