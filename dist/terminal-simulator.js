@@ -1,9 +1,9 @@
-var L = Object.defineProperty;
-var j = (o, e, t) => e in o ? L(o, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : o[e] = t;
+var _ = Object.defineProperty;
+var j = (o, e, t) => e in o ? _(o, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : o[e] = t;
 var m = (o, e, t) => j(o, typeof e != "symbol" ? e + "" : e, t);
-import { jsx as _ } from "react/jsx-runtime";
-import { useRef as R, useEffect as W } from "react";
-class f {
+import { jsx as W } from "react/jsx-runtime";
+import { useRef as R, useEffect as O } from "react";
+class p {
   constructor(e, t, r) {
     m(this, "isSuccess");
     m(this, "isFailure");
@@ -12,10 +12,10 @@ class f {
     this.isSuccess = e, this.isFailure = !e, this._error = t, this._value = r;
   }
   static ok(e) {
-    return new f(!0, void 0, e);
+    return new p(!0, void 0, e);
   }
   static fail(e) {
-    return new f(!1, e, void 0);
+    return new p(!1, e, void 0);
   }
   /**
    * Extrae el valor en caso de éxito.
@@ -149,11 +149,11 @@ class B {
   getNodes(e = ".", t = !1) {
     const r = this.resolvePath(e);
     if (!r)
-      return f.fail(`cannot access '${e}': No such file or directory`);
+      return p.fail(`cannot access '${e}': No such file or directory`);
     if (r.type === "file")
-      return f.ok([r]);
+      return p.ok([r]);
     let s = [...r.children];
-    return t || (s = s.filter((n) => !n.name.startsWith("."))), f.ok(s.sort((n, i) => n.name.localeCompare(i.name)));
+    return t || (s = s.filter((n) => !n.name.startsWith("."))), p.ok(s.sort((n, i) => n.name.localeCompare(i.name)));
   }
   readdir(e) {
     const t = this.resolvePath(e);
@@ -191,55 +191,55 @@ class B {
   touch(e, t = "") {
     const r = e.lastIndexOf("/"), s = r === -1 ? "." : e.substring(0, r) || "/", n = r === -1 ? e : e.substring(r + 1), i = this.resolvePath(s);
     if (!i || i.type !== "dir")
-      return f.fail(y.FS.NOT_FOUND(e));
+      return p.fail(y.FS.NOT_FOUND(e));
     if (!this.checkAccess(i, "write"))
-      return f.fail(y.FS.PERMISSION_DENIED(e));
+      return p.fail(y.FS.PERMISSION_DENIED(e));
     const a = i.children.find((c) => c.name === n);
     if (a)
-      return a.type === "dir" ? f.fail(y.FS.IS_DIRECTORY(e)) : this.checkAccess(a, "write") ? (t !== "" && (a.content = t), f.ok(a)) : f.fail(y.FS.PERMISSION_DENIED(e));
+      return a.type === "dir" ? p.fail(y.FS.IS_DIRECTORY(e)) : this.checkAccess(a, "write") ? (t !== "" && (a.content = t), p.ok(a)) : p.fail(y.FS.PERMISSION_DENIED(e));
     {
       const c = this.env.get("USER") || "root", u = A.create(n, "file", c, i, t);
-      return i.children.push(u), f.ok(u);
+      return i.children.push(u), p.ok(u);
     }
   }
   mkdir(e) {
     const t = e.lastIndexOf("/"), r = t === -1 ? "." : e.substring(0, t) || "/", s = t === -1 ? e : e.substring(t + 1), n = this.resolvePath(r);
     if (!n || n.type !== "dir")
-      return f.fail(y.FS.NOT_FOUND(e));
+      return p.fail(y.FS.NOT_FOUND(e));
     if (!this.checkAccess(n, "write"))
-      return f.fail(y.FS.PERMISSION_DENIED(e));
+      return p.fail(y.FS.PERMISSION_DENIED(e));
     if (n.children.some((a) => a.name === s))
-      return f.fail(y.FS.ALREADY_EXISTS(e));
+      return p.fail(y.FS.ALREADY_EXISTS(e));
     const i = A.create(s, "dir", this.env.get("USER"), n);
-    return n.children.push(i), f.ok(i);
+    return n.children.push(i), p.ok(i);
   }
   remove(e, t = !1) {
     const r = this.resolvePath(e);
-    return r ? r === this.root ? f.fail("cannot remove root directory '/'") : r === this.currentDirectory ? f.fail("cannot remove current directory '.' or '..'") : r.type === "dir" && !t ? f.fail(y.FS.IS_DIRECTORY(e)) : r.parent && !this.checkAccess(r.parent, "write") ? f.fail(y.FS.PERMISSION_DENIED(e)) : (r.parent && (r.parent.children = r.parent.children.filter((s) => s !== r), r.parent = null), f.ok()) : f.fail(y.FS.NOT_FOUND(e));
+    return r ? r === this.root ? p.fail("cannot remove root directory '/'") : r === this.currentDirectory ? p.fail("cannot remove current directory '.' or '..'") : r.type === "dir" && !t ? p.fail(y.FS.IS_DIRECTORY(e)) : r.parent && !this.checkAccess(r.parent, "write") ? p.fail(y.FS.PERMISSION_DENIED(e)) : (r.parent && (r.parent.children = r.parent.children.filter((s) => s !== r), r.parent = null), p.ok()) : p.fail(y.FS.NOT_FOUND(e));
   }
   // @/slices/filesystem/application/services/FileSystem.ts
   removeDirectory(e) {
     const t = this.resolvePath(e);
     if (!t)
-      return f.fail(y.FS.NOT_FOUND(e));
+      return p.fail(y.FS.NOT_FOUND(e));
     if (t.type !== "dir")
-      return f.fail(`Failed to remove '${e}': Not a directory`);
+      return p.fail(`Failed to remove '${e}': Not a directory`);
     if (t === this.root)
-      return f.fail("cannot remove root directory '/'");
+      return p.fail("cannot remove root directory '/'");
     if (t === this.currentDirectory)
-      return f.fail("cannot remove current directory '.'");
+      return p.fail("cannot remove current directory '.'");
     if (t.children.length > 0)
-      return f.fail(`Failed to remove '${e}': Directory not empty`);
+      return p.fail(`Failed to remove '${e}': Directory not empty`);
     const s = t.parent || this.resolvePath(e + "/..");
-    return s && !this.checkAccess(s, "write") ? f.fail(y.FS.PERMISSION_DENIED(e)) : (s && (s.children = s.children.filter((n) => n.name !== t.name)), f.ok());
+    return s && !this.checkAccess(s, "write") ? p.fail(y.FS.PERMISSION_DENIED(e)) : (s && (s.children = s.children.filter((n) => n.name !== t.name)), p.ok());
   }
   changeDirectory(e) {
     let t = null;
-    return e === "-" ? t = this.previousDirectory : t = this.resolvePath(e), t ? t.type !== "dir" ? f.fail(y.FS.NOT_A_DIRECTORY(e)) : (this.previousDirectory = this.currentDirectory, this.currentDirectory = t, f.ok()) : f.fail(y.FS.NOT_FOUND(e));
+    return e === "-" ? t = this.previousDirectory : t = this.resolvePath(e), t ? t.type !== "dir" ? p.fail(y.FS.NOT_A_DIRECTORY(e)) : (this.previousDirectory = this.currentDirectory, this.currentDirectory = t, p.ok()) : p.fail(y.FS.NOT_FOUND(e));
   }
   cat(e) {
     const t = this.resolvePath(e);
-    return t ? t.type === "dir" ? f.fail(y.FS.IS_DIRECTORY(e)) : this.checkAccess(t, "read") ? f.ok(t.content || "") : f.fail(y.FS.PERMISSION_DENIED(e)) : f.fail(y.FS.NOT_FOUND(e));
+    return t ? t.type === "dir" ? p.fail(y.FS.IS_DIRECTORY(e)) : this.checkAccess(t, "read") ? p.ok(t.content || "") : p.fail(y.FS.PERMISSION_DENIED(e)) : p.fail(y.FS.NOT_FOUND(e));
   }
   /**
    * Realiza una lectura directa de un archivo del sistema ignorando las restricciones 
@@ -247,7 +247,7 @@ class B {
    */
   catSystem(e) {
     const t = this.resolvePath(e);
-    return t ? t.type !== "file" ? f.fail("Not a file") : f.ok(t.content) : f.fail("File not found");
+    return t ? t.type !== "file" ? p.fail("Not a file") : p.ok(t.content) : p.fail("File not found");
   }
   // No se usa
   getPreviousDirectory() {
@@ -267,21 +267,21 @@ class B {
   setOwnership(e, t, r, s, n) {
     const i = this.resolvePath(e);
     if (!i)
-      return f.fail(`cannot access '${e}': No such file or directory`);
+      return p.fail(`cannot access '${e}': No such file or directory`);
     if (t !== "root") {
       if (i.owner !== t)
-        return f.fail(`changing group of '${e}': Operation not permitted`);
+        return p.fail(`changing group of '${e}': Operation not permitted`);
       if (n !== void 0 && !r.includes(t))
-        return f.fail(`changing group of '${e}': Group membership required`);
+        return p.fail(`changing group of '${e}': Group membership required`);
     }
-    return s !== void 0 && (i.owner = s), n !== void 0 && (i.group = n), f.ok();
+    return s !== void 0 && (i.owner = s), n !== void 0 && (i.group = n), p.ok();
   }
   getModificationTime(e) {
     var t;
     return ((t = this.resolvePath(e)) == null ? void 0 : t.mtime) || 0;
   }
   getType(e) {
-    return e.type === "dir" ? f.ok("dir") : e.type === "file" ? f.ok("file") : f.fail(y.FS.UNKNOWN_TYPE(e.name));
+    return e.type === "dir" ? p.ok("dir") : e.type === "file" ? p.ok("file") : p.fail(y.FS.UNKNOWN_TYPE(e.name));
   }
   /**
    * Método auxiliar para clonar un nodo en profundidad (Deep Copy)
@@ -297,9 +297,9 @@ class B {
   }
   copy(e, t, r = !1) {
     const s = S.resolve(e, this.currentDirectory, this.root);
-    if (!s) return f.fail(`cp: cannot stat '${e}': No such file or directory`);
+    if (!s) return p.fail(`cp: cannot stat '${e}': No such file or directory`);
     if (s.type === "dir" && !r)
-      return f.fail(`cp: -r not specified; omitting directory '${e}'`);
+      return p.fail(`cp: -r not specified; omitting directory '${e}'`);
     const n = S.resolve(t, this.currentDirectory, this.root);
     let i = null, a = s.name;
     if (n && n.type === "dir")
@@ -314,14 +314,14 @@ class B {
       }
     }
     if (!i || i.type !== "dir")
-      return f.fail(`cp: cannot create regular file '${t}': Not a directory`);
+      return p.fail(`cp: cannot create regular file '${t}': Not a directory`);
     const c = this.cloneNode(s, i);
-    return c.name = a, i.children = i.children.filter((u) => u.name !== a), i.children.push(c), f.ok();
+    return c.name = a, i.children = i.children.filter((u) => u.name !== a), i.children.push(c), p.ok();
   }
   move(e, t) {
     const r = S.resolve(e, this.currentDirectory, this.root);
-    if (!r) return f.fail(`mv: cannot stat '${e}': No such file or directory`);
-    if (r === this.root) return f.fail("mv: cannot move root directory '/'");
+    if (!r) return p.fail(`mv: cannot stat '${e}': No such file or directory`);
+    if (r === this.root) return p.fail("mv: cannot move root directory '/'");
     const s = S.resolve(t, this.currentDirectory, this.root);
     let n = null, i = r.name;
     if (s && s.type === "dir")
@@ -335,7 +335,7 @@ class B {
         n = S.resolve(c, this.currentDirectory, this.root), i = t.substring(a + 1);
       }
     }
-    return !n || n.type !== "dir" ? f.fail(`mv: cannot move to '${t}': Not a directory`) : (r.parent && (r.parent.children = r.parent.children.filter((a) => a !== r)), r.parent = n, r.name = i, n.children = n.children.filter((a) => a.name !== i), n.children.push(r), f.ok());
+    return !n || n.type !== "dir" ? p.fail(`mv: cannot move to '${t}': Not a directory`) : (r.parent && (r.parent.children = r.parent.children.filter((a) => a !== r)), r.parent = n, r.name = i, n.children = n.children.filter((a) => a.name !== i), n.children.push(r), p.ok());
   }
   // --- CARGA INICIAL DE SEGURIDAD (CENTRALIZAR EN EL FUTURO) ---
   loadDefaults() {
@@ -526,7 +526,7 @@ class q {
     this.repository.saveUsers(e), this.repository.saveGroups(t), this.lastUsersSync = this.fs.getModificationTime("/etc/passwd"), this.lastShadowSync = this.fs.getModificationTime("/etc/shadow"), this.lastGroupsSync = this.fs.getModificationTime("/etc/group");
   }
 }
-class z {
+class K {
   constructor(e) {
     this.fs = e;
   }
@@ -549,7 +549,9 @@ class z {
     return this.parseGroups(t);
   }
   saveUsers(e) {
-    const t = e.map((a) => `${a.username}:x:${a.uid}:${a.gid}:${a.fullName}:${a.home}:${a.shell}`).join(`
+    const t = e.map(
+      (a) => `${a.username}:x:${a.uid}:${a.gid}:${a.fullName}:${a.home}:${a.shell}`
+    ).join(`
 `);
     this.fs.writeFile("/etc/passwd", t);
     const r = Math.floor(Date.now() / (1e3 * 60 * 60 * 24)), s = this.fs.cat("/etc/shadow"), n = s.isSuccess ? this.parseShadow(s.getValue()) : /* @__PURE__ */ new Map(), i = e.map((a) => {
@@ -596,7 +598,7 @@ class z {
     });
   }
 }
-class K {
+class z {
   constructor(e) {
     this.env = e;
   }
@@ -621,36 +623,36 @@ class K {
     let c = e.trim(), u = null, l = !1;
     const h = c.match(/>>\s*([^\s]+)$/), d = c.match(/>\s*([^\s]+)$/);
     h ? (l = !0, u = h[1], c = c.replace(/>>\s*[^\s]+$/, "").trim()) : d && (l = !1, u = d[1], c = c.replace(/>\s*[^\s]+$/, "").trim());
-    const g = c.indexOf(" "), p = g === -1 ? c : c.substring(0, g), w = g === -1 ? "" : c.substring(g), U = this.env.getAlias(p.trim());
-    U && (c = `${U}${w}`.trim());
+    const g = c.indexOf(" "), f = g === -1 ? c : c.substring(0, g), w = g === -1 ? "" : c.substring(g), b = this.env.getAlias(f.trim());
+    b && (c = `${b}${w}`.trim());
     const v = this.tokenize(c);
     if (v.length === 0) return "";
-    const E = v[0].toLowerCase(), b = v.slice(1), $ = t.get(E);
-    if (!$) return `-bash: ${E}: command not found`;
-    const N = $.valuedFlags || [], T = E === "sudo" ? [...N, "sudo-pass", "--sudo-pass"] : N, O = this.extractAllowedFlagsFromCommand($, T);
+    const x = v[0].toLowerCase(), U = v.slice(1), E = t.get(x);
+    if (!E) return `-bash: ${x}: command not found`;
+    const N = E.valuedFlags || [], P = x === "sudo" ? [...N, "sudo-pass", "--sudo-pass"] : N, k = this.extractAllowedFlagsFromCommand(E, P);
     if (a != null && a.aborted)
       return "COMMAND_ABORTED";
-    const { options: C, args: k, flagValues: G } = this.parseArgsAndFlags(b, T, O), F = {
-      args: this.expandGlobPatterns(k, r),
-      options: C,
+    const { options: T, args: F, flagValues: G } = this.parseArgsAndFlags(U, P, k), L = {
+      args: this.expandGlobPatterns(F, r),
+      options: T,
       flagValues: G,
-      rawArgs: b,
+      rawArgs: U,
       fs: r,
       env: this.env,
       userManager: s,
       pipeInput: n,
       signal: a,
       kernel: i,
-      hasFlag: (x) => C.includes(x.startsWith("-") ? x : `-${x}`),
+      hasFlag: ($) => T.includes($.startsWith("-") ? $ : `-${$}`),
       rawInput: e
-    }, P = await $.execute(F);
+    }, I = await E.execute(L);
     if (a != null && a.aborted)
       return "COMMAND_ABORTED";
     if (u) {
-      const x = r.writeFile(u, P, l);
-      return x.isSuccess ? "" : x.getError();
+      const $ = r.writeFile(u, I, l);
+      return $.isSuccess ? "" : $.getError();
     }
-    return P;
+    return I;
   }
   tokenize(e) {
     const t = /"([^"]*)"|'([^']*)'|([^\s]+)/g, r = [];
@@ -667,8 +669,8 @@ class K {
         const u = c.startsWith("--"), l = u ? [c.slice(2)] : c.slice(1).split("");
         let h = !1;
         for (let d = 0; d < l.length; d++) {
-          const g = l[d], p = u ? `--${g}` : `-${g}`;
-          if (r && !r.has(p))
+          const g = l[d], f = u ? `--${g}` : `-${g}`;
+          if (r && !r.has(f))
             if (u) {
               n.push(c), h = !0;
               break;
@@ -677,12 +679,12 @@ class K {
               n.push(w), h = !0;
               break;
             }
-          if (s.push(p), t.includes(g) || t.includes(p)) {
+          if (s.push(f), t.includes(g) || t.includes(f)) {
             if (!u && c.slice(d + 2).length > 0) {
-              i[p] = c.slice(d + 2), h = !0;
+              i[f] = c.slice(d + 2), h = !0;
               break;
             } else if (a + 1 < e.length) {
-              i[p] = e[a + 1], a++, h = !0;
+              i[f] = e[a + 1], a++, h = !0;
               break;
             }
           }
@@ -789,21 +791,21 @@ const V = {
         return `ls: ${u.getError()}`;
       const l = u.getValue();
       e("-S") ? l.sort((d, g) => {
-        var p, w;
-        return (((p = g.content) == null ? void 0 : p.length) || 0) - (((w = d.content) == null ? void 0 : w.length) || 0);
+        var f, w;
+        return (((f = g.content) == null ? void 0 : f.length) || 0) - (((w = d.content) == null ? void 0 : w.length) || 0);
       }) : e("-r") && l.reverse();
       let h;
       e("-l") ? h = l.map((d) => {
         var N;
-        const p = (d.type === "dir" ? "d" : "-") + D(d.permissions.user) + D(d.permissions.group) + D(d.permissions.others), w = d.owner.padEnd(10), U = (d.group || d.owner).padEnd(10), v = d.type === "dir" ? 4096 : ((N = d.content) == null ? void 0 : N.length) || 0, E = e("-h") ? ee(v) : v.toString(), b = new Date(d.createdAt).toLocaleDateString("es-ES", {
+        const f = (d.type === "dir" ? "d" : "-") + D(d.permissions.user) + D(d.permissions.group) + D(d.permissions.others), w = d.owner.padEnd(10), b = (d.group || d.owner).padEnd(10), v = d.type === "dir" ? 4096 : ((N = d.content) == null ? void 0 : N.length) || 0, x = e("-h") ? ee(v) : v.toString(), U = new Date(d.createdAt).toLocaleDateString("es-ES", {
           month: "short",
           day: "2-digit",
           hour: "2-digit",
           minute: "2-digit"
-        }), $ = I(d, e("-F"));
-        return `${p}  1 ${w} ${U} ${E.padStart(8)} ${b} ${$}`;
+        }), E = C(d, e("-F"));
+        return `${f}  1 ${w} ${b} ${x.padStart(8)} ${U} ${E}`;
       }).join(`
-`) : h = l.map((d) => I(d, e("-F"))).join(e("-1") ? `
+`) : h = l.map((d) => C(d, e("-F"))).join(e("-1") ? `
 ` : "  "), i ? s.push(`${c}:`, h) : s.push(h);
     }
     const a = e("-1") ? `
@@ -828,7 +830,7 @@ function ee(o) {
     r /= 1024, t++;
   return `${r.toFixed(1)}${e[t]}`;
 }
-function I(o, e) {
+function C(o, e) {
   return o.type === "dir" ? `${o.name}/` : e && o.permissions.execute ? `${o.name}*` : o.name;
 }
 const te = {
@@ -857,7 +859,7 @@ const te = {
     const s = e.getType(r);
     return s.isFailure ? `file: ${s.getError()}` : s.getValue() === "dir" ? `${t}: directory` : `${t}: regular file`;
   }
-}, oe = {
+}, ie = {
   name: "rm",
   execute: ({ args: o, hasFlag: e, fs: t }) => {
     if (o.length < 1)
@@ -874,7 +876,7 @@ const te = {
     return n.length > 0 ? n.join(`
 `) : "";
   }
-}, ie = {
+}, oe = {
   name: "rmdir",
   execute: ({ args: o, fs: e }) => {
     if (o.length < 1)
@@ -911,8 +913,8 @@ const te = {
   re,
   se,
   ne,
-  oe,
   ie,
+  oe,
   ae,
   ce
 ], le = {
@@ -952,10 +954,10 @@ const te = {
     const l = Math.min(c.length, u.length);
     let h = 1, d = 1;
     for (let g = 0; g < l; g++) {
-      const p = c[g], w = u[g];
-      if (p !== w)
+      const f = c[g], w = u[g];
+      if (f !== w)
         return `${t} ${r} differ: byte ${d}, line ${h}`;
-      p === `
+      f === `
 ` && h++, d++;
     }
     return c.length > u.length ? `cmp: EOF on ${r} after byte ${d - 1}, line ${h}` : `cmp: EOF on ${t} after byte ${d - 1}, line ${h}`;
@@ -980,13 +982,13 @@ const te = {
     const l = [], h = Math.max(c.length, u.length);
     let d = 0;
     for (; d < h; ) {
-      const g = c[d], p = u[d];
-      g !== void 0 && p !== void 0 && g !== p ? (l.push(`${d + 1}c${d + 1}`), l.push(`< ${g}`), l.push("---"), l.push(`> ${p}`)) : g !== void 0 && p === void 0 ? (l.push(`${d + 1}d${u.length}`), l.push(`< ${g}`)) : g === void 0 && p !== void 0 && (l.push(`${c.length}a${d + 1}`), l.push(`> ${p}`)), d++;
+      const g = c[d], f = u[d];
+      g !== void 0 && f !== void 0 && g !== f ? (l.push(`${d + 1}c${d + 1}`), l.push(`< ${g}`), l.push("---"), l.push(`> ${f}`)) : g !== void 0 && f === void 0 ? (l.push(`${d + 1}d${u.length}`), l.push(`< ${g}`)) : g === void 0 && f !== void 0 && (l.push(`${c.length}a${d + 1}`), l.push(`> ${f}`)), d++;
     }
     return l.join(`
 `);
   }
-}, fe = {
+}, me = {
   name: "grep",
   execute: ({ args: o, hasFlag: e, fs: t, pipeInput: r }) => {
     const s = o[0], n = o[1];
@@ -1016,7 +1018,7 @@ const te = {
     return u ? h.length.toString() : h.join(`
 `);
   }
-}, me = {
+}, pe = {
   name: "wc",
   // No añadimos valuedFlags porque -l, -w y -c son booleanas, no esperan un parámetro.
   execute: async ({ args: o, hasFlag: e, fs: t, pipeInput: r }) => {
@@ -1026,16 +1028,16 @@ const te = {
       n = r;
     else {
       if (!s) return "wc: missing file operand";
-      const p = t.resolvePath(s);
-      if (!p || p.type !== "file")
+      const f = t.resolvePath(s);
+      if (!f || f.type !== "file")
         return `wc: ${s}: No such file or directory`;
-      n = p.content || "";
+      n = f.content || "";
     }
     const i = n === "" ? 0 : n.split(`
 `).length, a = n.trim() === "" ? 0 : n.trim().split(/\s+/).length, c = n.length, u = e("l"), l = e("w"), h = e("c") || e("m"), d = !u && !l && !h, g = [];
     return (u || d) && g.push(i.toString()), (l || d) && g.push(a.toString()), (h || d) && g.push(c.toString()), !r && s && g.push(s), g.join("	");
   }
-}, pe = {
+}, fe = {
   name: "head",
   valuedFlags: ["n"],
   execute: async ({ args: o, flagValues: e, fs: t, pipeInput: r }) => {
@@ -1164,16 +1166,16 @@ const te = {
   }
 }, ve = [
   le,
-  fe,
+  me,
   he,
   de,
-  pe,
+  fe,
   ge,
-  me,
+  pe,
   ye,
   Se,
   we
-], $e = {
+], Ee = {
   name: "echo",
   execute: ({ args: o, env: e }) => o.map((t) => {
     if (t.startsWith("$")) {
@@ -1182,23 +1184,23 @@ const te = {
     }
     return t;
   }).join(" ")
-}, xe = {
+}, $e = {
   name: "whoami",
   execute: ({ env: o }) => o.get("USER") || "unknown"
-}, Ee = {
+}, xe = {
   name: "clear",
   execute: () => "COMMAND_CLEAR"
 }, Ne = {
   name: "help",
   execute: async ({ args: o }) => `Comandos disponibles: ${M.map((e) => e.name).join(", ")}`
-}, Ue = {
+}, be = {
   name: "env",
   execute: ({ env: o }) => {
     const e = o.getAll();
     return Object.entries(e).map(([t, r]) => `${t}=${r}`).join(`
 `);
   }
-}, be = {
+}, Ue = {
   name: "history",
   execute: ({ kernel: o, hasFlag: e }) => {
     const t = o.getHistory();
@@ -1216,26 +1218,26 @@ const te = {
   name: "sudo",
   execute: async ({ args: o, kernel: e, env: t, userManager: r, flagValues: s, ...n }) => {
     if (o.length === 0) return "usage: sudo <command> [arguments]";
-    const i = t.get("USER") || "guest", c = r.getGroups().find((p) => p.groupName === "sudo" || p.groupName === "wheel"), u = c == null ? void 0 : c.members.includes(i);
+    const i = t.get("USER") || "guest", c = r.getGroups().find((f) => f.groupName === "sudo" || f.groupName === "wheel"), u = c == null ? void 0 : c.members.includes(i);
     if (i !== "root" && !u)
       return `Sorry, user ${i} is not allowed to execute sudo. This incident will be reported.`;
     let l = s["--sudo-pass"] || s["sudo-pass"] || null;
     if (!l && n.rawInput) {
-      const p = n.rawInput.match(/--sudo-pass=(\S+)/);
-      p && (l = p[1]);
+      const f = n.rawInput.match(/--sudo-pass=(\S+)/);
+      f && (l = f[1]);
     }
     if (i !== "root" && !l)
       return `AUTH_REQUIRED:sudo:${i}`;
     if (i !== "root" && l) {
-      const p = r.getUserByName(i), w = r.hashPassword(l);
-      if (!p || w !== p.password)
+      const f = r.getUserByName(i), w = r.hashPassword(l);
+      if (!f || w !== f.password)
         return "sudo: 1 incorrect password attempt";
     }
-    const d = o.filter((p) => !p.startsWith("--sudo-pass=")).join(" "), g = i;
+    const d = o.filter((f) => !f.startsWith("--sudo-pass=")).join(" "), g = i;
     try {
       return t.set("USER", "root"), t.set("SUDO_USER", g), await e.execute(d, !0);
-    } catch (p) {
-      return `sudo: error executing command: ${p.message}`;
+    } catch (f) {
+      return `sudo: error executing command: ${f.message}`;
     } finally {
       t.set("USER", g), t.set("SUDO_USER", "");
     }
@@ -1249,7 +1251,7 @@ const te = {
       return t.toUTCString();
     const r = o.find((a) => a.startsWith("+"));
     if (r)
-      return Te(t, r.slice(1));
+      return Pe(t, r.slice(1));
     const s = {
       weekday: "short",
       month: "short",
@@ -1263,7 +1265,7 @@ const te = {
     return `${n} ${i}`;
   }
 };
-function Te(o, e) {
+function Pe(o, e) {
   const t = {
     "%Y": o.getFullYear(),
     "%m": (o.getMonth() + 1).toString().padStart(2, "0"),
@@ -1277,7 +1279,7 @@ function Te(o, e) {
     r = r.replace(new RegExp(s, "g"), t[s]);
   return r;
 }
-const Ce = {
+const Te = {
   name: "uptime",
   // description: 'Muestra cuánto tiempo lleva el sistema encendido',
   execute: async ({ kernel: o, userManager: e }) => {
@@ -1287,7 +1289,7 @@ const Ce = {
     const l = e.getUsers().length;
     return ` ${r} up ${u},  ${l} users,  load average: 0.05, 0.03, 0.01`;
   }
-}, Pe = {
+}, Ie = {
   name: "who",
   // description: 'Muestra quién está conectado',
   execute: async ({ env: o, kernel: e }) => {
@@ -1301,7 +1303,7 @@ const Ce = {
     const t = o.get("USER") || "guest", r = o.get("HOSTNAME") || "js-terminal", s = new Date(Date.now() - e.getUptime()), n = s.toLocaleString("es-ES", { month: "short" }), i = s.getDate(), a = s.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", hour12: !1 });
     return `${t.padEnd(10)} pts/0        ${n} ${i} ${a} (${r})`;
   }
-}, Ie = {
+}, Oe = {
   name: "chown",
   // description: 'Cambia el propietario y el grupo de un archivo o directorio',
   execute: async ({ args: o, fs: e, env: t, userManager: r }) => {
@@ -1312,7 +1314,7 @@ const Ce = {
     const s = o[0], n = o[1], [i, a] = s.split(":");
     return i && !r.getUserByName(i) ? `chown: invalid user: '${i}'` : a && !r.getGroups().find((u) => u.groupName === a) ? `chown: invalid group: '${a}'` : e.setOwnership(n, "root", [], i, a).isSuccess ? "" : `chown: cannot access '${n}': No such file or directory`;
   }
-}, Me = {
+}, Ce = {
   name: "cal",
   execute: ({ args: o }) => {
     const e = /* @__PURE__ */ new Date();
@@ -1353,7 +1355,7 @@ const Ce = {
     return a.join(`
 `);
   }
-}, Oe = {
+}, Me = {
   name: "chgrp",
   execute: async ({ args: o, fs: e, env: t, userManager: r }) => {
     if (o.length < 2)
@@ -1390,7 +1392,7 @@ const Ce = {
     let a = r == null ? void 0 : r.substring(s ? s + 1 : 0).trim();
     return (a != null && a.startsWith("'") && (a != null && a.endsWith("'")) || a != null && a.startsWith('"') && (a != null && a.endsWith('"'))) && (a = a == null ? void 0 : a.substring(1, a.length - 1)), i === "" ? "alias: invalid alias name" : (t.setAlias(i, a), "");
   }
-}, Ge = {
+}, Fe = {
   name: "unalias",
   valuedFlags: [],
   execute: async ({ args: o, env: e }) => {
@@ -1401,23 +1403,23 @@ const Ce = {
         return `unalias: ${t}: not found`;
     return "";
   }
-}, Fe = [
+}, Ge = [
   Ae,
+  xe,
   Ee,
+  be,
+  Ne,
   $e,
   Ue,
-  Ne,
-  xe,
-  be,
   De,
-  Ce,
-  Pe,
-  Re,
+  Te,
   Ie,
-  Me,
+  Re,
   Oe,
+  Ce,
+  Me,
   ke,
-  Ge
+  Fe
 ], Le = {
   name: "groups",
   // description: 'Muestra los grupos a los que pertenece un usuario',
@@ -1425,7 +1427,7 @@ const Ce = {
     const r = o[0] || t.get("USER"), n = e.getGroups().filter((i) => i.groupName === r || i.members.includes(r)).map((i) => i.groupName);
     return n.length === 0 ? `${r} : no groups found` : `${r} : ${n.join(" ")}`;
   }
-}, je = {
+}, _e = {
   name: "adduser",
   // description: 'Añade un usuario al sistema o añade un usuario a un grupo',
   execute: async ({ args: o, userManager: e, env: t }) => {
@@ -1436,7 +1438,7 @@ const Ce = {
     }
     return o.length === 1 ? "Use 'useradd' to create new users or 'adduser user group' to link them." : "Usage: adduser USER GROUP";
   }
-}, _e = {
+}, je = {
   name: "addgroup",
   // description: 'Añade un nuevo grupo al sistema',
   valuedFlags: ["g"],
@@ -1538,7 +1540,7 @@ Notice: Account is locked until a password is set via 'passwd'.`;
     const s = (t.content || "").split(`
 `).filter((i) => i.trim() !== "");
     if (o.length > 0) {
-      const i = o[0].trim().toLowerCase(), a = s.find((p) => p.startsWith(`${i}:`));
+      const i = o[0].trim().toLowerCase(), a = s.find((f) => f.startsWith(`${i}:`));
       if (!a) return `finger: ${i}: no such user`;
       const c = a.split(":"), u = c[0], l = c[2], h = c[4] || u, d = c[5], g = c[6];
       return [
@@ -1559,7 +1561,7 @@ Notice: Account is locked until a password is set via 'passwd'.`;
     }), n.join(`
 `);
   }
-}, ze = {
+}, Ke = {
   name: "passwd",
   execute: async ({ args: o, userManager: e, env: t, fs: r }) => {
     const s = t.get("USER") || "guest";
@@ -1581,16 +1583,16 @@ Notice: Account is locked until a password is set via 'passwd'.`;
     const l = e.updatePassword(n, i);
     return l || `passwd: password updated successfully for user '${n}'`;
   }
-}, Ke = [
+}, ze = [
   We,
   He,
   Le,
-  je,
   _e,
+  je,
   Be,
   Ye,
   qe,
-  ze
+  Ke
 ], Je = {
   name: "save",
   execute: ({ kernel: o }) => {
@@ -1608,10 +1610,10 @@ Notice: Account is locked until a password is set via 'passwd'.`;
   Je,
   Qe
 ], M = [
-  ...Fe,
+  ...Ge,
   ...ue,
   ...ve,
-  ...Ke,
+  ...ze,
   ...Xe
 ];
 class Ze {
@@ -1811,7 +1813,7 @@ class nt {
     };
   }
 }
-class ot {
+class it {
   constructor(e, t, r) {
     m(this, "fileSystem");
     m(this, "environment");
@@ -1838,23 +1840,47 @@ class ot {
     this.environment.loadDefaults(), this.fileSystem.loadDefaults(), this.userManager.loadDefaults();
   }
 }
-class it {
+class ot {
   constructor(e = "/vms/default.json") {
     m(this, "startTime");
     m(this, "history", []);
     m(this, "isReady", !1);
+    // NUEVOS ESTADOS PARA EL HIPERVISOR
+    m(this, "powerState", "POWER_ON");
+    m(this, "ipAddress", null);
+    // Para la futura red
     m(this, "executor");
     m(this, "registry");
     m(this, "orchestrator");
     m(this, "persistence");
     this.startTime = Date.now();
-    const t = new Y(), r = new B(t), s = new z(r), n = new q(r, s);
-    this.orchestrator = new ot(r, t, n), this.executor = new K(t), this.registry = new Ze(), this.persistence = new nt(this.orchestrator, e);
+    const t = new Y(), r = new B(t), s = new K(r), n = new q(r, s);
+    this.orchestrator = new it(r, t, n), this.executor = new z(t), this.registry = new Ze(), this.persistence = new nt(this.orchestrator, e);
+  }
+  /**
+   * APAGAR LA MÁQUINA (Simula un shutdown)
+   */
+  shutdown() {
+    this.powerState = "POWER_OFF";
+  }
+  /**
+   * ENCENDER LA MÁQUINA (Simula un power on)
+   */
+  powerOn() {
+    this.powerState = "POWER_ON";
+  }
+  /**
+   * Comprobar el estado de energía externo (útil para el ping del hipervisor)
+   */
+  getPowerState() {
+    return this.powerState;
   }
   async boot() {
     this.isReady || (await this.persistence.initSystem(this.orchestrator), this.isReady = !0);
   }
   async execute(e, t = !1, r) {
+    if (this.powerState === "POWER_OFF")
+      return "SYSTEM_ERROR: Hardware is powered off. Cannot execute commands.";
     const s = e.trim();
     if (!s) return "";
     t || this.history.push(s);
@@ -1898,10 +1924,22 @@ class at {
     m(this, "outputElement");
     m(this, "inputElement");
     m(this, "promptElement");
+    m(this, "clickListener", null);
     this.outputElement = e, this.inputElement = t, this.promptElement = r, this.init();
   }
   init() {
-    window.addEventListener("click", () => this.inputElement.focus());
+    const e = this.outputElement.parentElement;
+    e && (this.clickListener = () => {
+      this.inputElement.disabled || this.inputElement.focus();
+    }, e.addEventListener("click", this.clickListener));
+  }
+  /**
+   * MÉTODO DE LIMPIEZA (Opcional pero recomendado para el hipervisor)
+   * Si alguna vez necesitas destruir por completo esta UI visual, limpia su listener de clics.
+   */
+  destroy() {
+    const e = this.outputElement.parentElement;
+    e && this.clickListener && e.removeEventListener("click", this.clickListener);
   }
   /**
    * Imprime una línea en la terminal
@@ -1919,7 +1957,7 @@ class at {
     const r = document.createElement("span");
     r.className = "prompt", r.innerText = this.promptElement.innerText + " ";
     const s = document.createElement("span");
-    s.innerText = e, t.appendChild(r), t.appendChild(s), this.outputElement.appendChild(t);
+    s.innerText = e, t.appendChild(r), t.appendChild(s), this.outputElement.appendChild(t), this.scrollToBottom();
   }
   /**
    * Actualiza el texto del prompt (ej: al cambiar de usuario o carpeta)
@@ -2011,14 +2049,28 @@ class lt {
 class ht {
   constructor(e, t, r, s, n) {
     m(this, "currentAbortController", null);
+    // GUARDADO DE REFERENCIAS PARA EL HIPERVISOR
+    m(this, "boundKeyDownListener", null);
+    m(this, "attachedInputElement", null);
     this.kernel = e, this.terminal = t, this.authManager = r, this.historyExpander = s, this.historyNavigator = n;
   }
   attach(e) {
-    e.addEventListener("keydown", async (t) => {
+    this.attachedInputElement = e, this.boundKeyDownListener = async (t) => {
       await this.handleKeyDown(t, e);
-    });
+    }, e.addEventListener("keydown", this.boundKeyDownListener);
+  }
+  /**
+   * MÉTODO PARA EL HIPERVISOR
+   * Desconecta los listeners del input de manera limpia sin alterar el Kernel.
+   */
+  detach() {
+    this.attachedInputElement && this.boundKeyDownListener && this.attachedInputElement.removeEventListener("keydown", this.boundKeyDownListener), this.attachedInputElement = null, this.boundKeyDownListener = null, this.currentAbortController && (this.currentAbortController.abort(), this.currentAbortController = null);
   }
   async handleKeyDown(e, t) {
+    if (this.kernel.getPowerState && this.kernel.getPowerState() === "POWER_OFF") {
+      e.preventDefault();
+      return;
+    }
     if (e.ctrlKey && e.key.toLowerCase() === "c") {
       if (e.preventDefault(), this.currentAbortController && !this.currentAbortController.signal.aborted) {
         this.currentAbortController.abort(), this.currentAbortController = null, this.terminal.print("^C"), this.terminal.updatePrompt(this.kernel.getPromptText()), t.value = "";
@@ -2055,7 +2107,7 @@ class ht {
           return i.endsWith("/") ? a[a.length - 2] + "/" : a[a.length - 1];
         });
         this.terminal.print(`
-` + n.join("  ")), this.terminal.updatePrompt(this.kernel.getPromptText());
+` + n.join("   ")), this.terminal.updatePrompt(this.kernel.getPromptText());
       }
     }
   }
@@ -2103,64 +2155,124 @@ class dt {
   constructor(e, t) {
     m(this, "kernel");
     m(this, "terminalUI");
-    this.kernel = new it(t), this.renderStructure(e);
+    m(this, "container");
+    m(this, "inputHandler");
+    m(this, "terminalEl");
+    this.container = e, this.kernel = t || new ot();
   }
-  // 1. Inyectamos dinámicamente tu estructura de index.html
-  renderStructure(e) {
-    e.innerHTML = `
-            <div id="terminal-container">
-                <div id="output">Cargando sistema...</div>
+  async boot(e) {
+    if (await this.kernel.boot(), this.terminalEl) {
+      this.terminalEl.style.display = "block", this.focusInput();
+      return;
+    }
+    this.renderStructure();
+  }
+  renderStructure() {
+    this.terminalEl = document.createElement("div"), this.terminalEl.className = "terminal-instance-wrapper ubuntu-terminal-theme", this.terminalEl.style.width = "100%", this.terminalEl.style.height = "100%", this.terminalEl.innerHTML = `
+            <div class="terminal-container">
+                <div class="terminal-output">Cargando sistema...</div>
                 <div class="input-line">
-                    <span id="prompt" class="prompt"></span>
-                    <input type="text" id="terminal-input" autofocus spellcheck="false" autocomplete="off">
+                    <span class="prompt"></span>
+                    <input type="text" class="terminal-input" autofocus spellcheck="false" autocomplete="off">
                 </div>
             </div>
-        `;
-    const t = e.querySelector("#output"), r = e.querySelector("#terminal-input"), s = e.querySelector("#prompt");
-    this.bootstrap(t, r, s);
+        `, this.container.appendChild(this.terminalEl);
+    const e = this.terminalEl.querySelector(".terminal-output"), t = this.terminalEl.querySelector(".terminal-input"), r = this.terminalEl.querySelector(".prompt");
+    if (!e || !t || !r) {
+      console.error("Error crítico: No se pudieron encontrar los elementos de la terminal usando las clases CSS.");
+      return;
+    }
+    this.bootstrap(e, t, r);
   }
   async bootstrap(e, t, r) {
-    await this.kernel.boot(), this.terminalUI = new at(e, t, r), this.terminalUI.clear();
+    this.terminalUI = new at(e, t, r), this.terminalUI.clear();
     const s = new ct(), n = new ut(), i = new lt(this.kernel.getHistory());
-    new ht(
+    if (this.inputHandler = new ht(
       this.kernel,
       this.terminalUI,
       s,
       n,
       i
-    ).attach(t), this.terminalUI.print("Welcome to Ubuntu 24.04 LTS (GNU/Linux 6.8.0-generic x86_64)"), this.terminalUI.print(`System information as of ${(/* @__PURE__ */ new Date()).toUTCString()}`), this.terminalUI.print(""), this.terminalUI.updatePrompt(this.kernel.getPromptText()), t.focus();
+    ), this.inputHandler.attach(t), this.kernel.getPowerState && this.kernel.getPowerState() === "POWER_OFF") {
+      this.applyPowerStateVisuals();
+      return;
+    }
+    this.showWelcomeMessage();
+  }
+  showWelcomeMessage() {
+    this.terminalUI.print("Welcome to Ubuntu 24.04 LTS (GNU/Linux 6.8.0-generic x86_64)"), this.terminalUI.print(`System information as of ${(/* @__PURE__ */ new Date()).toUTCString()}`), this.terminalUI.print(""), this.terminalUI.updatePrompt(this.kernel.getPromptText()), this.focusInput();
+  }
+  /**
+   * Apaga la terminal y limpia la pantalla desde código externo.
+   */
+  turnOff() {
+    this.kernel.shutdown(), this.applyPowerStateVisuals();
+  }
+  /**
+   * Enciende la terminal y restaura el prompt desde código externo.
+   */
+  turnOn() {
+    this.kernel.powerOn(), this.applyPowerStateVisuals();
+  }
+  /**
+   * Sincroniza el estado visual del Input y el Prompt según la energía actual del Kernel
+   */
+  applyPowerStateVisuals() {
+    const e = this.terminalEl.querySelector(".terminal-input"), t = this.terminalEl.querySelector(".prompt"), r = this.terminalEl.querySelector(".input-line");
+    !e || !t || !r || (this.kernel.getPowerState() === "POWER_OFF" ? (this.terminalUI.clear(), r.style.display = "none", this.terminalUI.print('The terminal is turned off. Press "Power On" in the hypervisor to start.'), e.disabled = !0, e.value = "", t.innerText = "") : (r.style.display = "flex", e.disabled = !1, this.terminalUI.clear(), this.showWelcomeMessage()));
+  }
+  focusInput() {
+    const e = this.terminalEl.querySelector(".terminal-input");
+    e && !e.disabled && e.focus();
+  }
+  detach() {
+    return this.terminalEl && (this.terminalEl.style.display = "none"), this.kernel;
   }
 }
-const yt = () => {
-  const o = R(null), e = R(null);
-  return W(() => {
-    if (o.current) {
-      e.current && (e.current = null);
+const yt = ({
+  configUrl: o,
+  isPowered: e = !0,
+  existingKernel: t
+}) => {
+  const r = R(null), s = R(null);
+  O(() => {
+    if (r.current) {
+      r.current.innerHTML = "";
       try {
-        e.current = new dt(o.current);
-      } catch (t) {
-        console.error("Error initializing ReactTerminal:", t);
+        const i = new dt(r.current, t);
+        s.current = i, i.boot(o).then(() => {
+          s.current && n(s.current, e);
+        }).catch((a) => {
+          console.error("Error durante el boot de TSTerminal:", a);
+        });
+      } catch (i) {
+        console.error("Error inicializando ReactTerminal:", i);
       }
       return () => {
-        e.current && (e.current = null);
+        s.current && (s.current.detach(), s.current = null);
       };
     }
-  }, []), /* @__PURE__ */ _(
+  }, [o, t]), O(() => {
+    s.current && n(s.current, e);
+  }, [e]);
+  const n = (i, a) => {
+    a ? i.turnOn() : i.turnOff();
+  };
+  return /* @__PURE__ */ W(
     "div",
     {
-      ref: o,
+      ref: r,
       className: "ubuntu-terminal-theme",
       style: {
         width: "100%",
         height: "100%",
         minHeight: "400px"
-        // Altura mínima para que sea usable
       }
     }
   );
 };
 export {
-  it as Kernel,
+  ot as Kernel,
   yt as ReactTerminal,
   dt as TSTerminal
 };

@@ -2,6 +2,7 @@ export class TerminalUI {
     private readonly outputElement: HTMLElement;
     private readonly inputElement: HTMLInputElement;
     private readonly promptElement: HTMLElement;
+    private clickListener: (() => void) | null = null;
 
     constructor(output: HTMLElement, input: HTMLInputElement, prompt: HTMLElement) {
         this.outputElement = output;
@@ -12,8 +13,28 @@ export class TerminalUI {
     }
 
     private init() {
-        // Aseguramos que el input siempre tenga el foco
-        window.addEventListener('click', () => this.inputElement.focus());
+        // En lugar de escuchar a 'window', escuchamos los clics en el contenedor superior de esta terminal.
+        // Así, si la terminal está oculta (display: none), el foco no se robará entre instancias.
+        const container = this.outputElement.parentElement;
+        if (container) {
+            this.clickListener = () => {
+                if (!this.inputElement.disabled) {
+                    this.inputElement.focus();
+                }
+            };
+            container.addEventListener('click', this.clickListener);
+        }
+    }
+
+    /**
+     * MÉTODO DE LIMPIEZA (Opcional pero recomendado para el hipervisor)
+     * Si alguna vez necesitas destruir por completo esta UI visual, limpia su listener de clics.
+     */
+    public destroy() {
+        const container = this.outputElement.parentElement;
+        if (container && this.clickListener) {
+            container.removeEventListener('click', this.clickListener);
+        }
     }
 
     /**
@@ -23,7 +44,7 @@ export class TerminalUI {
         const line = document.createElement('div');
         if (className) line.classList.add(className);
         
-        // Añadimos estilo para preservar espacios y saltos de línea (\n)
+        // El CSS encapsulado ya maneja esto, pero lo dejamos como fallback seguro
         line.style.whiteSpace = 'pre-wrap'; 
         line.style.wordBreak = 'break-all';
         
@@ -50,6 +71,7 @@ export class TerminalUI {
         historyLine.appendChild(promptCopy);
         historyLine.appendChild(commandText);
         this.outputElement.appendChild(historyLine);
+        this.scrollToBottom(); // Asegura el scroll al enviar comandos
     }
 
     /**

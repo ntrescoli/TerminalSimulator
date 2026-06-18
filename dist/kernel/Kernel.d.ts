@@ -2,11 +2,25 @@ export declare class Kernel {
     private readonly startTime;
     private history;
     private isReady;
+    private powerState;
+    private ipAddress;
     private readonly executor;
     private readonly registry;
     private readonly orchestrator;
     private readonly persistence;
     constructor(initialStateUrl?: string);
+    /**
+     * APAGAR LA MÁQUINA (Simula un shutdown)
+     */
+    shutdown(): void;
+    /**
+     * ENCENDER LA MÁQUINA (Simula un power on)
+     */
+    powerOn(): void;
+    /**
+     * Comprobar el estado de energía externo (útil para el ping del hipervisor)
+     */
+    getPowerState(): 'POWER_OFF' | 'POWER_ON';
     boot(): Promise<void>;
     execute(input: string, skipHistory?: boolean, signal?: AbortSignal): Promise<string>;
     getPromptText(): string;

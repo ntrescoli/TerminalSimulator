@@ -12,6 +12,10 @@ export class Kernel {
     private history: string[] = [];
     private isReady = false;
 
+    // NUEVOS ESTADOS PARA EL HIPERVISOR
+    private powerState: 'POWER_OFF' | 'POWER_ON' = 'POWER_ON'; 
+    private ipAddress: string | null = null; // Para la futura red
+
     private readonly executor: CommandExecutor;
     private readonly registry: CommandRegistry;
     private readonly orchestrator: SystemOrchestrator;
@@ -31,6 +35,28 @@ export class Kernel {
         this.persistence = new PersistenceManager(this.orchestrator, initialStateUrl);
     }
 
+    /**
+     * APAGAR LA MÁQUINA (Simula un shutdown)
+     */
+    public shutdown(): void {
+        this.powerState = 'POWER_OFF';
+        // Opcional: Podrías limpiar estados temporales o desalojar memoria volátil aquí
+    }
+
+    /**
+     * ENCENDER LA MÁQUINA (Simula un power on)
+     */
+    public powerOn(): void {
+        this.powerState = 'POWER_ON';
+    }
+
+    /**
+     * Comprobar el estado de energía externo (útil para el ping del hipervisor)
+     */
+    public getPowerState(): 'POWER_OFF' | 'POWER_ON' {
+        return this.powerState;
+    }
+
     public async boot(): Promise<void> {
         if (this.isReady) return;
         await this.persistence.initSystem(this.orchestrator);
@@ -38,6 +64,11 @@ export class Kernel {
     }
 
     public async execute(input: string, skipHistory = false, signal?: AbortSignal): Promise<string> {
+        // CONTROL CRÍTICO: Si la máquina está apagada, no procesa nada
+        if (this.powerState === 'POWER_OFF') {
+            return 'SYSTEM_ERROR: Hardware is powered off. Cannot execute commands.';
+        }
+        
         const trimmedInput = input.trim();
         if (!trimmedInput) return '';
 

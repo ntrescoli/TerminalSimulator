@@ -2,8 +2,14 @@ export declare class TerminalUI {
     private readonly outputElement;
     private readonly inputElement;
     private readonly promptElement;
+    private clickListener;
     constructor(output: HTMLElement, input: HTMLInputElement, prompt: HTMLElement);
     private init;
+    /**
+     * MÉTODO DE LIMPIEZA (Opcional pero recomendado para el hipervisor)
+     * Si alguna vez necesitas destruir por completo esta UI visual, limpia su listener de clics.
+     */
+    destroy(): void;
     /**
      * Imprime una línea en la terminal
      */

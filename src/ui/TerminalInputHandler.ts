@@ -6,6 +6,10 @@ import type { TerminalUI } from './Terminal';
 
 export class TerminalInputHandler {
     private currentAbortController: AbortController | null = null;
+    
+    // GUARDADO DE REFERENCIAS PARA EL HIPERVISOR
+    private boundKeyDownListener: ((e: KeyboardEvent) => Promise<void>) | null = null;
+    private attachedInputElement: HTMLInputElement | null = null;
 
     constructor(
         private readonly kernel: Kernel,
@@ -16,12 +20,42 @@ export class TerminalInputHandler {
     ) {}
 
     public attach(inputElement: HTMLInputElement): void {
-        inputElement.addEventListener('keydown', async (e: KeyboardEvent) => {
+        this.attachedInputElement = inputElement;
+
+        // Guardamos la función con nombre y referencia exacta en la clase
+        this.boundKeyDownListener = async (e: KeyboardEvent) => {
             await this.handleKeyDown(e, inputElement);
-        });
+        };
+
+        // Enganchamos el evento usando la referencia guardada
+        inputElement.addEventListener('keydown', this.boundKeyDownListener);
+    }
+
+    /**
+     * MÉTODO PARA EL HIPERVISOR
+     * Desconecta los listeners del input de manera limpia sin alterar el Kernel.
+     */
+    public detach(): void {
+        if (this.attachedInputElement && this.boundKeyDownListener) {
+            this.attachedInputElement.removeEventListener('keydown', this.boundKeyDownListener);
+        }
+        
+        this.attachedInputElement = null;
+        this.boundKeyDownListener = null;
+
+        if (this.currentAbortController) {
+            this.currentAbortController.abort();
+            this.currentAbortController = null;
+        }
     }
 
     private async handleKeyDown(e: KeyboardEvent, inputElement: HTMLInputElement): Promise<void> {
+        // Bloqueo preventivo: Si la máquina está apagada en el hipervisor, ignoramos el teclado
+        if (this.kernel.getPowerState && this.kernel.getPowerState() === 'POWER_OFF') {
+            e.preventDefault();
+            return;
+        }
+
         if (e.ctrlKey && e.key.toLowerCase() === 'c') {
             e.preventDefault();
 
@@ -82,7 +116,9 @@ export class TerminalInputHandler {
                     const parts = c.split('/');
                     return c.endsWith('/') ? parts[parts.length - 2] + '/' : parts[parts.length - 1];
                 });
-                this.terminal.print('\n' + suggestions.join('  '));
+                
+                // Imprime las sugerencias respetando el flujo de clases
+                this.terminal.print('\n' + suggestions.join('   '));
                 this.terminal.updatePrompt(this.kernel.getPromptText());
             }
         }
@@ -146,7 +182,8 @@ export class TerminalInputHandler {
             this.processResponse(response);
             inputElement.value = '';
             this.historyNavigator.reset();
-        } finally {
+        } 
+        finally {
             this.currentAbortController = null;
         }
     }

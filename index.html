@@ -2,11 +2,37 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ubuntu Server Simulator</title>
+    <title>Hipervisor con Control de Energía</title>
+    <link rel="stylesheet" href="./src/style.css">
+    <style>
+        body { font-family: sans-serif; background: #222; color: #fff; padding: 20px; }
+        .controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .vm-selectors button { padding: 10px 20px; font-size: 16px; cursor: pointer; margin-right: 10px; background: #444; color: #fff; border: 1px solid #666; }
+        .vm-selectors button.active { background: #E95420; border-color: #E95420; }
+        
+        /* Botón de encendido/apagado */
+        #btn-power { padding: 10px 25px; font-size: 16px; font-weight: bold; cursor: pointer; border: none; border-radius: 4px; transition: background 0.2s; }
+        .power-on { background: #2ea44f; color: #fff; } /* Verde = Máquina corriendo, botón sirve para apagar */
+        .power-off { background: #cb2431; color: #fff; } /* Rojo = Máquina apagada, botón sirve para encender */
+
+        #viewport { width: 100%; height: 500px; border: 2px solid #555; background: #000; }
+    </style>
 </head>
 <body>
-    <div id="app"></div> 
-    <script type="module" src="./src/main.ts"></script>
+
+    <h1>Hipervisor de Terminales</h1>
+    
+    <div class="controls">
+        <div class="vm-selectors">
+            <button id="btn-vm1" class="active">Máquina Virtual Alfa</button>
+            <button id="btn-vm2">Máquina Virtual Beta</button>
+        </div>
+        
+        <button id="btn-power" class="power-on">Apagar Máquina</button>
+    </div>
+
+    <div id="viewport"></div>
+
+    <script type="module" src="./test-hypervisor.js"></script>
 </body>
 </html>

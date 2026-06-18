@@ -17,6 +17,7 @@ vitest.config.ts
 
 # Excluir archivos de desarrollo
 *.html
+test-hypervisor.js
 GITHUB_SETUP.md
 RELEASE_CHECKLIST.md
 scripts/
