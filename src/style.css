@@ -1,44 +1,45 @@
-/* Variables protegidas bajo el espacio de nombres de tu tema */
+/* ==========================================================================
+   RAÍZ: ESPACIO DE NOMBRES ENCAPSULADO DE LA TERMINAL
+   ========================================================================== */
 .ubuntu-terminal-theme {
-    /* Si el hipervisor define --distro-text, lo usamos. Si no, blanco. */
+    /* Variables de diseño protegidas */
     --ub-text-color: var(--distro-text, #ffffff);
     --ub-prompt-color: var(--distro-accent, #8ae234);
     --ub-font-family: 'Ubuntu Mono', 'Courier New', monospace;
     
     box-sizing: border-box;
     width: 100%;
-    min-height: 400px;
-    height: 100%;
-    
-    /* El fondo del monitor se adapta al tema del hipervisor */
+    height: 100%; /* Ocupa el 100% del contenedor asignado por el hipervisor */
     background-color: var(--distro-header, #000000); 
     padding: 0;
     margin: 0;
     overflow: hidden;
+    display: flex; /* Asegura un comportamiento rígido de bloque */
+    flex-direction: column;
 }
 
-/* Aplicamos box-sizing universal interno para evitar desfases por paddings */
+/* Aplicamos box-sizing universal interno para evitar desfases */
 .ubuntu-terminal-theme *, 
 .ubuntu-terminal-theme *::before, 
 .ubuntu-terminal-theme *::after {
     box-sizing: border-box;
 }
 
-/* El contenedor principal pasa de ID a Clase */
+/* El contenedor interno donde se renderizan las líneas de comando */
 .ubuntu-terminal-theme .terminal-container {
-    /* El cuerpo de la terminal adopta el color exacto de la distro activa */
     background-color: var(--distro-bg, #300a24);
     width: 100%;
+    flex-grow: 1; /* Hacemos que se estire dinámicamente ocupando todo el espacio disponible */
     height: 100%;
     padding: 15px;
-    overflow-y: auto;
-    border-radius: 6px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    font-family: var(--ub-font-family) !important; /* !important combate el reseteo de Tailwind */
+    overflow-y: auto; /* Mantiene el scroll interno si el texto se desborda */
+    font-family: var(--ub-font-family) !important;
     font-size: 16px;
     line-height: 1.4;
     color: var(--ub-text-color);
     text-align: left;
+    display: flex;
+    flex-direction: column;
 }
 
 /* El área de salida pasa de ID a Clase */
