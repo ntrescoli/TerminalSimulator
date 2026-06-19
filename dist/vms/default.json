@@ -10,7 +10,7 @@
       "fullName": "root" 
     },
     { 
-      "username": "ubuntu", 
+      "username": "ubuntuDefault", 
       "password": "$6$rounds=5000$jsTerminalSalt$32bd2519ffffffff", 
       "uid": 1000, 
       "gid": 1000, 
