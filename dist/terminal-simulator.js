@@ -2,7 +2,7 @@ var _ = Object.defineProperty;
 var j = (o, e, t) => e in o ? _(o, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : o[e] = t;
 var m = (o, e, t) => j(o, typeof e != "symbol" ? e + "" : e, t);
 import { jsx as W } from "react/jsx-runtime";
-import { useRef as R, useEffect as O } from "react";
+import { useRef as O, useEffect as R } from "react";
 class p {
   constructor(e, t, r) {
     m(this, "isSuccess");
@@ -1296,14 +1296,14 @@ const Te = {
     const t = o.get("USER") || "guest", r = o.get("HOSTNAME") || "js-terminal", s = new Date(Date.now() - e.getUptime()), n = s.toLocaleString("es-ES", { month: "short" }), i = s.getDate(), a = s.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", hour12: !1 });
     return `${t.padEnd(10)} pts/0        ${n} ${i} ${a} (${r})`;
   }
-}, Re = {
+}, Oe = {
   name: "w",
   // description: 'Muestra quién está conectado',
   execute: async ({ env: o, kernel: e }) => {
     const t = o.get("USER") || "guest", r = o.get("HOSTNAME") || "js-terminal", s = new Date(Date.now() - e.getUptime()), n = s.toLocaleString("es-ES", { month: "short" }), i = s.getDate(), a = s.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", hour12: !1 });
     return `${t.padEnd(10)} pts/0        ${n} ${i} ${a} (${r})`;
   }
-}, Oe = {
+}, Re = {
   name: "chown",
   // description: 'Cambia el propietario y el grupo de un archivo o directorio',
   execute: async ({ args: o, fs: e, env: t, userManager: r }) => {
@@ -1414,8 +1414,8 @@ const Te = {
   De,
   Te,
   Ie,
-  Re,
   Oe,
+  Re,
   Ce,
   Me,
   ke,
@@ -2161,7 +2161,7 @@ class dt {
     this.container = e, this.kernel = t || new ot();
   }
   async boot(e) {
-    if (await this.kernel.boot(), this.terminalEl) {
+    if (await this.kernel.boot(e), this.terminalEl) {
       this.terminalEl.style.display = "block", this.focusInput();
       return;
     }
@@ -2200,7 +2200,9 @@ class dt {
     this.showWelcomeMessage();
   }
   showWelcomeMessage() {
-    this.terminalUI.print("Welcome to Ubuntu 24.04 LTS (GNU/Linux 6.8.0-generic x86_64)"), this.terminalUI.print(`System information as of ${(/* @__PURE__ */ new Date()).toUTCString()}`), this.terminalUI.print(""), this.terminalUI.updatePrompt(this.kernel.getPromptText()), this.focusInput();
+    var t;
+    const e = this.kernel.getEnv ? this.kernel.getEnv("HOSTNAME") : "ts-linux";
+    (t = this.terminalEl.querySelector(".terminal-output")) == null || t.classList.add("active-os"), this.terminalUI.print(`Welcome to the virtual machine [${e.toUpperCase()}]`), this.terminalUI.print(`System information as of ${(/* @__PURE__ */ new Date()).toUTCString()}`), this.terminalUI.print(""), this.terminalUI.updatePrompt(this.kernel.getPromptText()), this.focusInput();
   }
   /**
    * Apaga la terminal y limpia la pantalla desde código externo.
@@ -2235,8 +2237,8 @@ const yt = ({
   isPowered: e = !0,
   existingKernel: t
 }) => {
-  const r = R(null), s = R(null);
-  O(() => {
+  const r = O(null), s = O(null);
+  R(() => {
     if (r.current) {
       r.current.innerHTML = "";
       try {
@@ -2253,7 +2255,7 @@ const yt = ({
         s.current && (s.current.detach(), s.current = null);
       };
     }
-  }, [o, t]), O(() => {
+  }, [o, t]), R(() => {
     s.current && n(s.current, e);
   }, [e]);
   const n = (i, a) => {

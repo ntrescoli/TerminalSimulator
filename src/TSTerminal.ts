@@ -18,7 +18,7 @@ export class TSTerminal {
     }
 
     public async boot(configUrl?: string): Promise<void> {
-        await this.kernel.boot();
+        await this.kernel.boot(configUrl);
 
         // Si ya está renderizada en el DOM, la volvemos a mostrar (cambio de pestaña)
         if (this.terminalEl) {
@@ -92,7 +92,9 @@ export class TSTerminal {
     }
 
     private showWelcomeMessage() {
-        this.terminalUI.print('Welcome to Ubuntu 24.04 LTS (GNU/Linux 6.8.0-generic x86_64)');
+        const hostname = this.kernel.getEnv ? this.kernel.getEnv('HOSTNAME') : 'ts-linux';
+        this.terminalEl.querySelector('.terminal-output')?.classList.add('active-os');
+        this.terminalUI.print(`Welcome to the virtual machine [${hostname.toUpperCase()}]`);
         this.terminalUI.print(`System information as of ${new Date().toUTCString()}`);
         this.terminalUI.print('');
         this.terminalUI.updatePrompt(this.kernel.getPromptText());
