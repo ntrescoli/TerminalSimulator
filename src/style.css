@@ -1,20 +1,20 @@
 /* ==========================================================================
-   RAÍZ: ESPACIO DE NOMBRES ENCAPSULADO DE LA TERMINAL
+   RAÍZ: ESPACIO DE NOMBRES ENCAPSULADO DE LA TERMINAL (POLIMÓRFICA)
    ========================================================================== */
 .ubuntu-terminal-theme {
-    /* Variables de diseño protegidas */
+    /* 1. Mapeamos las variables de tu componente a los tokens del hipervisor */
     --ub-text-color: var(--distro-text, #ffffff);
     --ub-prompt-color: var(--distro-accent, #8ae234);
     --ub-font-family: 'Ubuntu Mono', 'Courier New', monospace;
     
     box-sizing: border-box;
     width: 100%;
-    height: 100%; /* Ocupa el 100% del contenedor asignado por el hipervisor */
-    background-color: var(--distro-header, #000000); 
+    height: 100%; 
+    background-color: var(--distro-header, #000000); /* Dinámico */
     padding: 0;
     margin: 0;
     overflow: hidden;
-    display: flex; /* Asegura un comportamiento rígido de bloque */
+    display: flex; 
     flex-direction: column;
 }
 
@@ -27,12 +27,13 @@
 
 /* El contenedor interno donde se renderizan las líneas de comando */
 .ubuntu-terminal-theme .terminal-container {
-    background-color: var(--distro-bg, #300a24);
+    /* ADAPTACIÓN REQUERIDA: Ahora hereda el fondo de la distro activa */
+    background-color: var(--distro-bg, #300a24); 
     width: 100%;
-    flex-grow: 1; /* Hacemos que se estire dinámicamente ocupando todo el espacio disponible */
+    flex-grow: 1; /* Estiramiento elástico e inmune a colapsos */
     height: 100%;
     padding: 15px;
-    overflow-y: auto; /* Mantiene el scroll interno si el texto se desborda */
+    overflow-y: auto; 
     font-family: var(--ub-font-family) !important;
     font-size: 16px;
     line-height: 1.4;
@@ -42,10 +43,10 @@
     flex-direction: column;
 }
 
-/* El área de salida pasa de ID a Clase */
+/* El área de salida */
 .ubuntu-terminal-theme .terminal-output {
-    white-space: pre-wrap; /* Mantiene espacios y saltos de línea */
-    word-break: break-all; /* Evita que líneas larguísimas rompan el contenedor */
+    white-space: pre-wrap; 
+    word-break: break-all; 
 }
 
 .ubuntu-terminal-theme .input-line {
@@ -55,12 +56,12 @@
 }
 
 .ubuntu-terminal-theme .prompt {
-    color: var(--ub-prompt-color);
+    color: var(--ub-prompt-color); /* Cambia a azul en Arch, verde en Mint, etc. */
     font-weight: bold;
     white-space: nowrap;
 }
 
-/* El input pasa de ID a Clase */
+/* Estilos nativos del input */
 .ubuntu-terminal-theme .terminal-input {
     background: transparent !important;
     border: none !important;
@@ -75,16 +76,19 @@
     box-shadow: none !important;
 }
 
-/* Scrollbar personalizado acotado ÚNICAMENTE a tu terminal */
+/* ==========================================================================
+   SCROLLBAR INTELIGENTE: SE ADAPTA A LOS BORDES DE CADA DISTRO
+   ========================================================================== */
 .ubuntu-terminal-theme .terminal-container::-webkit-scrollbar {
     width: 8px;
 }
 .ubuntu-terminal-theme .terminal-container::-webkit-scrollbar-thumb {
-    background: #5e2750;
+    /* ADAPTACIÓN REQUERIDA: Usamos el borde del sabor activo para el scrollbar */
+    background: var(--distro-border, #555555); 
     border-radius: 4px;
 }
 
-/* --- Clases auxiliares para componentes o hipervisor --- */
+/* --- Clases auxiliares --- */
 .ubuntu-terminal-theme .hidden {
     display: none !important;
 }
@@ -95,18 +99,21 @@
     opacity: 0.8;
 }
 
-/* Estilos de tu panel de control/hipervisor encapsulados */
+/* ==========================================================================
+   PANEL DE CONTROL DEL HIPERVISOR (Si decides usarlo)
+   ========================================================================== */
 .ubuntu-terminal-launcher-panel {
     width: 100%;
     margin-bottom: 18px;
     padding: 16px;
-    background: rgba(48, 10, 36, 0.95);
+    /* Adopta transparencias basadas en el fondo de la distro */
+    background: var(--distro-header, rgba(0, 0, 0, 0.95)); 
     border-radius: 8px;
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
     align-items: center;
-    font-family: 'Ubuntu Mono', 'Courier New', monospace;
+    font-family: var(--ub-font-family);
     color: #fff;
 }
 
@@ -120,8 +127,8 @@
     min-width: 220px;
     padding: 10px 12px;
     border-radius: 6px;
-    border: 1px solid #5e2750;
-    background: #1f0a1d;
+    border: 1px solid var(--distro-border);
+    background: var(--distro-bg);
     color: #fff;
     font-size: 14px;
 }
@@ -133,11 +140,11 @@
 }
 
 .ubuntu-terminal-launcher-panel button:hover {
-    background: #2a0e27;
+    background: var(--distro-accent-hover);
 }
 
 .ubuntu-terminal-launcher-panel .status {
     width: 100%;
     font-size: 0.95rem;
-    color: #8ae234;
+    color: var(--distro-accent);
 }
