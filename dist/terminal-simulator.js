@@ -1,7 +1,7 @@
-var _ = Object.defineProperty;
-var j = (o, e, t) => e in o ? _(o, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : o[e] = t;
-var m = (o, e, t) => j(o, typeof e != "symbol" ? e + "" : e, t);
-import { jsx as W } from "react/jsx-runtime";
+var j = Object.defineProperty;
+var W = (o, e, t) => e in o ? j(o, e, { enumerable: !0, configurable: !0, writable: !0, value: t }) : o[e] = t;
+var m = (o, e, t) => W(o, typeof e != "symbol" ? e + "" : e, t);
+import { jsx as H } from "react/jsx-runtime";
 import { useRef as O, useEffect as R } from "react";
 class p {
   constructor(e, t, r) {
@@ -49,7 +49,7 @@ const y = {
     UNKNOWN_TYPE: (o) => `bash: ${o}: unknown file type`
   }
 };
-class H {
+class B {
   /**
    * Valida si un usuario tiene permiso para realizar una acción
    */
@@ -111,7 +111,7 @@ class S {
     return r || "/";
   }
 }
-class B {
+class Y {
   constructor(e) {
     m(this, "root");
     m(this, "currentDirectory");
@@ -133,7 +133,7 @@ class B {
   }
   checkAccess(e, t) {
     const r = this.env.get("USER") || "guest", s = S.getAbsolutePath(e);
-    return H.canAccess(e, r, t, s);
+    return B.canAccess(e, r, t, s);
   }
   // --- MÉTODOS DE DATOS ---
   // public getNodes(path: string = ".", showHidden: boolean = false): INode[] {
@@ -345,7 +345,7 @@ sudo:x:27:guest,nico
 `), this.writeFile("home/readme.txt", "Bienvenido al sistema de archivos avanzado.");
   }
 }
-class Y {
+class q {
   constructor() {
     m(this, "vars");
     m(this, "aliases", /* @__PURE__ */ new Map());
@@ -415,7 +415,7 @@ class Y {
     };
   }
 }
-class q {
+class K {
   constructor(e, t) {
     m(this, "cachedUsers", []);
     m(this, "cachedGroups", []);
@@ -526,7 +526,7 @@ class q {
     this.repository.saveUsers(e), this.repository.saveGroups(t), this.lastUsersSync = this.fs.getModificationTime("/etc/passwd"), this.lastShadowSync = this.fs.getModificationTime("/etc/shadow"), this.lastGroupsSync = this.fs.getModificationTime("/etc/group");
   }
 }
-class K {
+class z {
   constructor(e) {
     this.fs = e;
   }
@@ -598,7 +598,7 @@ class K {
     });
   }
 }
-class z {
+class J {
   constructor(e) {
     this.env = e;
   }
@@ -629,13 +629,13 @@ class z {
     if (v.length === 0) return "";
     const x = v[0].toLowerCase(), U = v.slice(1), E = t.get(x);
     if (!E) return `-bash: ${x}: command not found`;
-    const N = E.valuedFlags || [], P = x === "sudo" ? [...N, "sudo-pass", "--sudo-pass"] : N, k = this.extractAllowedFlagsFromCommand(E, P);
+    const N = E.valuedFlags || [], P = x === "sudo" ? [...N, "sudo-pass", "--sudo-pass"] : N, F = this.extractAllowedFlagsFromCommand(E, P);
     if (a != null && a.aborted)
       return "COMMAND_ABORTED";
-    const { options: T, args: F, flagValues: G } = this.parseArgsAndFlags(U, P, k), L = {
-      args: this.expandGlobPatterns(F, r),
+    const { options: T, args: G, flagValues: L } = this.parseArgsAndFlags(U, P, F), _ = {
+      args: this.expandGlobPatterns(G, r),
       options: T,
-      flagValues: G,
+      flagValues: L,
       rawArgs: U,
       fs: r,
       env: this.env,
@@ -645,7 +645,7 @@ class z {
       kernel: i,
       hasFlag: ($) => T.includes($.startsWith("-") ? $ : `-${$}`),
       rawInput: e
-    }, I = await E.execute(L);
+    }, I = await E.execute(_);
     if (a != null && a.aborted)
       return "COMMAND_ABORTED";
     if (u) {
@@ -730,13 +730,13 @@ class z {
     }
   }
 }
-const J = {
+const Q = {
   name: "cd",
   execute: ({ args: o, fs: e, env: t }) => {
     const r = o[0] || "~", s = e.changeDirectory(r);
     return s.isFailure ? `cd: ${s.getError()}` : r === "-" ? S.getAbsolutePath(e.getCurrentDirectory()) : (t.set("PWD", S.getAbsolutePath(e.getCurrentDirectory())), "");
   }
-}, Q = {
+}, X = {
   name: "chmod",
   // description: 'Cambia los permisos de acceso a ficheros o directorios',
   execute: async ({ args: o, fs: e, env: t }) => {
@@ -748,13 +748,13 @@ const J = {
       return `chmod: changing permissions of '${s}': Operation not permitted`;
     try {
       let a;
-      return /^[0-7]{3}$/.test(r) ? a = X(r) : a = Z(n.permissions, r), n.permissions = a, "";
+      return /^[0-7]{3}$/.test(r) ? a = Z(r) : a = V(n.permissions, r), n.permissions = a, "";
     } catch {
       return `chmod: invalid mode: '${r}'`;
     }
   }
 };
-function X(o) {
+function Z(o) {
   const e = o.split("").map(Number), t = (r) => ({
     read: !!(r & 4),
     write: !!(r & 2),
@@ -766,7 +766,7 @@ function X(o) {
     others: t(e[2])
   };
 }
-function Z(o, e) {
+function V(o, e) {
   const t = JSON.parse(JSON.stringify(o)), r = e.match(/^([ugoa]*)([+\-=])([rwx]*)$/);
   if (!r) throw new Error();
   const [, s, n, i] = r, a = s === "" || s.includes("a") ? ["user", "group", "others"] : [];
@@ -778,7 +778,7 @@ function Z(o, e) {
     });
   }), t;
 }
-const V = {
+const ee = {
   name: "ls",
   execute: ({ args: o, hasFlag: e, fs: t }) => {
     const r = o.length ? o : ["."], s = [], n = r.reduce((c, u) => {
@@ -797,7 +797,7 @@ const V = {
       let h;
       e("-l") ? h = l.map((d) => {
         var N;
-        const f = (d.type === "dir" ? "d" : "-") + D(d.permissions.user) + D(d.permissions.group) + D(d.permissions.others), w = d.owner.padEnd(10), b = (d.group || d.owner).padEnd(10), v = d.type === "dir" ? 4096 : ((N = d.content) == null ? void 0 : N.length) || 0, x = e("-h") ? ee(v) : v.toString(), U = new Date(d.createdAt).toLocaleDateString("es-ES", {
+        const f = (d.type === "dir" ? "d" : "-") + D(d.permissions.user) + D(d.permissions.group) + D(d.permissions.others), w = d.owner.padEnd(10), b = (d.group || d.owner).padEnd(10), v = d.type === "dir" ? 4096 : ((N = d.content) == null ? void 0 : N.length) || 0, x = e("-h") ? te(v) : v.toString(), U = new Date(d.createdAt).toLocaleDateString("es-ES", {
           month: "short",
           day: "2-digit",
           hour: "2-digit",
@@ -822,7 +822,7 @@ function D(o) {
     o.execute ? "x" : "-"
   ].join("");
 }
-function ee(o) {
+function te(o) {
   if (o < 1024) return `${o}B`;
   const e = ["K", "M", "G"];
   let t = -1, r = o;
@@ -833,24 +833,24 @@ function ee(o) {
 function C(o, e) {
   return o.type === "dir" ? `${o.name}/` : e && o.permissions.execute ? `${o.name}*` : o.name;
 }
-const te = {
+const re = {
   name: "mkdir",
   execute: ({ args: o, fs: e }) => {
     if (o.length < 1) return "mkdir: missing operand";
     const t = e.mkdir(o[0]);
     return t.isFailure ? `mkdir: ${t.getError()}` : "";
   }
-}, re = {
+}, se = {
   name: "pwd",
   execute: ({ fs: o }) => S.getAbsolutePath(o.getCurrentDirectory())
-}, se = {
+}, ne = {
   name: "touch",
   execute: ({ args: o, fs: e }) => {
     if (o.length < 1) return "touch: missing file operand";
     const t = o[0], r = o[1] || "", s = e.touch(t, r);
     return s.isFailure ? `touch: ${s.getError()}` : "";
   }
-}, ne = {
+}, ie = {
   name: "file",
   execute: ({ args: o, fs: e }) => {
     if (o.length < 1) return "file: missing file operand";
@@ -859,7 +859,7 @@ const te = {
     const s = e.getType(r);
     return s.isFailure ? `file: ${s.getError()}` : s.getValue() === "dir" ? `${t}: directory` : `${t}: regular file`;
   }
-}, ie = {
+}, oe = {
   name: "rm",
   execute: ({ args: o, hasFlag: e, fs: t }) => {
     if (o.length < 1)
@@ -876,7 +876,7 @@ const te = {
     return n.length > 0 ? n.join(`
 `) : "";
   }
-}, oe = {
+}, ae = {
   name: "rmdir",
   execute: ({ args: o, fs: e }) => {
     if (o.length < 1)
@@ -889,7 +889,7 @@ const te = {
     return t.length > 0 ? t.join(`
 `) : "";
   }
-}, ae = {
+}, ce = {
   name: "cp",
   execute: ({ args: o, hasFlag: e, fs: t }) => {
     if (o.length < 2)
@@ -897,7 +897,7 @@ const te = {
     const r = o[0], s = o[1], n = e("-r") || e("-R") || e("--recursive"), i = t.copy(r, s, n);
     return i.isFailure ? i.getError() : "";
   }
-}, ce = {
+}, ue = {
   name: "mv",
   execute: ({ args: o, fs: e }) => {
     if (o.length < 2)
@@ -905,19 +905,19 @@ const te = {
     const t = o[0], r = o[1], s = e.move(t, r);
     return s.isFailure ? s.getError() : "";
   }
-}, ue = [
-  J,
+}, le = [
   Q,
-  V,
-  te,
+  X,
+  ee,
   re,
   se,
   ne,
   ie,
   oe,
   ae,
-  ce
-], le = {
+  ce,
+  ue
+], he = {
   name: "cat",
   execute: ({ args: o, fs: e, hasFlag: t }) => {
     if (o.length < 1) return "cat: missing file operand";
@@ -936,7 +936,7 @@ const te = {
 `).map((n, i) => `${(i + 1).toString().padStart(6)}  ${n}`).join(`
 `) : s;
   }
-}, he = {
+}, de = {
   name: "cmp",
   valuedFlags: [],
   execute: async ({ args: o, fs: e }) => {
@@ -962,7 +962,7 @@ const te = {
     }
     return c.length > u.length ? `cmp: EOF on ${r} after byte ${d - 1}, line ${h}` : `cmp: EOF on ${t} after byte ${d - 1}, line ${h}`;
   }
-}, de = {
+}, me = {
   name: "diff",
   valuedFlags: [],
   execute: async ({ args: o, fs: e }) => {
@@ -988,7 +988,7 @@ const te = {
     return l.join(`
 `);
   }
-}, me = {
+}, pe = {
   name: "grep",
   execute: ({ args: o, hasFlag: e, fs: t, pipeInput: r }) => {
     const s = o[0], n = o[1];
@@ -1018,7 +1018,7 @@ const te = {
     return u ? h.length.toString() : h.join(`
 `);
   }
-}, pe = {
+}, fe = {
   name: "wc",
   // No añadimos valuedFlags porque -l, -w y -c son booleanas, no esperan un parámetro.
   execute: async ({ args: o, hasFlag: e, fs: t, pipeInput: r }) => {
@@ -1037,7 +1037,7 @@ const te = {
 `).length, a = n.trim() === "" ? 0 : n.trim().split(/\s+/).length, c = n.length, u = e("l"), l = e("w"), h = e("c") || e("m"), d = !u && !l && !h, g = [];
     return (u || d) && g.push(i.toString()), (l || d) && g.push(a.toString()), (h || d) && g.push(c.toString()), !r && s && g.push(s), g.join("	");
   }
-}, fe = {
+}, ge = {
   name: "head",
   valuedFlags: ["n"],
   execute: async ({ args: o, flagValues: e, fs: t, pipeInput: r }) => {
@@ -1061,7 +1061,7 @@ const te = {
 `).slice(0, s).join(`
 `);
   }
-}, ge = {
+}, ye = {
   name: "tail",
   valuedFlags: ["n"],
   execute: async ({ args: o, flagValues: e, fs: t, pipeInput: r }) => {
@@ -1086,7 +1086,7 @@ const te = {
     return a.length > 1 && a[a.length - 1] === "" && a.pop(), a.slice(-s).join(`
 `);
   }
-}, ye = {
+}, Se = {
   name: "cut",
   valuedFlags: ["d", "f"],
   // Registramos 'd' (delimiter) y 'f' (fields)
@@ -1121,7 +1121,7 @@ const te = {
     }).join(`
 `);
   }
-}, Se = {
+}, we = {
   name: "sort",
   execute: async ({ args: o, hasFlag: e, fs: t, pipeInput: r }) => {
     const s = o[0] ? o[0].trim() : "";
@@ -1140,7 +1140,7 @@ const te = {
     return i.length > 1 && i[i.length - 1] === "" && i.pop(), i.sort((a, c) => a.localeCompare(c)), e("r") && i.reverse(), i.join(`
 `);
   }
-}, we = {
+}, ve = {
   name: "uniq",
   execute: async ({ args: o, hasFlag: e, fs: t, pipeInput: r }) => {
     const s = o[0] ? o[0].trim() : "";
@@ -1164,18 +1164,18 @@ const te = {
     return a ? c.push(`  ${l} ${u}`) : c.push(u), c.join(`
 `);
   }
-}, ve = [
-  le,
-  me,
+}, Ee = [
   he,
-  de,
-  fe,
-  ge,
   pe,
+  de,
+  me,
+  ge,
   ye,
+  fe,
   Se,
-  we
-], Ee = {
+  we,
+  ve
+], $e = {
   name: "echo",
   execute: ({ args: o, env: e }) => o.map((t) => {
     if (t.startsWith("$")) {
@@ -1184,23 +1184,23 @@ const te = {
     }
     return t;
   }).join(" ")
-}, $e = {
+}, xe = {
   name: "whoami",
   execute: ({ env: o }) => o.get("USER") || "unknown"
-}, xe = {
+}, Ne = {
   name: "clear",
   execute: () => "COMMAND_CLEAR"
-}, Ne = {
-  name: "help",
-  execute: async ({ args: o }) => `Comandos disponibles: ${M.map((e) => e.name).join(", ")}`
 }, be = {
+  name: "help",
+  execute: async ({ args: o }) => `Comandos disponibles: ${k.map((e) => e.name).join(", ")}`
+}, Ue = {
   name: "env",
   execute: ({ env: o }) => {
     const e = o.getAll();
     return Object.entries(e).map(([t, r]) => `${t}=${r}`).join(`
 `);
   }
-}, Ue = {
+}, Ae = {
   name: "history",
   execute: ({ kernel: o, hasFlag: e }) => {
     const t = o.getHistory();
@@ -1214,7 +1214,7 @@ const te = {
     return t.map((r, s) => `${(s + 1).toString().padStart(5)}  ${r}`).join(`
 `);
   }
-}, Ae = {
+}, De = {
   name: "sudo",
   execute: async ({ args: o, kernel: e, env: t, userManager: r, flagValues: s, ...n }) => {
     if (o.length === 0) return "usage: sudo <command> [arguments]";
@@ -1242,7 +1242,7 @@ const te = {
       t.set("USER", g), t.set("SUDO_USER", "");
     }
   }
-}, De = {
+}, Pe = {
   name: "date",
   // description: 'Muestra la fecha y hora del sistema',
   execute: async ({ args: o, hasFlag: e }) => {
@@ -1251,7 +1251,7 @@ const te = {
       return t.toUTCString();
     const r = o.find((a) => a.startsWith("+"));
     if (r)
-      return Pe(t, r.slice(1));
+      return Te(t, r.slice(1));
     const s = {
       weekday: "short",
       month: "short",
@@ -1265,7 +1265,7 @@ const te = {
     return `${n} ${i}`;
   }
 };
-function Pe(o, e) {
+function Te(o, e) {
   const t = {
     "%Y": o.getFullYear(),
     "%m": (o.getMonth() + 1).toString().padStart(2, "0"),
@@ -1279,7 +1279,7 @@ function Pe(o, e) {
     r = r.replace(new RegExp(s, "g"), t[s]);
   return r;
 }
-const Te = {
+const Ie = {
   name: "uptime",
   // description: 'Muestra cuánto tiempo lleva el sistema encendido',
   execute: async ({ kernel: o, userManager: e }) => {
@@ -1289,21 +1289,21 @@ const Te = {
     const l = e.getUsers().length;
     return ` ${r} up ${u},  ${l} users,  load average: 0.05, 0.03, 0.01`;
   }
-}, Ie = {
+}, Oe = {
   name: "who",
   // description: 'Muestra quién está conectado',
   execute: async ({ env: o, kernel: e }) => {
     const t = o.get("USER") || "guest", r = o.get("HOSTNAME") || "js-terminal", s = new Date(Date.now() - e.getUptime()), n = s.toLocaleString("es-ES", { month: "short" }), i = s.getDate(), a = s.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", hour12: !1 });
     return `${t.padEnd(10)} pts/0        ${n} ${i} ${a} (${r})`;
   }
-}, Oe = {
+}, Re = {
   name: "w",
   // description: 'Muestra quién está conectado',
   execute: async ({ env: o, kernel: e }) => {
     const t = o.get("USER") || "guest", r = o.get("HOSTNAME") || "js-terminal", s = new Date(Date.now() - e.getUptime()), n = s.toLocaleString("es-ES", { month: "short" }), i = s.getDate(), a = s.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", hour12: !1 });
     return `${t.padEnd(10)} pts/0        ${n} ${i} ${a} (${r})`;
   }
-}, Re = {
+}, Ce = {
   name: "chown",
   // description: 'Cambia el propietario y el grupo de un archivo o directorio',
   execute: async ({ args: o, fs: e, env: t, userManager: r }) => {
@@ -1314,7 +1314,7 @@ const Te = {
     const s = o[0], n = o[1], [i, a] = s.split(":");
     return i && !r.getUserByName(i) ? `chown: invalid user: '${i}'` : a && !r.getGroups().find((u) => u.groupName === a) ? `chown: invalid group: '${a}'` : e.setOwnership(n, "root", [], i, a).isSuccess ? "" : `chown: cannot access '${n}': No such file or directory`;
   }
-}, Ce = {
+}, Me = {
   name: "cal",
   execute: ({ args: o }) => {
     const e = /* @__PURE__ */ new Date();
@@ -1355,7 +1355,7 @@ const Te = {
     return a.join(`
 `);
   }
-}, Me = {
+}, ke = {
   name: "chgrp",
   execute: async ({ args: o, fs: e, env: t, userManager: r }) => {
     if (o.length < 2)
@@ -1374,7 +1374,7 @@ const Te = {
     );
     return c.isFailure ? `chgrp: ${c.getError()}` : "";
   }
-}, ke = {
+}, Fe = {
   name: "alias",
   valuedFlags: [],
   execute: async ({ args: o, rawArgs: e, env: t, rawInput: r }) => {
@@ -1392,7 +1392,7 @@ const Te = {
     let a = r == null ? void 0 : r.substring(s ? s + 1 : 0).trim();
     return (a != null && a.startsWith("'") && (a != null && a.endsWith("'")) || a != null && a.startsWith('"') && (a != null && a.endsWith('"'))) && (a = a == null ? void 0 : a.substring(1, a.length - 1)), i === "" ? "alias: invalid alias name" : (t.setAlias(i, a), "");
   }
-}, Fe = {
+}, Ge = {
   name: "unalias",
   valuedFlags: [],
   execute: async ({ args: o, env: e }) => {
@@ -1403,31 +1403,31 @@ const Te = {
         return `unalias: ${t}: not found`;
     return "";
   }
-}, Ge = [
-  Ae,
-  xe,
-  Ee,
-  be,
+}, Le = [
+  De,
   Ne,
   $e,
   Ue,
-  De,
-  Te,
+  be,
+  xe,
+  Ae,
+  Pe,
   Ie,
   Oe,
   Re,
   Ce,
   Me,
   ke,
-  Fe
-], Le = {
+  Fe,
+  Ge
+], _e = {
   name: "groups",
   // description: 'Muestra los grupos a los que pertenece un usuario',
   execute: async ({ args: o, userManager: e, env: t }) => {
     const r = o[0] || t.get("USER"), n = e.getGroups().filter((i) => i.groupName === r || i.members.includes(r)).map((i) => i.groupName);
     return n.length === 0 ? `${r} : no groups found` : `${r} : ${n.join(" ")}`;
   }
-}, _e = {
+}, je = {
   name: "adduser",
   // description: 'Añade un usuario al sistema o añade un usuario a un grupo',
   execute: async ({ args: o, userManager: e, env: t }) => {
@@ -1438,7 +1438,7 @@ const Te = {
     }
     return o.length === 1 ? "Use 'useradd' to create new users or 'adduser user group' to link them." : "Usage: adduser USER GROUP";
   }
-}, je = {
+}, We = {
   name: "addgroup",
   // description: 'Añade un nuevo grupo al sistema',
   valuedFlags: ["g"],
@@ -1465,7 +1465,7 @@ Uso: addgroup [OPCIONES] NOMBRE`;
     });
     return i || `Añadiendo el grupo '${s}' (GID ${n})... Hecho.`;
   }
-}, We = {
+}, He = {
   name: "su",
   execute: async ({ args: o, env: e, userManager: t }) => {
     const r = e.get("USER") || "guest", s = o[0] || "root", n = t.getUserByName(s);
@@ -1477,7 +1477,7 @@ Uso: addgroup [OPCIONES] NOMBRE`;
     const i = o[1];
     return i ? t.hashPassword(i) !== n.password ? "su: Authentication failure" : (e.set("USER", n.username), e.set("HOME", n.home), e.set("PWD", n.home), `Cambiando al usuario ${n.username}...`) : `AUTH_REQUIRED:su:${s}`;
   }
-}, He = {
+}, Be = {
   name: "useradd",
   valuedFlags: ["u", "s"],
   execute: async ({ args: o, flagValues: e, userManager: t, fs: r, env: s }) => {
@@ -1510,7 +1510,7 @@ Uso: addgroup [OPCIONES] NOMBRE`;
     return `useradd: user '${n}' added (UID: ${a})${l}
 Notice: Account is locked until a password is set via 'passwd'.`;
   }
-}, Be = {
+}, Ye = {
   name: "deluser",
   // description: 'Elimina un usuario del sistema',
   execute: async ({ args: o, userManager: e, env: t, fs: r }) => {
@@ -1522,7 +1522,7 @@ Notice: Account is locked until a password is set via 'passwd'.`;
     const a = e.deleteUser(s);
     return a || `Removing user '${s}'... Done.`;
   }
-}, Ye = {
+}, qe = {
   name: "delgroup",
   // description: 'Elimina un grupo del sistema',
   execute: async ({ args: o, userManager: e, env: t }) => {
@@ -1531,7 +1531,7 @@ Notice: Account is locked until a password is set via 'passwd'.`;
     const r = o[0], s = e.deleteGroup(r);
     return s || `Removing group '${r}'... Done.`;
   }
-}, qe = {
+}, Ke = {
   name: "finger",
   execute: async ({ args: o, fs: e }) => {
     const t = e.resolvePath("/etc/passwd");
@@ -1561,7 +1561,7 @@ Notice: Account is locked until a password is set via 'passwd'.`;
     }), n.join(`
 `);
   }
-}, Ke = {
+}, ze = {
   name: "passwd",
   execute: async ({ args: o, userManager: e, env: t, fs: r }) => {
     const s = t.get("USER") || "guest";
@@ -1583,17 +1583,17 @@ Notice: Account is locked until a password is set via 'passwd'.`;
     const l = e.updatePassword(n, i);
     return l || `passwd: password updated successfully for user '${n}'`;
   }
-}, ze = [
-  We,
+}, Je = [
   He,
-  Le,
+  Be,
   _e,
   je,
-  Be,
+  We,
   Ye,
   qe,
-  Ke
-], Je = {
+  Ke,
+  ze
+], Qe = {
   name: "save",
   execute: ({ kernel: o }) => {
     try {
@@ -1603,26 +1603,26 @@ Notice: Account is locked until a password is set via 'passwd'.`;
       return "Error al exportar: " + e;
     }
   }
-}, Qe = {
+}, Xe = {
   name: "easteregg",
   execute: () => "Esto es un Easter Egg."
-}, Xe = [
-  Je,
-  Qe
-], M = [
-  ...Ge,
-  ...ue,
-  ...ve,
-  ...ze,
-  ...Xe
+}, Ze = [
+  Qe,
+  Xe
+], k = [
+  ...Le,
+  ...le,
+  ...Ee,
+  ...Je,
+  ...Ze
 ];
-class Ze {
+class Ve {
   constructor() {
     m(this, "commands", /* @__PURE__ */ new Map());
     this.loadCommands();
   }
   loadCommands() {
-    M.forEach((e) => {
+    k.forEach((e) => {
       this.commands.set(e.name, e), e.alias && e.alias.forEach((t) => this.commands.set(t, e));
     });
   }
@@ -1640,7 +1640,7 @@ class Ze {
     return Array.from(new Set(Array.from(this.commands.values()).map((e) => e.name)));
   }
 }
-class Ve {
+class et {
   constructor(e) {
     m(this, "key", "fileSystem");
     this.fs = e;
@@ -1699,7 +1699,7 @@ class Ve {
     )), r;
   }
 }
-class et {
+class tt {
   constructor(e) {
     m(this, "key", "env");
     this.env = e;
@@ -1719,7 +1719,7 @@ class et {
       this.env.set(t, String(r));
   }
 }
-class tt {
+class rt {
   constructor(e) {
     m(this, "key", "groups");
     this.userManager = e;
@@ -1731,7 +1731,7 @@ class tt {
     this.userManager.saveGroup(e);
   }
 }
-class rt {
+class st {
   constructor(e) {
     m(this, "key", "users");
     this.userManager = e;
@@ -1743,7 +1743,7 @@ class rt {
     this.userManager.saveUser(e);
   }
 }
-class st {
+class nt {
   // El historial sí puede ser nativo del Kernel si se maneja aquí
   constructor(e, t = "/public/vms/default.json") {
     m(this, "savers", /* @__PURE__ */ new Map());
@@ -1777,21 +1777,21 @@ class st {
     this.history = e;
   }
 }
-class nt {
+class M {
   constructor(e, t = "/vms/default.json") {
     m(this, "envStateImpl");
     m(this, "fsStateImpl");
     m(this, "userStateImpl");
     m(this, "groupStateImpl");
     m(this, "jsonStorageImpl");
-    this.envStateImpl = new et(e.environment), this.fsStateImpl = new Ve(e.fileSystem), this.userStateImpl = new rt(e.userManager), this.groupStateImpl = new tt(e.userManager);
+    this.envStateImpl = new tt(e.environment), this.fsStateImpl = new et(e.fileSystem), this.userStateImpl = new st(e.userManager), this.groupStateImpl = new rt(e.userManager);
     const r = [
       this.envStateImpl,
       this.fsStateImpl,
       this.userStateImpl,
       this.groupStateImpl
     ];
-    this.jsonStorageImpl = new st(r, t);
+    this.jsonStorageImpl = new nt(r, t);
   }
   async initSystem(e) {
     try {
@@ -1854,8 +1854,8 @@ class ot {
     m(this, "orchestrator");
     m(this, "persistence");
     this.startTime = Date.now();
-    const t = new Y(), r = new B(t), s = new K(r), n = new q(r, s);
-    this.orchestrator = new it(r, t, n), this.executor = new z(t), this.registry = new Ze(), this.persistence = new nt(this.orchestrator, e);
+    const t = new q(), r = new Y(t), s = new z(r), n = new K(r, s);
+    this.orchestrator = new it(r, t, n), this.executor = new J(t), this.registry = new Ve(), this.persistence = new M(this.orchestrator, e);
   }
   /**
    * APAGAR LA MÁQUINA (Simula un shutdown)
@@ -1875,8 +1875,8 @@ class ot {
   getPowerState() {
     return this.powerState;
   }
-  async boot() {
-    this.isReady || (await this.persistence.initSystem(this.orchestrator), this.isReady = !0);
+  async boot(e) {
+    this.isReady || (e && (this.persistence = new M(this.orchestrator, e)), await this.persistence.initSystem(this.orchestrator), this.isReady = !0);
   }
   async execute(e, t = !1, r) {
     if (this.powerState === "POWER_OFF")
@@ -2261,7 +2261,7 @@ const yt = ({
   const n = (i, a) => {
     a ? i.turnOn() : i.turnOff();
   };
-  return /* @__PURE__ */ W(
+  return /* @__PURE__ */ H(
     "div",
     {
       ref: r,

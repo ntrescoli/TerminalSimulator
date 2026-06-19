@@ -19,7 +19,7 @@ export class Kernel {
     private readonly executor: CommandExecutor;
     private readonly registry: CommandRegistry;
     private readonly orchestrator: SystemOrchestrator;
-    private readonly persistence: PersistenceManager;
+    private persistence: PersistenceManager;
 
     constructor(initialStateUrl = '/vms/default.json') {
         this.startTime = Date.now();
@@ -57,8 +57,11 @@ export class Kernel {
         return this.powerState;
     }
 
-    public async boot(): Promise<void> {
+    public async boot(configUrl?: string): Promise<void> {
         if (this.isReady) return;
+        if (configUrl) {
+            this.persistence = new PersistenceManager(this.orchestrator, configUrl);
+        }
         await this.persistence.initSystem(this.orchestrator);
         this.isReady = true;
     }
