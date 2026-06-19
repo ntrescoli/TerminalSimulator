@@ -1,8 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { TSTerminal } from "./TSTerminal";
 import type { Kernel } from "./kernel/Kernel";
-// @ts-ignore
-import "./style.css"; // React importará tus estilos globales de la terminal
 
 interface ReactTerminalProps {
   /** URL opcional para el JSON de configuración de la máquina virtual (por ejemplo, '/vms/mi-config.json') */
@@ -80,11 +78,6 @@ export const ReactTerminal: React.FC<ReactTerminalProps> = ({
     <div
       ref={containerRef}
       className="ubuntu-terminal-theme"
-      style={{
-        width: "100%",
-        height: "100%",
-        minHeight: "400px",
-      }}
     />
   );
 };

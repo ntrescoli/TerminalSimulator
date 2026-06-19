@@ -1,5 +1,4 @@
 // Punto de entrada para Vanilla JS
-// @ts-ignore
 import './style.css';
 import { TSTerminal } from './TSTerminal';
 

@@ -1,3 +1,4 @@
+import './src/style.css';
 import { Kernel } from './src/kernel/Kernel.ts'
 import { TSTerminal } from './src/TSTerminal.ts';
 
